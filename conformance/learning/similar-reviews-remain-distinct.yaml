@@ -1,0 +1,17 @@
+scenario_format: 1
+id: learning.history.similar-reviews-remain-distinct
+family: learning
+layer: "08"
+status: PLACEHOLDER
+title: Two text-identical reviews on different dates are two observations
+description: Pins HIST-008 (FND App-F, MVP M2, R03 §27.3, R04 §36).
+requirements: [HIST-008]
+given:
+  knowledge: TO_BE_DEFINED_IN_LAYER_08
+when:
+  - review: TO_BE_DEFINED_IN_LAYER_08
+  - review_identical_content_later: TO_BE_DEFINED_IN_LAYER_08
+expect:
+  episodes: TO_BE_DEFINED_IN_LAYER_08
+negative_controls:
+  - semantic deduplication collapses the second review into the first

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://minion-memory.local/conformance/schema/scenario.schema.json",
+  "title": "Minion-Memory canonical conformance scenario (format 1)",
+  "description": "Language-neutral. Runners parse, construct public values, invoke the real implementation, normalize observable output and compare. They never implement semantics. Per-layer operation vocabularies extend given/when/expect; the envelope below is fixed.",
+  "type": "object",
+  "required": ["scenario_format", "id", "family", "layer", "status", "title", "requirements", "given", "when", "expect"],
+  "additionalProperties": false,
+  "properties": {
+    "scenario_format": {"const": 1},
+    "id": {"type": "string", "pattern": "^(core|learning|agent)(\\.[a-z0-9]+(-[a-z0-9]+)*)+$"},
+    "family": {"enum": ["core", "learning", "agent"]},
+    "layer": {"type": "string", "pattern": "^[0-9]{2}$"},
+    "status": {"enum": ["PLACEHOLDER", "DRAFT", "ACTIVE", "RETIRED"]},
+    "title": {"type": "string", "minLength": 1},
+    "description": {"type": "string"},
+    "requirements": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[A-Z]{2,5}-[0-9]{3}$"}
+    },
+    "given": {"type": "object"},
+    "when": {"type": "array", "items": {"type": "object"}},
+    "expect": {"type": "object"},
+    "negative_controls": {
+      "description": "Realistic wrong implementations this scenario must fail (agent-workflow §5).",
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "notes": {"type": "string"}
+  }
+}

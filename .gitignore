@@ -1,0 +1,12 @@
+# OWN-001: caches/venvs/targets live under the project-root .tmp, never here.
+# These entries are a safety net if a tool ignores the environment.
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+target/
+.coverage
+htmlcov/

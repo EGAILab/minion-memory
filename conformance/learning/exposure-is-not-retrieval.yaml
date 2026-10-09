@@ -1,0 +1,16 @@
+scenario_format: 1
+id: learning.interaction.exposure-is-not-retrieval
+family: learning
+layer: "08"
+status: PLACEHOLDER
+title: Answer reveal is recorded as exposure, never as successful retrieval
+description: Pins OBS-007 (FND §5.1, MVP §6, R03 §9, R03 §23).
+requirements: [OBS-007, OBS-006]
+given:
+  knowledge: TO_BE_DEFINED_IN_LAYER_08
+when:
+  - review_with_reveal: TO_BE_DEFINED_IN_LAYER_08
+expect:
+  history: TO_BE_DEFINED_IN_LAYER_08
+negative_controls:
+  - reveal of kp_spelling recorded as a successful retrieval of kp_spelling

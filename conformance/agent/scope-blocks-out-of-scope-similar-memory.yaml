@@ -1,0 +1,16 @@
+scenario_format: 1
+id: agent.retrieval.scope-blocks-out-of-scope-similar-memory
+family: agent
+layer: "15"
+status: PLACEHOLDER
+title: An out-of-scope memory is never returned, even at maximal similarity
+description: Pins SCOPE-006 and ARET-003 (R05 §5.3, §8, §16; R04 §42). Scope semantics are open (NF-018).
+requirements: [SCOPE-006, ARET-003]
+given:
+  records: TO_BE_DEFINED_IN_LAYER_15
+when:
+  - retrieve: TO_BE_DEFINED_IN_LAYER_15
+expect:
+  selected_record_refs: TO_BE_DEFINED_IN_LAYER_15
+negative_controls:
+  - rank by similarity first, filter scope afterwards with a top-k cut that admits the out-of-scope record

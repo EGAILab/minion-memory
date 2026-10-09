@@ -1,0 +1,21 @@
+scenario_format: 1
+id: core.history.same-operation-retry-commits-once
+family: core
+layer: "04"
+status: PLACEHOLDER
+title: Retrying the same durable operation identity commits one historical record
+description: >
+  Pins CORE-012 and PERS-006 (R04 §32, §40; IAA A18; R05 §6, §14). Identity domain and the
+  conflicting-retry outcome are open (NF-014).
+requirements: [CORE-012, PERS-006]
+given:
+  history: TO_BE_DEFINED_IN_LAYER_04
+when:
+  - commit: TO_BE_DEFINED_IN_LAYER_04
+  - commit_retry_same_operation: TO_BE_DEFINED_IN_LAYER_04
+expect:
+  committed_records: TO_BE_DEFINED_IN_LAYER_04
+  retry_result: TO_BE_DEFINED_IN_LAYER_04
+negative_controls:
+  - retry appends a second record
+  - retry deduplicates by content similarity instead of operation identity

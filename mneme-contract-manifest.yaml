@@ -1,0 +1,4422 @@
+# Minion-Memory contract manifest — TRACEABILITY, NOT SEMANTIC AUTHORITY.
+#
+# One row per requirement in minion-memory-docs/spec/**. Each row maps:
+#   upstream source -> requirement ID -> normalized spec anchor -> canonical scenario(s)
+#   -> Python location -> Rust location -> assurance evidence -> disposition
+# Python and Rust consume the same rows. Implementation/certification STATUS is not recorded here:
+# it lives in minion-memory-docs/process/certification-registry.yaml (NF-021).
+# `sources`, `title`, `profile` and `source_status` must equal the spec block; `mneme-process check
+# manifest` enforces it. `layer` is the WP-00 layer-plan assignment (plans/layer-plan.md).
+# Seeded mechanically from spec/ in WP-00; maintained by hand afterwards.
+manifest_version: 1
+contract:
+  bundle_id: mneme-v2.3-dual-profile
+  bundle_manifest: minion-memory-docs/reference/mneme-v2.3-source-bundle.yaml
+  spec_root: minion-memory-docs/spec
+  status_registry: minion-memory-docs/process/certification-registry.yaml
+  note: DRAFT seed (WP-00). Rows become implementation-facing per layer after CONTRACT_REVIEW.
+rows:
+- id: ACAP-001
+  title: AgentMemoryObservation
+  family: ACAP
+  profile: agent
+  layer: '13'
+  sources:
+  - '[R05 §5.1]'
+  - '[FND §G.4]'
+  - '[MVP §18.3]'
+  spec: spec/agent/capture.md#acap-001
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-019
+- id: ACAP-002
+  title: Capture order
+  family: ACAP
+  profile: agent
+  layer: '13'
+  sources:
+  - '[R05 §6]'
+  - '[R05 §10]'
+  - '[R04 §41.3]'
+  - '[MVP §18.3]'
+  spec: spec/agent/capture.md#acap-002
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ACAP-003
+  title: Capture is idempotent
+  family: ACAP
+  profile: agent
+  layer: '13'
+  sources:
+  - '[R05 §6]'
+  - '[R05 §14]'
+  - '[R05 §10]'
+  spec: spec/agent/capture.md#acap-003
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ACAP-004
+  title: Capture stays off the agent's critical path
+  family: ACAP
+  profile: agent
+  layer: '13'
+  sources:
+  - '[R05 §6]'
+  - '[R05 §10]'
+  - '[R05 §16]'
+  spec: spec/agent/capture.md#acap-004
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ACAP-005
+  title: Recoverable pending enrichment
+  family: ACAP
+  profile: agent
+  layer: '13'
+  sources:
+  - '[R05 §14]'
+  - '[R04 §41.3]'
+  spec: spec/agent/capture.md#acap-005
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ACAP-006
+  title: Similar observations remain distinct
+  family: ACAP
+  profile: agent
+  layer: '13'
+  sources:
+  - '[R05 §16]'
+  - '[IAA §A31]'
+  - '[R03 §28]'
+  spec: spec/agent/capture.md#acap-006
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ACAP-007
+  title: Origin distinguishes recalled from external information
+  family: ACAP
+  profile: agent
+  layer: '13'
+  sources:
+  - '[R05 §5.1]'
+  - '[R05 §7]'
+  - '[IAA §A30]'
+  - '[FND §G.4]'
+  spec: spec/agent/capture.md#acap-007
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios:
+  - agent.context.injected-memory-repetition-not-reinforced
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ACAP-008
+  title: Capture references session history; it does not copy or replace it
+  family: ACAP
+  profile: agent
+  layer: '13'
+  sources:
+  - '[R05 §4]'
+  - '[R04 §42]'
+  - '[R04 §41.2]'
+  spec: spec/agent/capture.md#acap-008
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ACON-001
+  title: ConsolidationOutcome
+  family: ACON
+  profile: agent
+  layer: '14'
+  sources:
+  - '[R05 §5.4]'
+  - '[R05 §6]'
+  - '[MVP §18.3]'
+  spec: spec/agent/consolidation.md#acon-001
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ACON-002
+  title: Consolidation never touches source observations
+  family: ACON
+  profile: agent
+  layer: '14'
+  sources:
+  - '[R05 §5.4]'
+  - '[IAA §A31]'
+  - '[R05 §16]'
+  spec: spec/agent/consolidation.md#acon-002
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ACON-003
+  title: Consolidation is attributable
+  family: ACON
+  profile: agent
+  layer: '14'
+  sources:
+  - '[R05 §5.4]'
+  spec: spec/agent/consolidation.md#acon-003
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ACON-004
+  title: Consolidation is not conversation compaction
+  family: ACON
+  profile: agent
+  layer: '14'
+  sources:
+  - '[FND §G.5]'
+  - '[R05 §4]'
+  - '[R04 §42]'
+  - '[IAA §A29]'
+  spec: spec/agent/consolidation.md#acon-004
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ACON-005
+  title: Consolidation algorithm is provisional
+  family: ACON
+  profile: agent
+  layer: '14'
+  sources:
+  - '[FND §G.7]'
+  - '[R05 §17]'
+  spec: spec/agent/consolidation.md#acon-005
+  source_status: PROVISIONAL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ACON-006
+  title: Consolidation runs asynchronously
+  family: ACON
+  profile: agent
+  layer: '14'
+  sources:
+  - '[R05 §6]'
+  - '[R05 §10]'
+  spec: spec/agent/consolidation.md#acon-006
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ACON-007
+  title: Agent consolidation does not change learning rules
+  family: ACON
+  profile: agent
+  layer: '14'
+  sources:
+  - '[R00 §21]'
+  - '[R03 §28]'
+  - '[IAA §13]'
+  spec: spec/agent/consolidation.md#acon-007
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ACTX-001
+  title: AgentContextProjection
+  family: ACTX
+  profile: agent
+  layer: '15'
+  sources:
+  - '[R05 §5.6]'
+  - '[FND §G.4]'
+  - '[MVP §18.3]'
+  spec: spec/agent/context.md#actx-001
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ACTX-002
+  title: Projection budget
+  family: ACTX
+  profile: agent
+  layer: '15'
+  sources:
+  - '[R05 §9]'
+  - '[R04 §38]'
+  spec: spec/agent/context.md#actx-002
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-017
+- id: ACTX-003
+  title: Model-visible projections are reconstructable
+  family: ACTX
+  profile: agent
+  layer: '15'
+  sources:
+  - '[FND §G.4]'
+  - '[R05 §11]'
+  - '[IAA §A32]'
+  - '[MVP §18.3]'
+  spec: spec/agent/context.md#actx-003
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ACTX-004
+  title: Context fencing
+  family: ACTX
+  profile: agent
+  layer: '15'
+  sources:
+  - '[FND §G.4]'
+  - '[R05 §7]'
+  - '[MVP §18.3]'
+  - '[IAA §A30]'
+  - '[R05 §16]'
+  - '[R05 §18]'
+  spec: spec/agent/context.md#actx-004
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios:
+  - agent.context.injected-memory-repetition-not-reinforced
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ACTX-005
+  title: Private records may be omitted
+  family: ACTX
+  profile: agent
+  layer: '15'
+  sources:
+  - '[R05 §15]'
+  spec: spec/agent/context.md#actx-005
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: MINT-001
+  title: Minion-Agent is a consumer, not authority
+  family: MINT
+  profile: agent
+  layer: '16'
+  sources:
+  - '[FND §G.5]'
+  - '[FND §G.7]'
+  - '[FND §G.8]'
+  - '[R05 §2]'
+  - '[R05 §3]'
+  spec: spec/agent/minion-agent-integration.md#mint-001
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-009
+- id: MINT-002
+  title: Session storage and long-term memory are separate
+  family: MINT
+  profile: agent
+  layer: '16'
+  sources:
+  - '[FND §G.5]'
+  - '[FND §G.7]'
+  - '[MVP §18.4]'
+  - '[R04 §41.2]'
+  - '[R05 §4]'
+  - '[IAA §A29]'
+  spec: spec/agent/minion-agent-integration.md#mint-002
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: MINT-003
+  title: Independent lifecycles
+  family: MINT
+  profile: agent
+  layer: '16'
+  sources:
+  - '[R05 §4]'
+  - '[R05 §16]'
+  - '[R04 §42]'
+  spec: spec/agent/minion-agent-integration.md#mint-003
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: MINT-004
+  title: Adapter stages
+  family: MINT
+  profile: agent
+  layer: '16'
+  sources:
+  - '[R05 §10]'
+  - '[FND §G.5]'
+  spec: spec/agent/minion-agent-integration.md#mint-004
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-007
+- id: MINT-005
+  title: Adapter, not framework coupling
+  family: MINT
+  profile: agent
+  layer: '16'
+  sources:
+  - '[R05 §10]'
+  - '[IAA §A33]'
+  - '[FND §G.5]'
+  spec: spec/agent/minion-agent-integration.md#mint-005
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: MINT-006
+  title: Request reconstruction
+  family: MINT
+  profile: agent
+  layer: '16'
+  sources:
+  - '[R05 §11]'
+  - '[R04 §42]'
+  - '[IAA §12]'
+  spec: spec/agent/minion-agent-integration.md#mint-006
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-007
+- id: MINT-007
+  title: Memory degradation is not fatal by default
+  family: MINT
+  profile: agent
+  layer: '16'
+  sources:
+  - '[R05 §14]'
+  spec: spec/agent/minion-agent-integration.md#mint-007
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: MINT-008
+  title: Event domains stay separate
+  family: MINT
+  profile: agent
+  layer: '16'
+  sources:
+  - '[IAA §12]'
+  - '[IAA §13]'
+  spec: spec/agent/minion-agent-integration.md#mint-008
+  source_status: GUARDRAIL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: MINT-009
+  title: Injection through the existing seam
+  family: MINT
+  profile: agent
+  layer: '16'
+  sources:
+  - '[R05 §10]'
+  - '[R05 §16]'
+  - '[IAA §12]'
+  - '[FND §G.5]'
+  spec: spec/agent/minion-agent-integration.md#mint-009
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-007
+  - NF-008
+- id: AMEM-001
+  title: MemoryRecord is a derived durable artifact
+  family: AMEM
+  profile: agent
+  layer: '13'
+  sources:
+  - '[R05 §5.2]'
+  - '[FND §G.4]'
+  - '[MVP §18.3]'
+  spec: spec/agent/records.md#amem-001
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-012
+- id: AMEM-002
+  title: Record taxonomy is provisional
+  family: AMEM
+  profile: agent
+  layer: '13'
+  sources:
+  - '[R05 §5.2]'
+  - '[R05 §17]'
+  - '[FND §G.7]'
+  spec: spec/agent/records.md#amem-002
+  source_status: PROVISIONAL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: AMEM-003
+  title: Record evolution never rewrites sources
+  family: AMEM
+  profile: agent
+  layer: '13'
+  sources:
+  - '[R05 §5.2]'
+  - '[R05 §5.4]'
+  - '[MVP §18.3]'
+  spec: spec/agent/records.md#amem-003
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: AMEM-004
+  title: Extractor output is not canonical by default
+  family: AMEM
+  profile: agent
+  layer: '13'
+  sources:
+  - '[IAA §13]'
+  - '[IAA §patterns-still-deliberately-not-copied]'
+  spec: spec/agent/records.md#amem-004
+  source_status: GUARDRAIL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: AMEM-005
+  title: Canonical versus rebuildable agent data
+  family: AMEM
+  profile: agent
+  layer: '13'
+  sources:
+  - '[R05 §12]'
+  - '[R04 §41.1]'
+  - '[R04 §42]'
+  spec: spec/agent/records.md#amem-005
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-012
+- id: ARET-001
+  title: RetrievalQuery
+  family: ARET
+  profile: agent
+  layer: '15'
+  sources:
+  - '[R05 §5.5]'
+  - '[R05 §10]'
+  spec: spec/agent/retrieval.md#aret-001
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ARET-002
+  title: Candidate discovery
+  family: ARET
+  profile: agent
+  layer: '15'
+  sources:
+  - '[R05 §5.5]'
+  - '[R05 §8]'
+  - '[FND §G.4]'
+  spec: spec/agent/retrieval.md#aret-002
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ARET-003
+  title: Scope before ranking
+  family: ARET
+  profile: agent
+  layer: '15'
+  sources:
+  - '[R05 §8]'
+  - '[R05 §5.3]'
+  - '[R05 §16]'
+  spec: spec/agent/retrieval.md#aret-003
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios:
+  - agent.retrieval.scope-blocks-out-of-scope-similar-memory
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ARET-004
+  title: Ranking signals; no frozen formula
+  family: ARET
+  profile: agent
+  layer: '15'
+  sources:
+  - '[R05 §8]'
+  - '[R05 §17]'
+  - '[FND §G.7]'
+  - '[FND §deliberately-not-frozen]'
+  spec: spec/agent/retrieval.md#aret-004
+  source_status: PROVISIONAL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ARET-005
+  title: Pre-request retrieval is scoped and budgeted
+  family: ARET
+  profile: agent
+  layer: '15'
+  sources:
+  - '[R05 §10]'
+  - '[MVP §18.3]'
+  - '[R05 §9]'
+  spec: spec/agent/retrieval.md#aret-005
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ARET-006
+  title: Deterministic rebuild equivalence
+  family: ARET
+  profile: agent
+  layer: '15'
+  sources:
+  - '[R05 §16]'
+  spec: spec/agent/retrieval.md#aret-006
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ARET-007
+  title: Agent policy is not learner scheduling
+  family: ARET
+  profile: agent
+  layer: '15'
+  sources:
+  - '[IAA §A34]'
+  - '[R05 §18]'
+  - '[R02 §17]'
+  spec: spec/agent/retrieval.md#aret-007
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: BKP-001
+  title: Package, record export and backup are separate protocols
+  family: BKP
+  profile: core
+  layer: '12'
+  sources:
+  - '[FND §13]'
+  - '[MVP §8]'
+  - '[R00 §11]'
+  - '[R01 §18]'
+  spec: spec/backup.md#bkp-001
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: BKP-002
+  title: Native backup is lossless and layout-independent
+  family: BKP
+  profile: core
+  layer: '12'
+  sources:
+  - '[FND §13]'
+  - '[R04 §17]'
+  - '[R04 §23]'
+  - '[R04 §24]'
+  - '[MVP §18.1]'
+  spec: spec/backup.md#bkp-002
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: BKP-003
+  title: Restore validates before writing
+  family: BKP
+  profile: core
+  layer: '12'
+  sources:
+  - '[R00 §13]'
+  - '[R03 §19]'
+  - '[R04 §17]'
+  - '[R04 §11]'
+  spec: spec/backup.md#bkp-003
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: BKP-004
+  title: Backup preserves profile/type/schema identity
+  family: BKP
+  profile: core
+  layer: '17'
+  sources:
+  - '[R04 §41.1]'
+  - '[R04 §42]'
+  spec: spec/backup.md#bkp-004
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: BKP-005
+  title: Derived data is optional in backup
+  family: BKP
+  profile: core
+  layer: '12'
+  sources:
+  - '[R04 §17]'
+  - '[IAA §5]'
+  - '[R04 §28]'
+  spec: spec/backup.md#bkp-005
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: BKP-006
+  title: Historical assets survive backup
+  family: BKP
+  profile: core
+  layer: '12'
+  sources:
+  - '[R04 §17]'
+  - '[R04 §8]'
+  spec: spec/backup.md#bkp-006
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: BKP-007
+  title: Restore mode for the MVP
+  family: BKP
+  profile: core
+  layer: '12'
+  sources:
+  - '[R04 §17]'
+  - '[MVP §13]'
+  - '[R00 §17]'
+  spec: spec/backup.md#bkp-007
+  source_status: MVP_ONLY
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: BKP-008
+  title: Learning backup content (conceptual)
+  family: BKP
+  profile: learning
+  layer: '12'
+  sources:
+  - '[R00 §13]'
+  - '[R04 §17]'
+  spec: spec/backup.md#bkp-008
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ARCH-001
+  title: Two primary proving profiles
+  family: ARCH
+  profile: core
+  layer: cross-cutting
+  sources:
+  - '[FND §executive-summary]'
+  - '[FND §1]'
+  - '[FND §G.7]'
+  - '[MVP §1]'
+  - '[MVP §2]'
+  spec: spec/core.md#arch-001
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-004
+- id: ARCH-002
+  title: Shared-core admission rule
+  family: ARCH
+  profile: core
+  layer: cross-cutting
+  sources:
+  - '[FND §G.1]'
+  - '[FND §G.7]'
+  - '[IAA §A26]'
+  - '[MVP §18.4]'
+  - '[R00 §21]'
+  spec: spec/core.md#arch-002
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ARCH-003
+  title: Profile namespaces; no universal Memory entity
+  family: ARCH
+  profile: core
+  layer: cross-cutting
+  sources:
+  - '[FND §G.1]'
+  - '[IAA §A27]'
+  - '[R00 §21]'
+  - '[MVP §18.4]'
+  spec: spec/core.md#arch-003
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ARCH-004
+  title: '`MemoryModel` means the learner memory model'
+  family: ARCH
+  profile: core
+  layer: cross-cutting
+  sources:
+  - '[FND §G.6]'
+  - '[MVP §18.2]'
+  - '[R02 §17]'
+  spec: spec/core.md#arch-004
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ARCH-005
+  title: Cross-profile analogies are not type aliases
+  family: ARCH
+  profile: core
+  layer: cross-cutting
+  sources:
+  - '[R05 §13]'
+  - '[R03 §28]'
+  - '[IAA §13]'
+  spec: spec/core.md#arch-005
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ARCH-006
+  title: Knowledge, interaction, observation, inference and decision are separate layers
+  family: ARCH
+  profile: learning
+  layer: '07'
+  sources:
+  - '[FND §3]'
+  - '[FND §19]'
+  - '[R00 §3]'
+  - '[R03 §3]'
+  spec: spec/core.md#arch-006
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ARCH-007
+  title: Capability seams, not a plugin runtime
+  family: ARCH
+  profile: core
+  layer: cross-cutting
+  sources:
+  - '[IAA §A6]'
+  - '[IAA §6]'
+  - '[IAA §7]'
+  - '[IAA §9]'
+  - '[R04 §26]'
+  - '[FND §deliberately-not-frozen]'
+  spec: spec/core.md#arch-007
+  source_status: GUARDRAIL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ARCH-008
+  title: Optional services are never on the authoritative critical path
+  family: ARCH
+  profile: core
+  layer: cross-cutting
+  sources:
+  - '[FND §1.1]'
+  - '[MVP §2]'
+  - '[MVP §18.4]'
+  - '[IAA §A14]'
+  - '[R04 §30]'
+  - '[R04 §39]'
+  - '[R00 §2]'
+  spec: spec/core.md#arch-008
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ARCH-009
+  title: Persisted does not imply active
+  family: ARCH
+  profile: core
+  layer: cross-cutting
+  sources:
+  - '[IAA §A5]'
+  - '[R04 §26]'
+  - '[R04 §30]'
+  spec: spec/core.md#arch-009
+  source_status: GUARDRAIL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ARCH-010
+  title: Durable domain events are separate from runtime events
+  family: ARCH
+  profile: core
+  layer: cross-cutting
+  sources:
+  - '[IAA §A2]'
+  - '[R04 §26]'
+  - '[FND §App-F]'
+  spec: spec/core.md#arch-010
+  source_status: GUARDRAIL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ARCH-011
+  title: Simplify behavior, not semantics
+  family: ARCH
+  profile: core
+  layer: cross-cutting
+  sources:
+  - '[MVP §1.1]'
+  - '[MVP §15]'
+  - '[FND §1]'
+  - '[R03 §26]'
+  spec: spec/core.md#arch-011
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-004
+- id: ARCH-012
+  title: Status labels and freeze policy
+  family: ARCH
+  profile: core
+  layer: cross-cutting
+  sources:
+  - '[FND §document-status-legend]'
+  - '[FND §E.1]'
+  spec: spec/core.md#arch-012
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: ARCH-013
+  title: External standards are adapters
+  family: ARCH
+  profile: core
+  layer: cross-cutting
+  sources:
+  - '[FND §13]'
+  - '[MVP §10]'
+  - '[R00 §2.1]'
+  spec: spec/core.md#arch-013
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: CORE-001
+  title: Opaque immutable identity
+  family: CORE
+  profile: core
+  layer: '01'
+  sources:
+  - '[FND §16]'
+  - '[R00 §10]'
+  - '[R04 §7]'
+  - '[MVP §18.1]'
+  spec: spec/core.md#core-001
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-010
+- id: CORE-002
+  title: ID, key and version answer different questions
+  family: CORE
+  profile: core
+  layer: '01'
+  sources:
+  - '[FND §16]'
+  - '[FND §8]'
+  - '[R00 §10]'
+  - '[R04 §7]'
+  - '[R04 §24]'
+  spec: spec/core.md#core-002
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-011
+- id: CORE-003
+  title: Same ID and same version imply identical content
+  family: CORE
+  profile: core
+  layer: '01'
+  sources:
+  - '[FND §8]'
+  - '[R00 §10]'
+  - '[R01 §4]'
+  - '[R04 §7]'
+  - '[R04 §24]'
+  spec: spec/core.md#core-003
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios:
+  - core.identity.same-version-different-content-conflicts
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-012
+  - NF-013
+- id: CORE-004
+  title: Edits version; replacement, split and merge create identities with lineage
+  family: CORE
+  profile: core
+  layer: '01'
+  sources:
+  - '[FND §4.6]'
+  - '[FND §14]'
+  - '[MVP §3]'
+  - '[R00 §10]'
+  - '[R01 §11]'
+  spec: spec/core.md#core-004
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: CORE-005
+  title: Schema versions are distinct from artifact and model versions
+  family: CORE
+  profile: core
+  layer: '01'
+  sources:
+  - '[FND §16]'
+  - '[R00 §13]'
+  - '[R01 §18]'
+  - '[R04 §16]'
+  spec: spec/core.md#core-005
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: CORE-006
+  title: Provenance capability
+  family: CORE
+  profile: core
+  layer: '01'
+  sources:
+  - '[FND §8]'
+  - '[MVP §3]'
+  - '[MVP §18.1]'
+  - '[R00 §10]'
+  - '[R01 §12]'
+  spec: spec/core.md#core-006
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: CORE-007
+  title: Producer provenance on interpretations
+  family: CORE
+  profile: core
+  layer: '01'
+  sources:
+  - '[FND §8]'
+  - '[R03 §12]'
+  - '[FND §7.3]'
+  spec: spec/core.md#core-007
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: CORE-008
+  title: Lineage
+  family: CORE
+  profile: core
+  layer: '01'
+  sources:
+  - '[MVP §18.1]'
+  - '[FND §G.1]'
+  - '[FND §G.2]'
+  - '[R01 §11]'
+  spec: spec/core.md#core-008
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: CORE-009
+  title: Retired is not deleted
+  family: CORE
+  profile: core
+  layer: '01'
+  sources:
+  - '[R00 §10]'
+  - '[R04 §7]'
+  - '[R04 §8]'
+  - '[R04 §24]'
+  - '[MVP §8]'
+  spec: spec/core.md#core-009
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: CORE-010
+  title: Large content is referenced, not duplicated
+  family: CORE
+  profile: core
+  layer: '01'
+  sources:
+  - '[FND §8]'
+  - '[MVP §9]'
+  - '[R00 §4.6]'
+  - '[R03 §11]'
+  spec: spec/core.md#core-010
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: CORE-011
+  title: Integrity hashes where required
+  family: CORE
+  profile: core
+  layer: '01'
+  sources:
+  - '[MVP §18.1]'
+  - '[R04 §7]'
+  - '[R01 §8]'
+  - '[R01 §9]'
+  spec: spec/core.md#core-011
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-013
+- id: CORE-012
+  title: Durable operation identity
+  family: CORE
+  profile: core
+  layer: '01'
+  sources:
+  - '[MVP §18.1]'
+  - '[MVP §M2]'
+  - '[R00 §20.2]'
+  - '[R04 §32]'
+  - '[IAA §A18]'
+  - '[R05 §6]'
+  - '[R05 §14]'
+  spec: spec/core.md#core-012
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios:
+  - core.history.same-operation-retry-commits-once
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-014
+- id: CORE-013
+  title: Similarity is never identity
+  family: CORE
+  profile: core
+  layer: '01'
+  sources:
+  - '[FND §G.4]'
+  - '[R01 §13]'
+  - '[R04 §36]'
+  - '[IAA §A23]'
+  - '[IAA §13]'
+  - '[R05 §5.5]'
+  - '[R05 §18]'
+  spec: spec/core.md#core-013
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: HIST-001
+  title: Canonical history is authoritative; everything else is derived
+  family: HIST
+  profile: core
+  layer: '02'
+  sources:
+  - '[FND §App-F]'
+  - '[FND §foundation-level-clarifications]'
+  - '[IAA §A1]'
+  - '[MVP §18.1]'
+  - '[R00 §20.1]'
+  - '[R04 §26]'
+  - '[R04 §30]'
+  spec: spec/core.md#hist-001
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: HIST-002
+  title: Typed, profile-owned canonical history
+  family: HIST
+  profile: core
+  layer: '02'
+  sources:
+  - '[FND §G.2]'
+  - '[MVP §18.1]'
+  - '[R04 §41.1]'
+  spec: spec/core.md#hist-002
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: HIST-003
+  title: Deterministic semantic order
+  family: HIST
+  profile: core
+  layer: '02'
+  sources:
+  - '[FND §6]'
+  - '[MVP §5.1]'
+  - '[IAA §A12]'
+  - '[R04 §9]'
+  - '[R04 §26]'
+  - '[R03 §5]'
+  spec: spec/core.md#hist-003
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: HIST-004
+  title: '`occurred_at` and `recorded_at` are distinct'
+  family: HIST
+  profile: core
+  layer: '02'
+  sources:
+  - '[FND §6]'
+  - '[MVP §5.1]'
+  - '[R04 §9]'
+  - '[R03 §5]'
+  - '[R05 §5.1]'
+  spec: spec/core.md#hist-004
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-015
+- id: HIST-005
+  title: No global total order is assumed
+  family: HIST
+  profile: core
+  layer: '02'
+  sources:
+  - '[FND §App-E]'
+  - '[MVP §5.1]'
+  - '[R00 §6]'
+  - '[R04 §9]'
+  spec: spec/core.md#hist-005
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-016
+- id: HIST-006
+  title: History is append-only
+  family: HIST
+  profile: core
+  layer: '03'
+  sources:
+  - '[FND §8]'
+  - '[FND §14]'
+  - '[R03 §14]'
+  - '[R04 §9]'
+  - '[R04 §11]'
+  - '[R03 §26]'
+  spec: spec/core.md#hist-006
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: HIST-007
+  title: Reinterpretation appends overlays
+  family: HIST
+  profile: core
+  layer: '03'
+  sources:
+  - '[FND §14]'
+  - '[FND §19]'
+  - '[IAA §A16]'
+  - '[MVP §6]'
+  - '[R03 §13]'
+  - '[R03 §27.4]'
+  - '[R04 §35]'
+  spec: spec/core.md#hist-007
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: HIST-008
+  title: No semantic deduplication of canonical observations
+  family: HIST
+  profile: core
+  layer: '04'
+  sources:
+  - '[FND §foundation-level-clarifications]'
+  - '[MVP §M2]'
+  - '[R00 §20.5]'
+  - '[R00 §21]'
+  - '[R03 §27.3]'
+  - '[R04 §36]'
+  - '[IAA §A20]'
+  - '[IAA §A31]'
+  - '[R05 §16]'
+  spec: spec/core.md#hist-008
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios:
+  - learning.history.similar-reviews-remain-distinct
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: HIST-009
+  title: Durability barrier before lossy compaction
+  family: HIST
+  profile: core
+  layer: '04'
+  sources:
+  - '[IAA §A13]'
+  spec: spec/core.md#hist-009
+  source_status: GUARDRAIL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: HIST-010
+  title: System-provided information keeps its origin
+  family: HIST
+  profile: core
+  layer: '02'
+  sources:
+  - '[FND §foundation-level-clarifications]'
+  - '[IAA §A7]'
+  - '[IAA §A30]'
+  - '[MVP §M4]'
+  - '[R03 §28]'
+  - '[FND §App-F]'
+  spec: spec/core.md#hist-010
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PROJ-001
+  title: One canonical projection path per history family
+  family: PROJ
+  profile: core
+  layer: '03'
+  sources:
+  - '[FND §foundation-level-clarifications]'
+  - '[MVP §M3]'
+  - '[MVP §18.1]'
+  - '[IAA §A17]'
+  - '[R04 §31~2]'
+  - '[R02 §10]'
+  - '[R04 §40]'
+  spec: spec/core.md#proj-001
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-002
+- id: PROJ-002
+  title: Purpose-specific projections
+  family: PROJ
+  profile: core
+  layer: '03'
+  sources:
+  - '[IAA §A11]'
+  - '[R04 §26]'
+  - '[FND §deliberately-not-frozen]'
+  spec: spec/core.md#proj-002
+  source_status: GUARDRAIL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PROJ-003
+  title: ProjectionBudget
+  family: PROJ
+  profile: core
+  layer: '06'
+  sources:
+  - '[MVP §18.1]'
+  - '[R04 §38]'
+  - '[IAA §A22]'
+  - '[R05 §9]'
+  spec: spec/core.md#proj-003
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-017
+- id: PROJ-004
+  title: Budgets apply to projections, never to canonical storage
+  family: PROJ
+  profile: core
+  layer: '06'
+  sources:
+  - '[R04 §38]'
+  - '[IAA §A22]'
+  - '[R05 §9]'
+  spec: spec/core.md#proj-004
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PROJ-005
+  title: Material projected context carries provenance
+  family: PROJ
+  profile: core
+  layer: '06'
+  sources:
+  - '[MVP §18.1]'
+  - '[R05 §11]'
+  - '[IAA §A3]'
+  spec: spec/core.md#proj-005
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: RET-001
+  title: Identity first, discovery last
+  family: RET
+  profile: core
+  layer: '06'
+  sources:
+  - '[FND §G.4]'
+  - '[MVP §18.1]'
+  - '[R00 §20.4]'
+  - '[R01 §14]'
+  - '[IAA §A9]'
+  - '[IAA §A23]'
+  - '[R05 §8]'
+  spec: spec/core.md#ret-001
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: RET-002
+  title: Indexes are rebuildable read models
+  family: RET
+  profile: core
+  layer: '06'
+  sources:
+  - '[R01 §14]'
+  - '[R04 §37]'
+  - '[R04 §41.1]'
+  - '[IAA §A23]'
+  - '[R05 §12]'
+  spec: spec/core.md#ret-002
+  source_status: GUARDRAIL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: RET-003
+  title: Structured retrieval works without semantic indexing
+  family: RET
+  profile: core
+  layer: '06'
+  sources:
+  - '[R05 §16]'
+  - '[R01 §15]'
+  - '[R01 §19]'
+  - '[R04 §40]'
+  spec: spec/core.md#ret-003
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: RET-004
+  title: Index loss never touches canonical data
+  family: RET
+  profile: core
+  layer: '06'
+  sources:
+  - '[R04 §40]'
+  - '[R04 §41.1]'
+  - '[R04 §42]'
+  - '[R05 §14]'
+  spec: spec/core.md#ret-004
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: RET-005
+  title: Progressive disclosure
+  family: RET
+  profile: core
+  layer: '06'
+  sources:
+  - '[IAA §A21]'
+  - '[R01 §14]'
+  - '[R04 §37]'
+  - '[R03 §27.5]'
+  - '[R05 §8]'
+  spec: spec/core.md#ret-005
+  source_status: GUARDRAIL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: RET-006
+  title: Shared index infrastructure keeps namespaces distinct
+  family: RET
+  profile: core
+  layer: '06'
+  sources:
+  - '[R01 §21]'
+  - '[R02 §17]'
+  - '[R03 §27.5]'
+  spec: spec/core.md#ret-006
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: EVAL-001
+  title: EvaluationOutcome is the evaluator's conclusion
+  family: EVAL
+  profile: learning
+  layer: 09
+  sources:
+  - '[FND §7.2]'
+  - '[MVP §3]'
+  - '[R00 §7.2]'
+  - '[R03 §7]'
+  - '[R04 §10]'
+  spec: spec/learning/evidence.md#eval-001
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: EVAL-002
+  title: Evaluator kinds and provenance
+  family: EVAL
+  profile: learning
+  layer: 09
+  sources:
+  - '[R03 §7]'
+  - '[R03 §20]'
+  - '[MVP §7.1]'
+  spec: spec/learning/evidence.md#eval-002
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: EVAL-003
+  title: Evaluator changes never mutate historical outcomes
+  family: EVAL
+  profile: learning
+  layer: 09
+  sources:
+  - '[R03 §7]'
+  - '[R03 §13]'
+  - '[R04 §35]'
+  spec: spec/learning/evidence.md#eval-003
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: EVAL-004
+  title: Standards response processing maps to EvaluationOutcome
+  family: EVAL
+  profile: learning
+  layer: 09
+  sources:
+  - '[FND §13]'
+  spec: spec/learning/evidence.md#eval-004
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: EVID-001
+  title: MemoryEvidence is interpretation, not fact
+  family: EVID
+  profile: learning
+  layer: 09
+  sources:
+  - '[FND §7.3]'
+  - '[MVP §3]'
+  - '[R00 §7.3]'
+  - '[R03 §8]'
+  spec: spec/learning/evidence.md#evid-001
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: EVID-002
+  title: Evidence directions and quality
+  family: EVID
+  profile: learning
+  layer: 09
+  sources:
+  - '[FND §7.3]'
+  - '[R03 §8]'
+  - '[R03 §8.1]'
+  - '[FND §App-D]'
+  spec: spec/learning/evidence.md#evid-002
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: EVID-003
+  title: Missing evidence is unknown
+  family: EVID
+  profile: learning
+  layer: 09
+  sources:
+  - '[FND §7.3]'
+  - '[FND §19]'
+  - '[MVP §6]'
+  - '[R00 §4.2]'
+  - '[R00 §7.3]'
+  - '[R03 §23]'
+  spec: spec/learning/evidence.md#evid-003
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: EVID-004
+  title: Declared coverage is not obtained evidence
+  family: EVID
+  profile: learning
+  layer: 09
+  sources:
+  - '[FND §5]'
+  - '[MVP §6]'
+  - '[R03 §8.1]'
+  - '[R03 §23]'
+  spec: spec/learning/evidence.md#evid-004
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: EVID-005
+  title: Evidence mappings are versioned
+  family: EVID
+  profile: learning
+  layer: 09
+  sources:
+  - '[FND §7.3]'
+  - '[FND §App-E]'
+  - '[R00 §7.3]'
+  - '[R01 §6]'
+  - '[MVP §6]'
+  spec: spec/learning/evidence.md#evid-005
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: EVID-006
+  title: Historical evidence is never rewritten
+  family: EVID
+  profile: learning
+  layer: 09
+  sources:
+  - '[MVP §6]'
+  - '[R03 §8.1]'
+  - '[R03 §13]'
+  - '[R04 §35]'
+  - '[R04 §40]'
+  spec: spec/learning/evidence.md#evid-006
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: EVID-007
+  title: Self-rating is an MVP signal
+  family: EVID
+  profile: learning
+  layer: 09
+  sources:
+  - '[MVP §6]'
+  - '[MVP §14]'
+  - '[R00 §7.3]'
+  - '[R03 §20]'
+  spec: spec/learning/evidence.md#evid-007
+  source_status: MVP_ONLY
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: EVID-008
+  title: Exposure contamination qualifies evidence
+  family: EVID
+  profile: learning
+  layer: 09
+  sources:
+  - '[R02 §8]'
+  - '[IAA §4]'
+  - '[FND §5.2]'
+  - '[R03 §27.2]'
+  spec: spec/learning/evidence.md#evid-008
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: EVID-009
+  title: Diagnostics are derived and uncertainty-preserving
+  family: EVID
+  profile: learning
+  layer: 09
+  sources:
+  - '[FND §12]'
+  - '[R02 §14]'
+  - '[R03 §15]'
+  - '[R03 §15.1]'
+  - '[R03 §15.2]'
+  spec: spec/learning/evidence.md#evid-009
+  source_status: PROVISIONAL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: EVID-010
+  title: Repeated failure triggers diagnostic suspicion
+  family: EVID
+  profile: learning
+  layer: 09
+  sources:
+  - '[FND §12]'
+  spec: spec/learning/evidence.md#evid-010
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: EVID-011
+  title: Model-validation feedback is meta-evidence
+  family: EVID
+  profile: learning
+  layer: 09
+  sources:
+  - '[R03 §28]'
+  spec: spec/learning/evidence.md#evid-011
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: EVID-012
+  title: Progressive diagnostic reads
+  family: EVID
+  profile: learning
+  layer: 09
+  sources:
+  - '[R03 §27.5]'
+  spec: spec/learning/evidence.md#evid-012
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LMEM-001
+  title: No universal learner-state schema
+  family: LMEM
+  profile: learning
+  layer: '10'
+  sources:
+  - '[FND §9]'
+  - '[R00 §8]'
+  - '[R04 §12]'
+  - '[IAA §6]'
+  spec: spec/learning/inference.md#lmem-001
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LMEM-002
+  title: Learner state is latent, model-specific and rebuildable
+  family: LMEM
+  profile: learning
+  layer: '10'
+  sources:
+  - '[FND §3]'
+  - '[FND §9]'
+  - '[FND §19]'
+  - '[R00 §8]'
+  - '[R02 §3]'
+  - '[R03 §16]'
+  - '[MVP §7.1]'
+  spec: spec/learning/inference.md#lmem-002
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LMEM-003
+  title: No fabricated uncertainty
+  family: LMEM
+  profile: learning
+  layer: '10'
+  sources:
+  - '[FND §19]'
+  - '[FND §App-E]'
+  - '[R00 §8]'
+  - '[R03 §16]'
+  - '[R02 §3]'
+  spec: spec/learning/inference.md#lmem-003
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LMEM-004
+  title: Component-to-state mapping is model-defined
+  family: LMEM
+  profile: learning
+  layer: '10'
+  sources:
+  - '[FND §9]'
+  spec: spec/learning/inference.md#lmem-004
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LMEM-005
+  title: Context-conditioned accessibility
+  family: LMEM
+  profile: learning
+  layer: '10'
+  sources:
+  - '[FND §9.1]'
+  - '[MVP §10]'
+  - '[FND §19]'
+  spec: spec/learning/inference.md#lmem-005
+  source_status: PROVISIONAL
+  disposition: reserved
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LMEM-006
+  title: Priors are not evidence
+  family: LMEM
+  profile: learning
+  layer: '10'
+  sources:
+  - '[FND §10]'
+  spec: spec/learning/inference.md#lmem-006
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LMEM-007
+  title: Definition, instance, state and policy are distinct
+  family: LMEM
+  profile: learning
+  layer: '10'
+  sources:
+  - '[FND §14]'
+  - '[FND §15]'
+  - '[FND §19]'
+  spec: spec/learning/inference.md#lmem-007
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LMEM-008
+  title: Deterministic rebuild equivalence
+  family: LMEM
+  profile: learning
+  layer: '10'
+  sources:
+  - '[R02 §16]'
+  - '[R04 §12]'
+  - '[R04 §22]'
+  - '[MVP §13]'
+  - '[R00 §17]'
+  - '[R03 §22]'
+  spec: spec/learning/inference.md#lmem-008
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LMEM-009
+  title: Mastery and urgency are projections
+  family: LMEM
+  profile: learning
+  layer: '10'
+  sources:
+  - '[R02 §3]'
+  - '[R04 §12]'
+  - '[R00 §2.1]'
+  - '[R03 §16]'
+  spec: spec/learning/inference.md#lmem-009
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LMEM-010
+  title: Learning phase vocabulary is MVP-only
+  family: LMEM
+  profile: learning
+  layer: '10'
+  sources:
+  - '[FND §10]'
+  - '[FND §19]'
+  - '[MVP §7.1]'
+  - '[R00 §9]'
+  spec: spec/learning/inference.md#lmem-010
+  source_status: MVP_ONLY
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LMEM-011
+  title: Re-inference and rescheduling are separate operations
+  family: LMEM
+  profile: learning
+  layer: '10'
+  sources:
+  - '[FND §14]'
+  - '[R02 §12]'
+  - '[R04 §13]'
+  spec: spec/learning/inference.md#lmem-011
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LMEM-012
+  title: Learner state does not follow split/merge
+  family: LMEM
+  profile: learning
+  layer: '10'
+  sources:
+  - '[FND §4.6]'
+  - '[R00 §10]'
+  - '[R01 §11]'
+  - '[R04 §7]'
+  spec: spec/learning/inference.md#lmem-012
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LMEM-013
+  title: Interpretable baseline model
+  family: LMEM
+  profile: learning
+  layer: '10'
+  sources:
+  - '[FND §15.1]'
+  spec: spec/learning/inference.md#lmem-013
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LEARN-001
+  title: LearningEpisode
+  family: LEARN
+  profile: learning
+  layer: 08
+  sources:
+  - '[FND §6]'
+  - '[MVP §3]'
+  - '[R00 §6]'
+  - '[R03 §4]'
+  spec: spec/learning/interaction.md#learn-001
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LEARN-002
+  title: Event vocabulary
+  family: LEARN
+  profile: learning
+  layer: 08
+  sources:
+  - '[FND §6]'
+  - '[FND §19]'
+  - '[FND §App-E]'
+  - '[MVP §5.1]'
+  - '[R00 §6]'
+  - '[R03 §5]'
+  spec: spec/learning/interaction.md#learn-002
+  source_status: PROVISIONAL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LEARN-003
+  title: Flashcard projection of an episode
+  family: LEARN
+  profile: learning
+  layer: 08
+  sources:
+  - '[FND §6]'
+  - '[FND §18]'
+  - '[MVP §5]'
+  - '[R03 §5]'
+  - '[R03 §20]'
+  spec: spec/learning/interaction.md#learn-003
+  source_status: MVP_ONLY
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LEARN-004
+  title: Event envelope
+  family: LEARN
+  profile: learning
+  layer: 08
+  sources:
+  - '[R04 §9]'
+  - '[R04 §27]'
+  - '[IAA §3]'
+  spec: spec/learning/interaction.md#learn-004
+  source_status: GUARDRAIL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LEARN-005
+  title: Completed episodes are never lost; review sessions are runtime
+  family: LEARN
+  profile: learning
+  layer: 08
+  sources:
+  - '[R04 §29]'
+  - '[R00 §17]'
+  - '[MVP §13]'
+  spec: spec/learning/interaction.md#learn-005
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LEARN-006
+  title: Abandonment is not negative evidence
+  family: LEARN
+  profile: learning
+  layer: 08
+  sources:
+  - '[R03 §5]'
+  - '[R00 §7.1]'
+  spec: spec/learning/interaction.md#learn-006
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LEARN-007
+  title: Historical execution snapshot
+  family: LEARN
+  profile: learning
+  layer: 08
+  sources:
+  - '[R03 §11]'
+  - '[FND §8]'
+  - '[IAA §A3]'
+  - '[R04 §10]'
+  spec: spec/learning/interaction.md#learn-007
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LEARN-008
+  title: Interaction commits carry operation identity
+  family: LEARN
+  profile: learning
+  layer: 08
+  sources:
+  - '[R00 §20.2]'
+  - '[R04 §32]'
+  - '[R04 §40]'
+  - '[IAA §A18]'
+  spec: spec/learning/interaction.md#learn-008
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LEARN-009
+  title: No extra learner burden in the MVP flow
+  family: LEARN
+  profile: learning
+  layer: 08
+  sources:
+  - '[R03 §20]'
+  - '[R03 §23]'
+  - '[MVP §13]'
+  - '[R00 §2]'
+  spec: spec/learning/interaction.md#learn-009
+  source_status: MVP_ONLY
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LEARN-010
+  title: Corrections reference originals
+  family: LEARN
+  profile: learning
+  layer: 08
+  sources:
+  - '[R03 §14]'
+  - '[R04 §9]'
+  spec: spec/learning/interaction.md#learn-010
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: OBS-001
+  title: RawObservation is the strongest historical authority
+  family: OBS
+  profile: learning
+  layer: 08
+  sources:
+  - '[FND §7]'
+  - '[FND §8]'
+  - '[MVP §3]'
+  - '[R00 §7.1]'
+  - '[R03 §6]'
+  - '[R04 §10]'
+  spec: spec/learning/interaction.md#obs-001
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: OBS-002
+  title: Rich raw capture when practical
+  family: OBS
+  profile: learning
+  layer: 08
+  sources:
+  - '[FND §7.1]'
+  - '[R00 §7.1]'
+  - '[R03 §6.1]'
+  - '[MVP §6]'
+  spec: spec/learning/interaction.md#obs-002
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-019
+- id: OBS-003
+  title: Signals are observations, not verdicts
+  family: OBS
+  profile: learning
+  layer: 08
+  sources:
+  - '[R00 §7.1]'
+  - '[R03 §6.1]'
+  - '[R02 §9]'
+  spec: spec/learning/interaction.md#obs-003
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: OBS-004
+  title: Unknown is never defaulted
+  family: OBS
+  profile: learning
+  layer: 08
+  sources:
+  - '[R03 §6.1]'
+  - '[FND §7.3]'
+  - '[R00 §7.3]'
+  spec: spec/learning/interaction.md#obs-004
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: OBS-005
+  title: Raw observations are immutable
+  family: OBS
+  profile: learning
+  layer: 08
+  sources:
+  - '[R04 §10]'
+  - '[R04 §35]'
+  - '[R03 §13]'
+  - '[R04 §40]'
+  spec: spec/learning/interaction.md#obs-005
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: OBS-006
+  title: Exposure provenance
+  family: OBS
+  profile: learning
+  layer: 08
+  sources:
+  - '[MVP §M4]'
+  - '[R00 §20.3]'
+  - '[R03 §27.2]'
+  - '[IAA §4]'
+  - '[IAA §A7]'
+  - '[R04 §30]'
+  spec: spec/learning/interaction.md#obs-006
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios:
+  - learning.interaction.exposure-is-not-retrieval
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: OBS-007
+  title: Exposure is not retrieval
+  family: OBS
+  profile: learning
+  layer: 08
+  sources:
+  - '[FND §5.1]'
+  - '[MVP §6]'
+  - '[MVP §13]'
+  - '[R00 §5]'
+  - '[R03 §9]'
+  - '[R03 §23]'
+  spec: spec/learning/interaction.md#obs-007
+  source_status: FROZEN
+  disposition: adopted
+  scenarios:
+  - learning.interaction.exposure-is-not-retrieval
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: OBS-008
+  title: Hint progression
+  family: OBS
+  profile: learning
+  layer: 08
+  sources:
+  - '[R03 §10]'
+  spec: spec/learning/interaction.md#obs-008
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: KNOW-001
+  title: KnowledgeUnit
+  family: KNOW
+  profile: learning
+  layer: '07'
+  sources:
+  - '[FND §4.1]'
+  - '[MVP §3]'
+  - '[R00 §4.1]'
+  spec: spec/learning/knowledge.md#know-001
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: KNOW-002
+  title: KnowledgeComponent
+  family: KNOW
+  profile: learning
+  layer: '07'
+  sources:
+  - '[FND §4.2]'
+  - '[FND §4.6]'
+  - '[R00 §4.2]'
+  - '[MVP §3]'
+  spec: spec/learning/knowledge.md#know-002
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: KNOW-003
+  title: Component kinds
+  family: KNOW
+  profile: learning
+  layer: '07'
+  sources:
+  - '[FND §4.3]'
+  - '[FND §4.4]'
+  - '[FND §4.5]'
+  - '[MVP §4.1]'
+  - '[MVP §4.2]'
+  - '[MVP §14]'
+  - '[R00 §4.3]'
+  spec: spec/learning/knowledge.md#know-003
+  source_status: PROVISIONAL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: KNOW-004
+  title: Cross-unit component reuse
+  family: KNOW
+  profile: learning
+  layer: '07'
+  sources:
+  - '[FND §4.2]'
+  - '[MVP §4.2]'
+  - '[R00 §4.1]'
+  - '[R01 §5]'
+  - '[FND §13.1]'
+  spec: spec/learning/knowledge.md#know-004
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: KNOW-005
+  title: KnowledgeStructure is not ComponentRelation
+  family: KNOW
+  profile: learning
+  layer: '07'
+  sources:
+  - '[FND §4.4]'
+  - '[FND §4.7]'
+  - '[FND §19]'
+  spec: spec/learning/knowledge.md#know-005
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: KNOW-006
+  title: Typed component relations
+  family: KNOW
+  profile: learning
+  layer: '07'
+  sources:
+  - '[FND §4.7]'
+  - '[FND §11]'
+  - '[MVP §4.2]'
+  - '[MVP §10]'
+  - '[R00 §4.4]'
+  spec: spec/learning/knowledge.md#know-006
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: KNOW-007
+  title: Importance is Knowledge; difficulty is learner state
+  family: KNOW
+  profile: learning
+  layer: '07'
+  sources:
+  - '[R00 §4.2]'
+  spec: spec/learning/knowledge.md#know-007
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: KNOW-008
+  title: Collections are organization, not identity or mastery
+  family: KNOW
+  profile: learning
+  layer: '07'
+  sources:
+  - '[R00 §4.5]'
+  - '[R01 §7]'
+  - '[R00 §11]'
+  - '[FND §18]'
+  - '[R04 §8]'
+  spec: spec/learning/knowledge.md#know-008
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: KNOW-009
+  title: Assets
+  family: KNOW
+  profile: learning
+  layer: '07'
+  sources:
+  - '[R00 §4.6]'
+  - '[R01 §8]'
+  - '[R04 §4]'
+  spec: spec/learning/knowledge.md#know-009
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: KNOW-010
+  title: LearningSupport is defined in Knowledge; usage is history
+  family: KNOW
+  profile: learning
+  layer: '07'
+  sources:
+  - '[R00 §4.6]'
+  - '[R03 §10]'
+  spec: spec/learning/knowledge.md#know-010
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: KNOW-011
+  title: RecallForm is a semantic activity definition
+  family: KNOW
+  profile: learning
+  layer: '07'
+  sources:
+  - '[FND §5]'
+  - '[MVP §3]'
+  - '[R00 §5]'
+  - '[R01 §6]'
+  - '[FND §19]'
+  spec: spec/learning/knowledge.md#know-011
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: KNOW-012
+  title: RecallForm declares tests and exposes
+  family: KNOW
+  profile: learning
+  layer: '07'
+  sources:
+  - '[FND §5.1]'
+  - '[FND §5]'
+  - '[MVP §4.1]'
+  - '[R00 §5]'
+  spec: spec/learning/knowledge.md#know-012
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: KNOW-013
+  title: Independent stable identities for Knowledge artifacts
+  family: KNOW
+  profile: learning
+  layer: '07'
+  sources:
+  - '[MVP §4.1]'
+  - '[R01 §4]'
+  - '[R04 §22]'
+  - '[R04 §24]'
+  spec: spec/learning/knowledge.md#know-013
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: KNOW-014
+  title: Progressive-resolution presentation
+  family: KNOW
+  profile: learning
+  layer: '07'
+  sources:
+  - '[IAA §A8]'
+  spec: spec/learning/knowledge.md#know-014
+  source_status: GUARDRAIL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: KNOW-015
+  title: Current-version Knowledge storage
+  family: KNOW
+  profile: learning
+  layer: '07'
+  sources:
+  - '[R04 §8]'
+  - '[MVP §8]'
+  spec: spec/learning/knowledge.md#know-015
+  source_status: MVP_ONLY
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: KNOW-016
+  title: Separation from Agent Memory
+  family: KNOW
+  profile: learning
+  layer: '07'
+  sources:
+  - '[R01 §1]'
+  - '[R01 §21]'
+  - '[R05 §17]'
+  spec: spec/learning/knowledge.md#know-016
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: MIG-001
+  title: Legacy card mapping
+  family: MIG
+  profile: learning
+  layer: '12'
+  sources:
+  - '[MVP §11]'
+  - '[MVP §13]'
+  - '[R00 §14]'
+  - '[R04 §15]'
+  - '[R04 §22]'
+  spec: spec/learning/migration.md#mig-001
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: MIG-002
+  title: Stable IDs are generated once
+  family: MIG
+  profile: learning
+  layer: '12'
+  sources:
+  - '[MVP §11]'
+  - '[R00 §14]'
+  - '[R04 §15]'
+  - '[R04 §16]'
+  spec: spec/learning/migration.md#mig-002
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: MIG-003
+  title: Never fabricate history
+  family: MIG
+  profile: learning
+  layer: '12'
+  sources:
+  - '[MVP §11]'
+  - '[R00 §14]'
+  - '[R02 §15]'
+  - '[R03 §21]'
+  - '[R04 §15]'
+  - '[R04 §22]'
+  spec: spec/learning/migration.md#mig-003
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: MIG-004
+  title: Legacy schedule state
+  family: MIG
+  profile: learning
+  layer: '12'
+  sources:
+  - '[R02 §15]'
+  - '[R04 §15]'
+  spec: spec/learning/migration.md#mig-004
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: MIG-005
+  title: Migration is idempotent, transactional, forward-only
+  family: MIG
+  profile: learning
+  layer: '12'
+  sources:
+  - '[R04 §15]'
+  - '[R04 §16]'
+  spec: spec/learning/migration.md#mig-005
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: MIG-006
+  title: Legacy Markdown adapter
+  family: MIG
+  profile: learning
+  layer: '12'
+  sources:
+  - '[R01 §16]'
+  - '[FND §18]'
+  spec: spec/learning/migration.md#mig-006
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PKG-001
+  title: Package shape and field ownership
+  family: PKG
+  profile: learning
+  layer: '12'
+  sources:
+  - '[R01 §3]'
+  - '[R00 §11]'
+  - '[MVP §8]'
+  - '[FND §13.1]'
+  spec: spec/learning/package.md#pkg-001
+  source_status: MVP_ONLY
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-001
+- id: PKG-002
+  title: A package is an interchange protocol
+  family: PKG
+  profile: learning
+  layer: '12'
+  sources:
+  - '[R00 §11]'
+  - '[MVP §8]'
+  - '[R01 §1]'
+  spec: spec/learning/package.md#pkg-002
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PKG-003
+  title: Validate before mutating
+  family: PKG
+  profile: learning
+  layer: '12'
+  sources:
+  - '[R01 §9]'
+  - '[R01 §19]'
+  - '[R04 §14]'
+  spec: spec/learning/package.md#pkg-003
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PKG-004
+  title: Reconciliation by stable ID
+  family: PKG
+  profile: learning
+  layer: '12'
+  sources:
+  - '[R00 §12]'
+  - '[R01 §10]'
+  - '[MVP §8]'
+  - '[R04 §7]'
+  spec: spec/learning/package.md#pkg-004
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PKG-005
+  title: Meaning of absence
+  family: PKG
+  profile: learning
+  layer: '12'
+  sources:
+  - '[R00 §12]'
+  - '[R01 §10]'
+  - '[R04 §14]'
+  - '[MVP §8]'
+  spec: spec/learning/package.md#pkg-005
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PKG-006
+  title: Import is transactional
+  family: PKG
+  profile: learning
+  layer: '12'
+  sources:
+  - '[R04 §14]'
+  - '[R04 §22]'
+  - '[R01 §17]'
+  spec: spec/learning/package.md#pkg-006
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PKG-007
+  title: Import never owns learner history
+  family: PKG
+  profile: learning
+  layer: '12'
+  sources:
+  - '[MVP §8]'
+  - '[MVP §13]'
+  - '[R00 §12]'
+  - '[R01 §1]'
+  - '[R01 §17]'
+  - '[R04 §11]'
+  - '[R04 §14]'
+  spec: spec/learning/package.md#pkg-007
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PKG-008
+  title: Identical re-import is idempotent
+  family: PKG
+  profile: learning
+  layer: '12'
+  sources:
+  - '[R00 §17]'
+  - '[R01 §19]'
+  - '[MVP §13]'
+  spec: spec/learning/package.md#pkg-008
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PKG-009
+  title: Duplicate detection is advisory
+  family: PKG
+  profile: learning
+  layer: '12'
+  sources:
+  - '[R01 §13]'
+  - '[IAA §A20]'
+  - '[R04 §36]'
+  - '[MVP §M2]'
+  spec: spec/learning/package.md#pkg-009
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PKG-010
+  title: Import audit records
+  family: PKG
+  profile: learning
+  layer: '12'
+  sources:
+  - '[R04 §14]'
+  - '[R04 §4]'
+  spec: spec/learning/package.md#pkg-010
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PKG-011
+  title: Package compatibility
+  family: PKG
+  profile: learning
+  layer: '12'
+  sources:
+  - '[R01 §18]'
+  spec: spec/learning/package.md#pkg-011
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SCHED-001
+  title: Prediction is not policy
+  family: SCHED
+  profile: learning
+  layer: '11'
+  sources:
+  - '[FND §11]'
+  - '[FND §19]'
+  - '[R00 §9]'
+  - '[R02 §2]'
+  - '[MVP §7.1]'
+  spec: spec/learning/scheduling.md#sched-001
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SCHED-002
+  title: Policy is not a single scalar
+  family: SCHED
+  profile: learning
+  layer: '11'
+  sources:
+  - '[FND §11]'
+  - '[R02 §5]'
+  - '[IAA §A25]'
+  spec: spec/learning/scheduling.md#sched-002
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SCHED-003
+  title: Budgets are not only item counts
+  family: SCHED
+  profile: learning
+  layer: '11'
+  sources:
+  - '[R02 §6]'
+  - '[FND §11]'
+  spec: spec/learning/scheduling.md#sched-003
+  source_status: PROVISIONAL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SCHED-004
+  title: FixedInterval and adaptive strategies
+  family: SCHED
+  profile: learning
+  layer: '11'
+  sources:
+  - '[MVP §7.1]'
+  - '[MVP §13]'
+  - '[R00 §9]'
+  - '[R02 §4]'
+  - '[R02 §16]'
+  spec: spec/learning/scheduling.md#sched-004
+  source_status: MVP_ONLY
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SCHED-005
+  title: Offline, AI-free scheduling critical path
+  family: SCHED
+  profile: learning
+  layer: '11'
+  sources:
+  - '[MVP §7.1]'
+  - '[R00 §9]'
+  - '[R02 §4]'
+  - '[R02 §13]'
+  - '[FND §18]'
+  spec: spec/learning/scheduling.md#sched-005
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SCHED-006
+  title: Strategy selection is configuration
+  family: SCHED
+  profile: learning
+  layer: '11'
+  sources:
+  - '[R02 §4]'
+  - '[R04 §4]'
+  - '[R04 §13]'
+  spec: spec/learning/scheduling.md#sched-006
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SCHED-007
+  title: RecallForm selection
+  family: SCHED
+  profile: learning
+  layer: '11'
+  sources:
+  - '[R02 §7]'
+  - '[R00 §9]'
+  spec: spec/learning/scheduling.md#sched-007
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SCHED-008
+  title: Sibling and contamination suppression
+  family: SCHED
+  profile: learning
+  layer: '11'
+  sources:
+  - '[FND §5.2]'
+  - '[R00 §5]'
+  - '[R02 §7]'
+  - '[R02 §16]'
+  spec: spec/learning/scheduling.md#sched-008
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SCHED-009
+  title: Schedule state is replaceable
+  family: SCHED
+  profile: learning
+  layer: '11'
+  sources:
+  - '[R04 §13]'
+  - '[R03 §17]'
+  - '[FND §14]'
+  spec: spec/learning/scheduling.md#sched-009
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SCHED-010
+  title: Graph relations are features, not a scheduler
+  family: SCHED
+  profile: learning
+  layer: '11'
+  sources:
+  - '[FND §11]'
+  spec: spec/learning/scheduling.md#sched-010
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SCHED-011
+  title: Learning scheduling is not agent ranking
+  family: SCHED
+  profile: learning
+  layer: '11'
+  sources:
+  - '[R02 §17]'
+  - '[IAA §A34]'
+  spec: spec/learning/scheduling.md#sched-011
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PERS-001
+  title: Persistence tiers
+  family: PERS
+  profile: core
+  layer: '04'
+  sources:
+  - '[R04 §3]'
+  - '[MVP §9]'
+  - '[R00 §13]'
+  spec: spec/persistence.md#pers-001
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PERS-002
+  title: Durability hierarchy
+  family: PERS
+  profile: core
+  layer: '04'
+  sources:
+  - '[FND §17]'
+  - '[FND §8]'
+  - '[R03 §17]'
+  - '[R00 §13]'
+  spec: spec/persistence.md#pers-002
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PERS-003
+  title: Durable semantics, replaceable storage layout
+  family: PERS
+  profile: core
+  layer: '04'
+  sources:
+  - '[FND §17]'
+  - '[R04 §4]'
+  - '[R04 §5]'
+  - '[R04 §6]'
+  - '[R04 §24]'
+  spec: spec/persistence.md#pers-003
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PERS-004
+  title: Durable capture precedes enrichment
+  family: PERS
+  profile: core
+  layer: '04'
+  sources:
+  - '[MVP §M1]'
+  - '[MVP §18.3]'
+  - '[R03 §27.1]'
+  - '[IAA §A24]'
+  - '[R04 §39]'
+  - '[R04 §41.3]'
+  - '[R05 §6]'
+  spec: spec/persistence.md#pers-004
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PERS-005
+  title: Transactions and crash safety
+  family: PERS
+  profile: core
+  layer: '04'
+  sources:
+  - '[R04 §18]'
+  - '[R04 §22]'
+  - '[R04 §14]'
+  spec: spec/persistence.md#pers-005
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PERS-006
+  title: Idempotent commit per operation identity
+  family: PERS
+  profile: core
+  layer: '04'
+  sources:
+  - '[R04 §32]'
+  - '[R04 §40]'
+  - '[IAA §A18]'
+  - '[R05 §14]'
+  spec: spec/persistence.md#pers-006
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios:
+  - core.history.same-operation-retry-commits-once
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-014
+- id: PERS-007
+  title: Bounded and incremental history access
+  family: PERS
+  profile: core
+  layer: '04'
+  sources:
+  - '[MVP §M5]'
+  - '[MVP §18.1]'
+  - '[R02 §10]'
+  - '[R04 §34]'
+  - '[IAA §A19]'
+  - '[R04 §40]'
+  spec: spec/persistence.md#pers-007
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-016
+- id: PERS-008
+  title: HistoryBoundary
+  family: PERS
+  profile: core
+  layer: '04'
+  sources:
+  - '[FND §G.2]'
+  - '[R04 §41.1]'
+  - '[MVP §M5]'
+  spec: spec/persistence.md#pers-008
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-016
+- id: PERS-009
+  title: ReplayCheckpoint is an accelerator, never authority
+  family: PERS
+  profile: core
+  layer: '05'
+  sources:
+  - '[FND §foundation-level-clarifications]'
+  - '[R02 §11]'
+  - '[R04 §28]'
+  - '[R04 §33]'
+  - '[IAA §A10]'
+  - '[IAA §A15]'
+  - '[IAA §5]'
+  spec: spec/persistence.md#pers-009
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PERS-010
+  title: Checkpoint replay equivalence
+  family: PERS
+  profile: core
+  layer: '05'
+  sources:
+  - '[IAA §5]'
+  - '[R04 §40]'
+  spec: spec/persistence.md#pers-010
+  source_status: GUARDRAIL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PERS-011
+  title: Checkpoints never cross profiles
+  family: PERS
+  profile: core
+  layer: '05'
+  sources:
+  - '[R04 §41.1]'
+  - '[R05 §12]'
+  spec: spec/persistence.md#pers-011
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PERS-012
+  title: Domain repositories; append semantics for history
+  family: PERS
+  profile: core
+  layer: '04'
+  sources:
+  - '[R04 §11]'
+  - '[R04 §19]'
+  spec: spec/persistence.md#pers-012
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PERS-013
+  title: Local-first
+  family: PERS
+  profile: core
+  layer: '04'
+  sources:
+  - '[R01 §15]'
+  - '[R02 §13]'
+  - '[R04 §39]'
+  - '[R04 §20]'
+  spec: spec/persistence.md#pers-013
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PERS-014
+  title: Shared physical storage keeps profile identity explicit
+  family: PERS
+  profile: core
+  layer: '04'
+  sources:
+  - '[R04 §41.1]'
+  - '[R03 §28]'
+  - '[IAA §A27]'
+  spec: spec/persistence.md#pers-014
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PERS-015
+  title: Concurrency assumption
+  family: PERS
+  profile: core
+  layer: '04'
+  sources:
+  - '[R04 §18]'
+  - '[R03 §24]'
+  spec: spec/persistence.md#pers-015
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PERS-016
+  title: Asset write integrity
+  family: PERS
+  profile: core
+  layer: '04'
+  sources:
+  - '[R04 §18]'
+  spec: spec/persistence.md#pers-016
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PRIV-001
+  title: Durability is bounded by privacy and minimization
+  family: PRIV
+  profile: core
+  layer: cross-cutting
+  sources:
+  - '[FND §17]'
+  - '[FND §7.1]'
+  - '[FND §19]'
+  - '[MVP §9]'
+  spec: spec/privacy.md#priv-001
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PRIV-002
+  title: Richest useful observation, not everything
+  family: PRIV
+  profile: core
+  layer: cross-cutting
+  sources:
+  - '[MVP §9]'
+  - '[R00 §7.1]'
+  - '[R03 §18]'
+  - '[R04 §20]'
+  - '[R04 §10]'
+  spec: spec/privacy.md#priv-002
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PRIV-003
+  title: Local by default; no silent transmission
+  family: PRIV
+  profile: core
+  layer: cross-cutting
+  sources:
+  - '[MVP §9]'
+  - '[R03 §18]'
+  - '[R04 §20]'
+  spec: spec/privacy.md#priv-003
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PRIV-004
+  title: Logs and telemetry avoid content
+  family: PRIV
+  profile: core
+  layer: cross-cutting
+  sources:
+  - '[R04 §20]'
+  - '[R05 §15]'
+  spec: spec/privacy.md#priv-004
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PRIV-005
+  title: Honest about what was not retained
+  family: PRIV
+  profile: core
+  layer: cross-cutting
+  sources:
+  - '[R05 §6]'
+  - '[R03 §21]'
+  spec: spec/privacy.md#priv-005
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: PRIV-006
+  title: Agent memory privacy is first-class
+  family: PRIV
+  profile: agent
+  layer: '13'
+  sources:
+  - '[R05 §15]'
+  spec: spec/privacy.md#priv-006
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SCOPE-001
+  title: MemoryScope is a shared-core concept
+  family: SCOPE
+  profile: core
+  layer: '02'
+  sources:
+  - '[FND §G.3]'
+  - '[FND §G.7]'
+  - '[MVP §18.1]'
+  - '[IAA §A28]'
+  spec: spec/scope.md#scope-001
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-018
+- id: SCOPE-002
+  title: Core owns shape and composition; profiles own vocabulary
+  family: SCOPE
+  profile: core
+  layer: '02'
+  sources:
+  - '[FND §G.3]'
+  - '[R00 §21]'
+  - '[R04 §41.1]'
+  - '[MVP §18.1]'
+  spec: spec/scope.md#scope-002
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-018
+- id: SCOPE-003
+  title: Scope is a correctness and privacy boundary
+  family: SCOPE
+  profile: core
+  layer: '02'
+  sources:
+  - '[FND §G.3]'
+  - '[R05 §5.3]'
+  - '[R05 §15]'
+  spec: spec/scope.md#scope-003
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SCOPE-004
+  title: Agent scope dimensions
+  family: SCOPE
+  profile: agent
+  layer: '02'
+  sources:
+  - '[R05 §5.3]'
+  - '[IAA §A28]'
+  - '[FND §G.3]'
+  spec: spec/scope.md#scope-004
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-018
+- id: SCOPE-005
+  title: Learning scope facets (illustrative)
+  family: SCOPE
+  profile: learning
+  layer: '02'
+  sources:
+  - '[FND §G.3]'
+  spec: spec/scope.md#scope-005
+  source_status: PROVISIONAL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-018
+- id: SCOPE-006
+  title: Scope is enforced before ranking
+  family: SCOPE
+  profile: core
+  layer: '02'
+  sources:
+  - '[R05 §5.3]'
+  - '[R05 §8]'
+  - '[R05 §18]'
+  - '[R04 §42]'
+  - '[IAA §13]'
+  spec: spec/scope.md#scope-006
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios:
+  - agent.retrieval.scope-blocks-out-of-scope-similar-memory
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-018
+- id: SER-001
+  title: Explicit schema versions; declared read window
+  family: SER
+  profile: core
+  layer: '01'
+  sources:
+  - '[R00 §15]'
+  - '[R03 §19]'
+  - '[R04 §16]'
+  - '[MVP §18.1]'
+  spec: spec/serialization.md#ser-001
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-019
+- id: SER-002
+  title: Old records decode through version-specific readers
+  family: SER
+  profile: core
+  layer: '01'
+  sources:
+  - '[FND §16]'
+  - '[R00 §15]'
+  - '[R03 §19]'
+  - '[IAA §7]'
+  - '[R04 §16]'
+  spec: spec/serialization.md#ser-002
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SER-003
+  title: Missing is unknown
+  family: SER
+  profile: core
+  layer: '01'
+  sources:
+  - '[FND §16]'
+  - '[R00 §15]'
+  - '[R03 §19]'
+  - '[R04 §16]'
+  - '[MVP §13]'
+  spec: spec/serialization.md#ser-003
+  source_status: FROZEN
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SER-004
+  title: No silent change of stored meaning
+  family: SER
+  profile: core
+  layer: '01'
+  sources:
+  - '[R00 §15]'
+  - '[R03 §19]'
+  - '[R04 §16]'
+  - '[R04 §22]'
+  spec: spec/serialization.md#ser-004
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SER-005
+  title: Required versus ignorable compatibility
+  family: SER
+  profile: core
+  layer: '02'
+  sources:
+  - '[IAA §A4]'
+  - '[IAA §3]'
+  - '[R04 §27]'
+  - '[R04 §30]'
+  - '[R01 §18]'
+  - '[R05 §14]'
+  spec: spec/serialization.md#ser-005
+  source_status: GUARDRAIL
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SER-006
+  title: Profile and type identity are explicit
+  family: SER
+  profile: core
+  layer: '02'
+  sources:
+  - '[R03 §28]'
+  - '[R04 §41.1]'
+  - '[R04 §42]'
+  - '[MVP §18.1]'
+  spec: spec/serialization.md#ser-006
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: SER-007
+  title: Migration fixtures per supported version
+  family: SER
+  profile: core
+  layer: '01'
+  sources:
+  - '[R00 §15]'
+  - '[R04 §16]'
+  spec: spec/serialization.md#ser-007
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []

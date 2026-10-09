@@ -1,0 +1,19 @@
+scenario_format: 1
+id: agent.context.injected-memory-repetition-not-reinforced
+family: agent
+layer: "15"
+status: PLACEHOLDER
+title: An assistant repeating injected memory does not create independent reinforcement
+description: Pins ACTX-004 and ACAP-007 (FND G.4, R05 §7, §16, MVP §18.3).
+requirements: [ACTX-004, ACAP-007]
+given:
+  records: TO_BE_DEFINED_IN_LAYER_15
+when:
+  - project_and_inject: TO_BE_DEFINED_IN_LAYER_15
+  - capture_assistant_repetition: TO_BE_DEFINED_IN_LAYER_15
+expect:
+  captured_origin: TO_BE_DEFINED_IN_LAYER_15
+  reinforcement: TO_BE_DEFINED_IN_LAYER_15
+negative_controls:
+  - capture records the repetition with origin external/user
+  - consolidation counts the repetition as a confirmation of the injected record
