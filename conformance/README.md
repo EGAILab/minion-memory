@@ -25,7 +25,7 @@ One scenario per `.yaml` file, envelope fixed by `schema/scenario.schema.json`:
 | `negative_controls` | realistic wrong implementations this scenario must kill |
 
 **YAML profile (hazard H6).** Files are read through the YAML-1.2-core boundary
-(`minion-memory-docs/process/tools`, `yamlcore.py`): JSON-domain values only; no anchors/aliases,
+(`minion-memory-docs/process/tools`, `yamlcore.py`): JSON-domain values only; Unicode scalar values only (no surrogate code points); no anchors/aliases,
 tags or duplicate keys; any scalar whose YAML 1.1 and 1.2 readings differ must be quoted (e.g.
 `"yes"`, `"2026-10-09"`, `"010"`). Both runners must load with an equivalent profile.
 

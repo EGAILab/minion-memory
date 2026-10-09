@@ -345,8 +345,8 @@ rows:
   profile: agent
   layer: '15'
   sources:
-  - '[FND §G.4]'
   - '[R05 §11]'
+  - '[FND §G.4]'
   - '[IAA §A32]'
   - '[MVP §18.3]'
   spec: spec/agent/context.md#actx-003
@@ -1173,7 +1173,7 @@ rows:
   - '[FND §1]'
   - '[R03 §26]'
   spec: spec/core.md#arch-011
-  source_status: FROZEN
+  source_status: NORMATIVE
   disposition: adopted
   scenarios: []
   python:
@@ -1299,7 +1299,7 @@ rows:
   - '[R00 §10]'
   - '[R01 §11]'
   spec: spec/core.md#core-004
-  source_status: FROZEN
+  source_status: NORMATIVE
   disposition: adopted
   scenarios: []
   python:
@@ -1541,10 +1541,10 @@ rows:
   evidence: []
   findings: []
 - id: HIST-003
-  title: Deterministic semantic order
+  title: Deterministic episode event order
   family: HIST
-  profile: core
-  layer: '02'
+  profile: learning
+  layer: 08
   sources:
   - '[FND §6]'
   - '[MVP §5.1]'
@@ -2048,7 +2048,7 @@ rows:
   - '[R03 §8.1]'
   - '[FND §App-D]'
   spec: spec/learning/evidence.md#evid-002
-  source_status: FROZEN
+  source_status: NORMATIVE
   disposition: adopted
   scenarios: []
   python:
@@ -2126,6 +2126,8 @@ rows:
   profile: learning
   layer: 09
   sources:
+  - '[FND §8]'
+  - '[FND §14]'
   - '[MVP §6]'
   - '[R03 §8.1]'
   - '[R03 §13]'
@@ -2461,7 +2463,7 @@ rows:
   - '[R02 §12]'
   - '[R04 §13]'
   spec: spec/learning/inference.md#lmem-011
-  source_status: FROZEN
+  source_status: NORMATIVE
   disposition: adopted
   scenarios: []
   python:
@@ -2481,7 +2483,7 @@ rows:
   - '[R01 §11]'
   - '[R04 §7]'
   spec: spec/learning/inference.md#lmem-012
-  source_status: FROZEN
+  source_status: NORMATIVE
   disposition: adopted
   scenarios: []
   python:
@@ -2498,6 +2500,46 @@ rows:
   sources:
   - '[FND §15.1]'
   spec: spec/learning/inference.md#lmem-013
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LMEM-014
+  title: Learner-model evaluation discipline
+  family: LMEM
+  profile: learning
+  layer: '10'
+  sources:
+  - '[FND §15]'
+  - '[FND §15.1]'
+  - '[MVP §10]'
+  spec: spec/learning/inference.md#lmem-014
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios: []
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings: []
+- id: LMEM-015
+  title: Learner-model ReplayCheckpoint dependencies
+  family: LMEM
+  profile: learning
+  layer: '10'
+  sources:
+  - '[R02 §11]'
+  - '[R04 §28]'
+  - '[R04 §33]'
+  - '[IAA §2]'
+  - '[IAA §A15]'
+  spec: spec/learning/inference.md#lmem-015
   source_status: NORMATIVE
   disposition: adopted
   scenarios: []
@@ -2776,7 +2818,7 @@ rows:
   - '[FND §7.3]'
   - '[R00 §7.3]'
   spec: spec/learning/interaction.md#obs-004
-  source_status: FROZEN
+  source_status: NORMATIVE
   disposition: adopted
   scenarios: []
   python:
@@ -3078,7 +3120,7 @@ rows:
   - '[R01 §6]'
   - '[FND §19]'
   spec: spec/learning/knowledge.md#know-011
-  source_status: FROZEN
+  source_status: NORMATIVE
   disposition: adopted
   scenarios: []
   python:
@@ -3898,9 +3940,9 @@ rows:
   layer: '05'
   sources:
   - '[FND §foundation-level-clarifications]'
-  - '[R02 §11]'
   - '[R04 §28]'
-  - '[R04 §33]'
+  - '[R04 §41.1]'
+  - '[R05 §12]'
   - '[IAA §A10]'
   - '[IAA §A15]'
   - '[IAA §5]'

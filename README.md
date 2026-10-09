@@ -15,7 +15,7 @@ minion-memory/
 │   ├── schema/                    scenario envelope schema (support, not a family)
 │   ├── core/  learning/  agent/
 ├── minion-memory-python/          Claude-owned Python implementation (scaffold only)
-└── minion-memory-rust/            Codex-owned Rust implementation (not created yet)
+└── minion-memory-rust/            Codex-owned; ownership README only, Cargo workspace not created yet
 ```
 
 - Semantics come from the authority bundle via `../minion-memory-docs/spec/**`, never from either
