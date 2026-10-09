@@ -4224,6 +4224,7 @@ rows:
   profile: core
   layer: '02'
   sources:
+  - '[FND §G.7]'
   - '[FND §G.3]'
   - '[R00 §21]'
   - '[R04 §41.1]'
