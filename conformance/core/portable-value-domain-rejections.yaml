@@ -63,6 +63,12 @@ when:
 - canonicalize:
     case: 'precedence: stage-2 order is canonical member order'
     value_json: '{"b":9007199254740992,"a":1e400}'
+- canonicalize:
+    case: equivalent member order gives the same error (G-034)
+    value_json: '{"a":1e400,"b":9007199254740992}'
+- canonicalize:
+    case: canonical order across nesting levels (G-034)
+    value_json: '{"b":{"a":1e400},"a":[9007199254740992]}'
 expect:
   results:
   - case: integer above the safe bound
@@ -101,6 +107,10 @@ expect:
     error: value.lone_surrogate
   - case: 'precedence: stage-2 order is canonical member order'
     error: value.number_not_finite
+  - case: equivalent member order gives the same error (G-034)
+    error: value.number_not_finite
+  - case: canonical order across nesting levels (G-034)
+    error: value.integer_out_of_range
 negative_controls:
 - accepting 2^53 because the host integer type can hold it (Python int, Rust i64)
 - replacing a lone surrogate with U+FFFD instead of rejecting
