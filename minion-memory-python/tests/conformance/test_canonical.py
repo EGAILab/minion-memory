@@ -93,6 +93,9 @@ OPERATIONS: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] = {
     ),
     "compare_history_boundaries": lambda p: {"result": core.compare_history_boundaries(p["a"], p["b"])},
     "history_boundaries_equal": lambda p: {"result": core.history_boundaries_equal(p["a"], p["b"])},
+    "validate_scope": lambda p: {"result": core.validate_scope(p["scope"])},
+    "scopes_equal": lambda p: {"result": core.scopes_equal(p["a"], p["b"])},
+    "scope_visible": lambda p: {"result": core.scope_visible(p["record"], p["query"])},
 }
 
 

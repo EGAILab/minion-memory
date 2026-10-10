@@ -4225,7 +4225,7 @@ rows:
   scenarios:
   - core.scope.value-shape
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/core/scope.py
   rust:
     location: null
   evidence: []
@@ -4248,7 +4248,7 @@ rows:
   scenarios:
   - core.scope.value-shape
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/core/scope.py
   rust:
     location: null
   evidence: []
@@ -4269,7 +4269,7 @@ rows:
   scenarios:
   - core.scope.applicability-matching
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/core/scope.py
   rust:
     location: null
   evidence: []
@@ -4289,7 +4289,7 @@ rows:
   scenarios:
   - core.scope.agent-isolation-six-dimensions
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/core/scope.py
   rust:
     location: null
   evidence: []
@@ -4332,7 +4332,7 @@ rows:
   - core.scope.agent-isolation-six-dimensions
   - agent.retrieval.scope-blocks-out-of-scope-similar-memory
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/core/scope.py
   rust:
     location: null
   evidence: []
