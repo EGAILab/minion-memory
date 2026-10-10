@@ -106,6 +106,55 @@ def _observe(operation: str, params: dict[str, Any]) -> dict[str, Any]:
         return observed
 
 
+def _expected_failure(scenario: dict[str, Any]) -> str | None:
+    """The xfail reason for a scenario that is not evidence, in the corpus rules' order (README):
+    DRAFT first, naming its layer, even if it also holds a placeholder (WP02-CR-007); then an ACTIVE
+    placeholder is an error; then a TO_BE_ placeholder; then an ACTIVE layer above IMPLEMENTED_LAYER.
+    """
+    layer, sid, status = scenario["layer"], scenario["id"], scenario["status"]
+    if status == "DRAFT":
+        return (
+            f"DRAFT scenario, layer {layer} contract under review (conformance/README.md Drafts rule; {sid})"
+        )
+    if _has_placeholder(scenario):
+        assert status != "ACTIVE", f"ACTIVE scenario must not hold TO_BE_ values ({sid})"
+        return f"TO_BE_ placeholder scenario, layer {layer} (conformance/README.md; {sid})"
+    if status == "ACTIVE" and int(layer) > IMPLEMENTED_LAYER:
+        return (
+            f"ACTIVE scenario, layer {layer} above Python implemented layer {IMPLEMENTED_LAYER:02d} "
+            f"(conformance/README.md Implemented layers rule; {sid})"
+        )
+    return None
+
+
+def _control(status: str, layer: str, placeholder: bool) -> dict[str, Any]:
+    return {
+        "id": "core.runner.control",
+        "status": status,
+        "layer": layer,
+        "given": {"note": "TO_BE_X"} if placeholder else {},
+    }
+
+
+def test_runner_dispositions() -> None:
+    """Self-controls for the corpus rules, including the WP02-CR-007 witness (DRAFT + placeholder)."""
+    draft_placeholder = _expected_failure(_control("DRAFT", "02", placeholder=True))
+    assert (
+        draft_placeholder is not None
+        and "layer 02" in draft_placeholder
+        and "Drafts rule" in draft_placeholder
+    )
+    draft = _expected_failure(_control("DRAFT", "01", placeholder=False))
+    assert draft is not None and "layer 01" in draft and "Drafts rule" in draft
+    placeholder = _expected_failure(_control("PLACEHOLDER", "04", placeholder=True))
+    assert placeholder is not None and "layer 04" in placeholder and "TO_BE_" in placeholder
+    above = _expected_failure(_control("ACTIVE", f"{IMPLEMENTED_LAYER + 1:02d}", placeholder=False))
+    assert above is not None and "Implemented layers rule" in above and "Python" in above
+    assert _expected_failure(_control("ACTIVE", f"{IMPLEMENTED_LAYER:02d}", placeholder=False)) is None
+    with pytest.raises(AssertionError, match="must not hold TO_BE_"):
+        _expected_failure(_control("ACTIVE", "01", placeholder=True))
+
+
 def test_corpus_is_discovered() -> None:
     assert _scenario_files(), f"no canonical scenarios found under {CORPUS}"
 
@@ -115,13 +164,9 @@ def test_canonical_scenario(path: Path) -> None:
     scenario = yaml.safe_load(path.read_text(encoding="utf-8"))
     schema = json.loads((CORPUS / "schema" / "scenario.schema.json").read_text(encoding="utf-8"))
     jsonschema.validate(scenario, schema)
-    if _has_placeholder(scenario):
-        pytest.xfail("TO_BE_ placeholder scenario (conformance/README.md)")
-    if scenario["status"] == "DRAFT":
-        layer, sid = scenario["layer"], scenario["id"]
-        pytest.xfail(f"DRAFT scenario, layer {layer} contract not yet reviewed ({sid})")
-    if int(scenario["layer"]) > IMPLEMENTED_LAYER:
-        pytest.xfail(f"layer {scenario['layer']} not yet implemented in Python ({scenario['id']})")
+    reason = _expected_failure(scenario)
+    if reason is not None:
+        pytest.xfail(reason)
     expected = scenario["expect"]["results"]
     assert len(expected) == len(scenario["when"]), "one expectation per step"
     failures = []
