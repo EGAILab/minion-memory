@@ -1,0 +1,198 @@
+scenario_format: 1
+id: core.scope.applicability-matching
+family: core
+layer: '02'
+status: DRAFT
+title: A record is visible only when every facet it declares matches the allowed scope; omission never widens
+description: SCOPE-003/006 Layer 02 matching; Owner G-056..G-063 (reference/governance/2026-10-11-owner-wp02s-memoryscope.md).
+requirements:
+- SCOPE-003
+- SCOPE-006
+given: {}
+when:
+- scope_visible:
+    case: global record is visible to a full query
+    record:
+      scope_state: resolved
+      facets: {}
+    query:
+      agent.principal: u-1
+      agent.session: s-1
+- scope_visible:
+    case: global record is visible to an empty query
+    record:
+      scope_state: resolved
+      facets: {}
+    query: {}
+- scope_visible:
+    case: empty query sees only global records
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: u-1
+    query: {}
+- scope_visible:
+    case: record facets are a subset of the query
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: u-1
+    query:
+      agent.principal: u-1
+      agent.conversation: c-1
+      agent.session: s-1
+- scope_visible:
+    case: one mismatched declared facet hides the record
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: u-1
+        agent.workspace: w-p
+    query:
+      agent.principal: u-1
+      agent.workspace: w-q
+- scope_visible:
+    case: a query omitting a declared facet never widens
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: u-1
+        agent.workspace: w-p
+    query:
+      agent.principal: u-1
+- scope_visible:
+    case: extra query facets do not hide a broader record
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: u-1
+        agent.workspace: w-p
+    query:
+      agent.principal: u-1
+      agent.workspace: w-p
+      agent.conversation: c-1
+      agent.task: t-1
+- scope_visible:
+    case: unresolved record is hidden even from a full query
+    record:
+      scope_state: unresolved
+    query:
+      agent.principal: u-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: record with an unknown facet is hidden (fail-closed, G-061)
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: u-1
+        agent.mood: calm
+    query:
+      agent.principal: u-1
+- scope_visible:
+    case: record with a learning facet is hidden (learning vocabulary deferred, G-062)
+    record:
+      scope_state: resolved
+      facets:
+        learning.course: c-1
+    query:
+      agent.principal: u-1
+- scope_visible:
+    case: query naming an unknown facet is rejected (G-061)
+    record:
+      scope_state: resolved
+      facets: {}
+    query:
+      agent.mood: calm
+- scope_visible:
+    case: query naming a learning facet is rejected
+    record:
+      scope_state: resolved
+      facets: {}
+    query:
+      learning.course: c-1
+- scope_visible:
+    case: source alias 'user' never enters the core
+    record:
+      scope_state: resolved
+      facets: {}
+    query:
+      agent.user: u-1
+- scope_visible:
+    case: a query has no unresolved form
+    record:
+      scope_state: resolved
+      facets: {}
+    query:
+      scope_state: unresolved
+- scope_visible:
+    case: query value outside the token grammar
+    record:
+      scope_state: resolved
+      facets: {}
+    query:
+      agent.session: S-1
+- scope_visible:
+    case: invalid record before invalid query (declared order)
+    record:
+      scope_state: maybe
+    query:
+      agent.mood: x
+- scope_visible:
+    case: values are compared exactly
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: u-1
+    query:
+      agent.principal: u-01
+expect:
+  results:
+  - case: global record is visible to a full query
+    result: true
+  - case: global record is visible to an empty query
+    result: true
+  - case: empty query sees only global records
+    result: false
+  - case: record facets are a subset of the query
+    result: true
+  - case: one mismatched declared facet hides the record
+    result: false
+  - case: a query omitting a declared facet never widens
+    result: false
+  - case: extra query facets do not hide a broader record
+    result: true
+  - case: unresolved record is hidden even from a full query
+    result: false
+  - case: record with an unknown facet is hidden (fail-closed, G-061)
+    result: false
+  - case: record with a learning facet is hidden (learning vocabulary deferred, G-062)
+    result: false
+  - case: query naming an unknown facet is rejected (G-061)
+    error: scope.query_invalid
+    argument: query
+  - case: query naming a learning facet is rejected
+    error: scope.query_invalid
+    argument: query
+  - case: source alias 'user' never enters the core
+    error: scope.query_invalid
+    argument: query
+  - case: a query has no unresolved form
+    error: scope.query_invalid
+    argument: query
+  - case: query value outside the token grammar
+    error: scope.query_invalid
+    argument: query
+  - case: invalid record before invalid query (declared order)
+    error: scope.invalid
+    argument: record
+  - case: values are compared exactly
+    result: false
+negative_controls:
+- treating a query-omitted facet as a wildcard
+- showing unresolved records
+- ignoring unknown record facets
+- accepting unknown or aliased query facets
