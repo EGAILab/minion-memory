@@ -2,7 +2,7 @@ scenario_format: 1
 id: core.history.envelope-admission-shape
 family: core
 layer: '02'
-status: DRAFT
+status: ACTIVE
 title: A recognized history envelope is closed, carries recorded_at, and is decoded to normalized values
 description: HIST-002 envelope; Owner G-048..G-055 (reference/governance/2026-10-11-owner-layer02-start.md); stage precedence SER-008 G-031/G-034.
 requirements:

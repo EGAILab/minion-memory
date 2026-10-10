@@ -2,7 +2,7 @@ scenario_format: 1
 id: core.history.profile-exclusion
 family: core
 layer: '02'
-status: DRAFT
+status: ACTIVE
 title: A profile reader excludes other-profile records without decoding or compatibility classification
 description: SER-006 / HIST-002; Owner G-050; Owner G-048..G-055 (reference/governance/2026-10-11-owner-layer02-start.md).
 requirements:

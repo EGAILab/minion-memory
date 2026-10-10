@@ -39,6 +39,13 @@ The reason references this rule and the scenario's layer. A `DRAFT` scenario is 
 evidence, never passes, is never skipped silently, and never fails the suite: its contract is still
 under review. Promotion to `ACTIVE` happens only once the contract is agreed.
 
+**Implemented layers (NF-026).** Each runner declares the highest layer its language implements.
+An `ACTIVE` scenario above that layer is reported as an expected failure (`xfail`) whose reason
+names the layer and the language. It never passes and is never skipped silently. The declaration
+moves only within that language's implementation candidate, which then has to pass every `ACTIVE`
+scenario up to the declared layer. This is how "Python at most one layer ahead of Rust" stays
+visible without a red suite in the lagging language.
+
 **Runner rule.** A runner parses, constructs public values, invokes the real implementation,
 normalizes observable output and compares. It never implements semantics (ordering, idempotency,
 scope resolution, consolidation, evidence inference, serialization repair, expected results).

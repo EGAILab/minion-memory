@@ -1543,7 +1543,7 @@ rows:
   - core.history.envelope-admission-shape
   - core.history.profile-exclusion
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/core/history.py
   rust:
     location: null
   evidence: []
@@ -1610,7 +1610,7 @@ rows:
   scenarios:
   - core.history.boundary-local-cursor
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/core/history.py
   rust:
     location: null
   evidence: []
@@ -1722,7 +1722,7 @@ rows:
   scenarios:
   - core.history.envelope-admission-shape
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/core/history.py
   rust:
     location: null
   evidence: []
@@ -4434,7 +4434,7 @@ rows:
   - core.history.envelope-admission-shape
   - core.history.replay-compatibility
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/core/history.py
   rust:
     location: null
   evidence: []
@@ -4455,7 +4455,7 @@ rows:
   scenarios:
   - core.history.profile-exclusion
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/core/history.py
   rust:
     location: null
   evidence: []

@@ -2,7 +2,7 @@ scenario_format: 1
 id: core.history.replay-compatibility
 family: core
 layer: '02'
-status: DRAFT
+status: ACTIVE
 title: Unrecognized records are skipped only when declared ignorable; unrecognized required records stop replay
 description: SER-005 replay admission; Owner G-048..G-055 (reference/governance/2026-10-11-owner-layer02-start.md).
 requirements:

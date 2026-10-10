@@ -1,11 +1,19 @@
-"""Layer 01 core primitives (agreed contract checkpoint: docs 62adec5f / code 860e91c1).
+"""Core primitives: Layer 01 (certified; docs 71e2b12e / code cc3c5d54) and Layer 02 history envelope
+(agreed contract: docs 6f761081 / code 15b71ca3).
 
 Public API: value validation and canonical bytes (SER-008, SER-009), stable IDs and versions
 (CORE-001, CORE-002), revision comparison (CORE-003), operation identity (CORE-012) and timestamps
-(HIST-004). Every rejection raises `MnemeValidationError` with one stable code (G-031).
+(HIST-004); Layer 02 history envelope admission and HistoryBoundary (HIST-002, HIST-005, SER-005,
+SER-006). Every rejection raises `MnemeValidationError` with one stable code (G-031).
 """
 
 from .errors import MnemeValidationError
+from .history import (
+    HistoryAdmission,
+    admit_history_record,
+    compare_history_boundaries,
+    history_boundaries_equal,
+)
 from .identity import (
     OperationIdentity,
     compare_artifact_revisions,
@@ -28,16 +36,20 @@ from .values import (
 )
 
 __all__ = [
+    "HistoryAdmission",
     "JsonText",
     "MnemeValidationError",
     "OperationIdentity",
     "Value",
+    "admit_history_record",
     "canonical_bytes",
     "compare_artifact_revisions",
+    "compare_history_boundaries",
     "compare_operation_identities",
     "compare_versions",
     "content_hash",
     "decode_json",
+    "history_boundaries_equal",
     "normalize_timestamp",
     "operation_identity",
     "raw_content_hash",

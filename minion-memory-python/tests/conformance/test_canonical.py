@@ -8,6 +8,8 @@ it).
 * a scenario containing any `TO_BE_` value is reported xfail (conformance/README.md), detected
   recursively from the document itself — never from a list of names;
 * a DRAFT scenario is reported xfail (its layer's contract is not yet reviewed);
+* an ACTIVE scenario above `IMPLEMENTED_LAYER` is reported xfail: that layer is not yet implemented
+  in Python (conformance/README.md, implemented-layer rule);
 * an ACTIVE scenario must pass, and an ACTIVE scenario using an operation this runner does not know
   fails loudly: a missing operation is a gap, not a skip.
 
@@ -32,6 +34,8 @@ from minion_memory import core
 
 CORPUS = Path(__file__).resolve().parents[3] / "conformance"
 FAMILIES = ("core", "learning", "agent")
+# Highest layer the Python implementation covers; it moves only with an implementation candidate.
+IMPLEMENTED_LAYER = 2
 
 
 def _scenario_files() -> list[Path]:
@@ -61,6 +65,13 @@ def _canonicalize(params: dict[str, Any]) -> dict[str, Any]:
     return {"canonical": raw.decode("utf-8"), "sha256": core.content_hash(value)}
 
 
+def _admission(admission: core.HistoryAdmission) -> dict[str, Any]:
+    observed: dict[str, Any] = {"outcome": admission.outcome}
+    if admission.envelope is not None:
+        observed["envelope"] = admission.envelope
+    return observed
+
+
 OPERATIONS: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] = {
     "canonicalize": _canonicalize,
     "compare_versions": lambda p: {"result": core.compare_versions(p["a"], p["b"])},
@@ -77,6 +88,11 @@ OPERATIONS: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] = {
     },
     "hash_content": lambda p: {"sha256": core.raw_content_hash(bytes.fromhex(p["hex"]))},
     "compare_artifact_revisions": lambda p: {"result": core.compare_artifact_revisions(p["a"], p["b"])},
+    "admit_history_record": lambda p: _admission(
+        core.admit_history_record(p["reader"], _input(p, "record", "record_json"))
+    ),
+    "compare_history_boundaries": lambda p: {"result": core.compare_history_boundaries(p["a"], p["b"])},
+    "history_boundaries_equal": lambda p: {"result": core.history_boundaries_equal(p["a"], p["b"])},
 }
 
 
@@ -104,6 +120,8 @@ def test_canonical_scenario(path: Path) -> None:
     if scenario["status"] == "DRAFT":
         layer, sid = scenario["layer"], scenario["id"]
         pytest.xfail(f"DRAFT scenario, layer {layer} contract not yet reviewed ({sid})")
+    if int(scenario["layer"]) > IMPLEMENTED_LAYER:
+        pytest.xfail(f"layer {scenario['layer']} not yet implemented in Python ({scenario['id']})")
     expected = scenario["expect"]["results"]
     assert len(expected) == len(scenario["when"]), "one expectation per step"
     failures = []

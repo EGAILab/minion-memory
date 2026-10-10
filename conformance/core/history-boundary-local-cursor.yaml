@@ -2,7 +2,7 @@ scenario_format: 1
 id: core.history.boundary-local-cursor
 family: core
 layer: '02'
-status: DRAFT
+status: ACTIVE
 title: A HistoryBoundary orders positions only within one store; cross-store ordering is incomparable
 description: HIST-005; NF-016 resolved under Owner G-047 and G-051; Owner G-048..G-055 (reference/governance/2026-10-11-owner-layer02-start.md).
 requirements:
