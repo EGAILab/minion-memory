@@ -1,0 +1,441 @@
+scenario_format: 1
+id: core.history.envelope-admission-shape
+family: core
+layer: '02'
+status: DRAFT
+title: A recognized history envelope is closed, carries recorded_at, and is decoded to normalized values
+description: HIST-002 envelope; Owner G-048..G-051 (reference/governance/2026-10-11-owner-layer02-start.md); stage precedence SER-008 G-031/G-034.
+requirements:
+- HIST-002
+- HIST-010
+- SER-005
+given: {}
+when:
+- admit_history_record:
+    case: minimal recognized envelope
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: occurred_at after recorded_at is accepted; no order is required (G-049)
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T07:59:00Z'
+      occurred_at: '2026-10-11T10:00:00+02:00'
+- admit_history_record:
+    case: payload and provenance reach the reader as normalized values (HIST-010)
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+      payload:
+        answer: Paris
+        score: 1.0
+        hints: []
+      provenance:
+        exposure: hint
+        hint_id: h-1
+- admit_history_record:
+    case: schema_version 1.0 is edition 1 (one numeric kind, G-023)
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record_json: '{"record_id": "ev-0001", "profile": "learning", "record_type": "attempt", "schema_version": 1.0, "compatibility": "required", "recorded_at": "2026-10-11T08:00:00Z"}'
+- admit_history_record:
+    case: unknown top-level member (closed envelope, G-048)
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+      extra: 1
+- admit_history_record:
+    case: missing recorded_at (G-049)
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+- admit_history_record:
+    case: missing record_id
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: occurred_at null is not unknown; unknown is absence (G-049)
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+      occurred_at: null
+- admit_history_record:
+    case: occurred_at empty string
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+      occurred_at: ''
+- admit_history_record:
+    case: record_id outside the stable-ID domain
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: Ev-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: 'typed fields in canonical order: occurred_at before record_id (G-034)'
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: Ev-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+      occurred_at: yesterday
+- admit_history_record:
+    case: 'typed fields in canonical order: record_id before recorded_at'
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: Ev-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: now
+- admit_history_record:
+    case: closed shape before typed fields
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: Ev-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+      extra: 1
+- admit_history_record:
+    case: generic stage 2 before typed fields (G-031)
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record_json: '{"record_id": "Ev-1", "profile": "learning", "record_type": "attempt", "schema_version": 1, "compatibility": "required", "payload": {"x": 1e400}, "recorded_at": "2026-10-11T08:00:00Z"}'
+- admit_history_record:
+    case: 'generic stage 1: duplicate member'
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record_json: '{"record_id":"ev-1","record_id":"ev-2","profile":"learning","record_type":"attempt","schema_version":1,"compatibility":"required","recorded_at":"2026-10-11T08:00:00Z"}'
+- admit_history_record:
+    case: non-object envelope
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+    - learning
+    - attempt
+- admit_history_record:
+    case: compatibility outside required|ignorable
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: Required
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: schema_version 0
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 0
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: schema_version as a string
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: '1'
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: schema_version fractional
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1.5
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: record_type outside the token domain
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: Attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+expect:
+  results:
+  - case: minimal recognized envelope
+    outcome: decode
+    envelope:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00.000000Z'
+  - case: occurred_at after recorded_at is accepted; no order is required (G-049)
+    outcome: decode
+    envelope:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T07:59:00.000000Z'
+      occurred_at: '2026-10-11T08:00:00.000000Z'
+  - case: payload and provenance reach the reader as normalized values (HIST-010)
+    outcome: decode
+    envelope:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00.000000Z'
+      payload:
+        answer: Paris
+        score: 1
+        hints: []
+      provenance:
+        exposure: hint
+        hint_id: h-1
+  - case: schema_version 1.0 is edition 1 (one numeric kind, G-023)
+    outcome: decode
+    envelope:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00.000000Z'
+  - case: unknown top-level member (closed envelope, G-048)
+    error: history.envelope_invalid
+    argument: record
+  - case: missing recorded_at (G-049)
+    error: history.envelope_invalid
+    argument: record
+  - case: missing record_id
+    error: history.envelope_invalid
+    argument: record
+  - case: occurred_at null is not unknown; unknown is absence (G-049)
+    error: timestamp.invalid
+    argument: record
+  - case: occurred_at empty string
+    error: timestamp.invalid
+    argument: record
+  - case: record_id outside the stable-ID domain
+    error: id.invalid
+    argument: record
+  - case: 'typed fields in canonical order: occurred_at before record_id (G-034)'
+    error: timestamp.invalid
+    argument: record
+  - case: 'typed fields in canonical order: record_id before recorded_at'
+    error: id.invalid
+    argument: record
+  - case: closed shape before typed fields
+    error: history.envelope_invalid
+    argument: record
+  - case: generic stage 2 before typed fields (G-031)
+    error: value.number_not_finite
+    argument: record
+  - case: 'generic stage 1: duplicate member'
+    error: value.duplicate_key
+    argument: record
+  - case: non-object envelope
+    error: history.envelope_invalid
+    argument: record
+  - case: compatibility outside required|ignorable
+    error: history.envelope_invalid
+    argument: record
+  - case: schema_version 0
+    error: history.envelope_invalid
+    argument: record
+  - case: schema_version as a string
+    error: history.envelope_invalid
+    argument: record
+  - case: schema_version fractional
+    error: history.envelope_invalid
+    argument: record
+  - case: record_type outside the token domain
+    error: history.envelope_invalid
+    argument: record
+negative_controls:
+- accepting unknown top-level members of a recognized schema
+- 'treating occurred_at: null as unknown'
+- inferring occurred_at from recorded_at or requiring occurred_at <= recorded_at
+- dropping or rewriting payload/provenance on admission
+- checking typed fields before the closed shape

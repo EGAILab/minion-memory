@@ -1539,7 +1539,9 @@ rows:
   spec: spec/core.md#hist-002
   source_status: NORMATIVE
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.history.envelope-admission-shape
+  - core.history.profile-exclusion
   python:
     location: null
   rust:
@@ -1605,7 +1607,8 @@ rows:
   spec: spec/core.md#hist-005
   source_status: NORMATIVE
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.history.boundary-local-cursor
   python:
     location: null
   rust:
@@ -1716,7 +1719,8 @@ rows:
   spec: spec/core.md#hist-010
   source_status: NORMATIVE
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.history.envelope-admission-shape
   python:
     location: null
   rust:
@@ -4426,7 +4430,9 @@ rows:
   spec: spec/serialization.md#ser-005
   source_status: GUARDRAIL
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.history.envelope-admission-shape
+  - core.history.replay-compatibility
   python:
     location: null
   rust:
@@ -4446,7 +4452,8 @@ rows:
   spec: spec/serialization.md#ser-006
   source_status: NORMATIVE
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.history.profile-exclusion
   python:
     location: null
   rust:

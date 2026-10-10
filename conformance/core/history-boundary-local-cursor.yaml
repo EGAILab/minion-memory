@@ -1,0 +1,228 @@
+scenario_format: 1
+id: core.history.boundary-local-cursor
+family: core
+layer: '02'
+status: DRAFT
+title: A HistoryBoundary orders positions only within one store; cross-store ordering is incomparable
+description: HIST-005; NF-016 resolved under Owner G-047 and G-051; Owner G-048..G-051 (reference/governance/2026-10-11-owner-layer02-start.md).
+requirements:
+- HIST-005
+given: {}
+when:
+- compare_history_boundaries:
+    case: same store, lower position
+    a:
+      store_id: store-1
+      position: 3
+    b:
+      store_id: store-1
+      position: 5
+- compare_history_boundaries:
+    case: same store, same position
+    a:
+      store_id: store-1
+      position: 5
+    b:
+      store_id: store-1
+      position: 5
+- compare_history_boundaries:
+    case: same store, higher position
+    a:
+      store_id: store-1
+      position: 9
+    b:
+      store_id: store-1
+      position: 2
+- compare_history_boundaries:
+    case: position 0 is before the first record
+    a:
+      store_id: store-1
+      position: 0
+    b:
+      store_id: store-1
+      position: 1
+- compare_history_boundaries:
+    case: position 2.0 is 2 (one numeric kind)
+    a:
+      store_id: store-1
+      position: 2.0
+    b:
+      store_id: store-1
+      position: 2
+- compare_history_boundaries:
+    case: different stores are incomparable even at equal positions (G-051)
+    a:
+      store_id: store-1
+      position: 5
+    b:
+      store_id: store-2
+      position: 5
+- compare_history_boundaries:
+    case: no order is derived from store IDs
+    a:
+      store_id: store-a
+      position: 1
+    b:
+      store_id: store-b
+      position: 9
+- history_boundaries_equal:
+    case: equal pair
+    a:
+      store_id: store-1
+      position: 5
+    b:
+      store_id: store-1
+      position: 5
+- history_boundaries_equal:
+    case: 'different stores: false, not an error (G-051)'
+    a:
+      store_id: store-1
+      position: 5
+    b:
+      store_id: store-2
+      position: 5
+- history_boundaries_equal:
+    case: different positions
+    a:
+      store_id: store-1
+      position: 5
+    b:
+      store_id: store-1
+      position: 6
+- compare_history_boundaries:
+    case: unknown member
+    a:
+      store_id: store-1
+      position: 1
+      cursor: x
+    b:
+      store_id: store-1
+      position: 2
+- compare_history_boundaries:
+    case: negative position
+    a:
+      store_id: store-1
+      position: 1
+    b:
+      store_id: store-1
+      position: -1
+- compare_history_boundaries:
+    case: fractional position
+    a:
+      store_id: store-1
+      position: 1.5
+    b:
+      store_id: store-1
+      position: 2
+- compare_history_boundaries:
+    case: position as a string
+    a:
+      store_id: store-1
+      position: 1
+    b:
+      store_id: store-1
+      position: '2'
+- compare_history_boundaries:
+    case: store_id outside the stable-ID domain
+    a:
+      store_id: Store-1
+      position: 1
+    b:
+      store_id: store-1
+      position: 2
+- compare_history_boundaries:
+    case: missing position
+    a:
+      store_id: store-1
+    b:
+      store_id: store-1
+      position: 2
+- compare_history_boundaries:
+    case: 'position beyond the safe integer bound: generic stage 2'
+    a:
+      store_id: store-1
+      position: 9007199254740992
+    b:
+      store_id: store-1
+      position: 2
+- compare_history_boundaries:
+    case: invalid boundary precedes incomparability
+    a:
+      store_id: store-1
+      position: -1
+    b:
+      store_id: store-2
+      position: 2
+- compare_history_boundaries:
+    case: argument a before argument b
+    a:
+      store_id: store-1
+      position: -1
+    b:
+      store_id: store-1
+      position: -2
+- history_boundaries_equal:
+    case: equality also validates its arguments
+    a:
+      store_id: store-1
+      position: 1
+    b:
+      store_id: store-1
+      position: 1.5
+expect:
+  results:
+  - case: same store, lower position
+    result: less
+  - case: same store, same position
+    result: equal
+  - case: same store, higher position
+    result: greater
+  - case: position 0 is before the first record
+    result: less
+  - case: position 2.0 is 2 (one numeric kind)
+    result: equal
+  - case: different stores are incomparable even at equal positions (G-051)
+    error: history.boundary_incomparable
+  - case: no order is derived from store IDs
+    error: history.boundary_incomparable
+  - case: equal pair
+    result: true
+  - case: 'different stores: false, not an error (G-051)'
+    result: false
+  - case: different positions
+    result: false
+  - case: unknown member
+    error: history.boundary_invalid
+    argument: a
+  - case: negative position
+    error: history.boundary_invalid
+    argument: b
+  - case: fractional position
+    error: history.boundary_invalid
+    argument: a
+  - case: position as a string
+    error: history.boundary_invalid
+    argument: b
+  - case: store_id outside the stable-ID domain
+    error: history.boundary_invalid
+    argument: a
+  - case: missing position
+    error: history.boundary_invalid
+    argument: a
+  - case: 'position beyond the safe integer bound: generic stage 2'
+    error: value.integer_out_of_range
+    argument: a
+  - case: invalid boundary precedes incomparability
+    error: history.boundary_invalid
+    argument: a
+  - case: argument a before argument b
+    error: history.boundary_invalid
+    argument: a
+  - case: equality also validates its arguments
+    error: history.boundary_invalid
+    argument: b
+negative_controls:
+- comparing positions across stores
+- ordering by store ID
+- treating the cursor as a global or causal order
+- returning an error for cross-store structural equality

@@ -34,6 +34,11 @@ runners detect it recursively from the document and report `xfail` with a reason
 rule; they never skip silently or keep a name list. A scenario with status `ACTIVE` must contain no
 `TO_BE_` value.
 
+**Drafts (NF-026).** Both runners report every `DRAFT` scenario as an expected failure (`xfail`).
+The reason references this rule and the scenario's layer. A `DRAFT` scenario is never executed as
+evidence, never passes, is never skipped silently, and never fails the suite: its contract is still
+under review. Promotion to `ACTIVE` happens only once the contract is agreed.
+
 **Runner rule.** A runner parses, constructs public values, invokes the real implementation,
 normalizes observable output and compares. It never implements semantics (ordering, idempotency,
 scope resolution, consolidation, evidence inference, serialization repair, expected results).

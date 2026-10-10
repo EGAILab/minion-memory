@@ -1,0 +1,141 @@
+scenario_format: 1
+id: core.history.profile-exclusion
+family: core
+layer: '02'
+status: DRAFT
+title: A profile reader excludes other-profile records without decoding or compatibility classification
+description: SER-006 / HIST-002; Owner G-050; Owner G-048..G-051 (reference/governance/2026-10-11-owner-layer02-start.md).
+requirements:
+- SER-006
+- HIST-002
+given: {}
+when:
+- admit_history_record:
+    case: 'other profile, unrecognized required type: excluded, compatibility not consulted'
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: obs-1
+      profile: agent
+      record_type: observation
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: 'other profile with the same type name as a recognized type: excluded (namespacing)'
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: agent
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: 'other profile is not shape-validated: excluded'
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: agent
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      extra: 1
+- admit_history_record:
+    case: missing profile is an envelope error, not exclusion
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: empty profile is an envelope error
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: ''
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: 'other profile with invalid identity: envelope error'
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: agent
+      record_type: attempt
+      schema_version: 0
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: generic stages apply before exclusion (G-031)
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record_json: '{"record_id": "ev-0001", "profile": "agent", "record_type": "attempt", "schema_version": 1, "compatibility": "required", "payload": [1e400], "recorded_at": "2026-10-11T08:00:00Z"}'
+expect:
+  results:
+  - case: 'other profile, unrecognized required type: excluded, compatibility not consulted'
+    outcome: excluded
+  - case: 'other profile with the same type name as a recognized type: excluded (namespacing)'
+    outcome: excluded
+  - case: 'other profile is not shape-validated: excluded'
+    outcome: excluded
+  - case: missing profile is an envelope error, not exclusion
+    error: history.envelope_invalid
+    argument: record
+  - case: empty profile is an envelope error
+    error: history.envelope_invalid
+    argument: record
+  - case: 'other profile with invalid identity: envelope error'
+    error: history.envelope_invalid
+    argument: record
+  - case: generic stages apply before exclusion (G-031)
+    error: value.number_not_finite
+    argument: record
+negative_controls:
+- decoding an other-profile record whose type name matches
+- classifying an other-profile record as skip/unknown_required
+- treating a missing profile as exclusion
