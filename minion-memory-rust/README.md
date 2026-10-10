@@ -64,9 +64,11 @@ Draft 2020-12 schema, and calls public operations. It performs no canonicalizati
 It reports the discovered ACTIVE scenario/step counts and explicit expected failures; the Layer 01
 base currently has 8 ACTIVE scenarios / 146 steps and 5 recursive `TO_BE_` expected failures.
 Every DRAFT scenario reports xfail with its layer and the corpus rule as the reason. Drafts never
-execute as evidence; promotion to ACTIVE executes every step and fails on unsupported operations
-or wrong results. Counts are derived from dispatch, not pinned to the Layer 01 inventory.
-Unknown ACTIVE operations fail. Native scenario integers are constructed exactly as Rust `i128`;
+execute as evidence. The Rust runner declares `IMPLEMENTED_LAYER = 1`: ACTIVE scenarios above
+Layer 01 report xfail naming their layer, Rust and the Implemented layers rule. This declaration
+moves only with a Rust implementation candidate. At or below the declared layer, promotion to
+ACTIVE executes every step and fails on unsupported operations or wrong results. Counts derive
+from dispatch, not a pinned inventory. Unknown eligible ACTIVE operations fail. Native scenario integers are constructed exactly as Rust `i128`;
 JSON-text inputs are handed to the library untouched.
 
 `tests/layer01.rs` covers source/stage/canonical precedence, native values, typed rules, timestamps,

@@ -4,6 +4,9 @@ use minion_memory::*;
 use serde_json::{Value as Json, json};
 use std::path::{Path, PathBuf};
 
+// Moves only with a Rust implementation candidate that passes the newly admitted corpus.
+const IMPLEMENTED_LAYER: u8 = 1;
+
 fn observe(step: &Json) -> Result<Json, String> {
     let step = step.as_object().ok_or("operation must be a map")?;
     if step.len() != 1 {
@@ -89,6 +92,13 @@ enum ScenarioOutcome {
 // The caller validates the shared envelope schema before dispatching any scenario.
 // Status controls evidence eligibility only; all ACTIVE steps use the real library.
 fn run_scenario(scenario: &Json) -> Result<ScenarioOutcome, String> {
+    run_scenario_at_layer(scenario, IMPLEMENTED_LAYER)
+}
+
+fn run_scenario_at_layer(
+    scenario: &Json,
+    implemented_layer: u8,
+) -> Result<ScenarioOutcome, String> {
     let status = scenario["status"]
         .as_str()
         .ok_or("scenario status must be a string")?;
@@ -108,6 +118,22 @@ fn run_scenario(scenario: &Json) -> Result<ScenarioOutcome, String> {
                 "DRAFT scenario, layer {layer} contract under review (conformance/README.md Drafts rule)"
             ),
         });
+    }
+    if status == "ACTIVE" {
+        let layer_text = scenario["layer"]
+            .as_str()
+            .ok_or("ACTIVE must name its layer")?;
+        if layer_text.len() != 2 || !layer_text.bytes().all(|c| c.is_ascii_digit()) {
+            return Err("ACTIVE layer must contain two ASCII digits".into());
+        }
+        let layer: u8 = layer_text.parse().map_err(|_| "invalid ACTIVE layer")?;
+        if layer > implemented_layer {
+            return Ok(ScenarioOutcome::ExpectedFailure {
+                reason: format!(
+                    "ACTIVE scenario, layer {layer_text} above Rust implemented layer {implemented_layer:02} (conformance/README.md Implemented layers rule)"
+                ),
+            });
+        }
     }
     if placeholder {
         return Ok(ScenarioOutcome::ExpectedFailure {
@@ -175,13 +201,13 @@ fn canonical_corpus() {
 fn draft_rule_and_active_promotion() {
     let mut scenario = json!({
         "scenario_format": 1, "id": "core.runner.draft-control", "family": "core",
-        "layer": "02", "status": "DRAFT", "title": "runner control",
+        "layer": "01", "status": "DRAFT", "title": "runner control",
         "requirements": ["SER-008"], "given": {},
         "when": [{"unknown_active": {}}], "expect": {"results": [{"result": "wrong"}]}
     });
     let expected = ScenarioOutcome::ExpectedFailure {
         reason:
-            "DRAFT scenario, layer 02 contract under review (conformance/README.md Drafts rule)"
+            "DRAFT scenario, layer 01 contract under review (conformance/README.md Drafts rule)"
                 .into(),
     };
     assert_eq!(run_scenario(&scenario), Ok(expected));
@@ -245,6 +271,54 @@ fn draft_rule_and_active_promotion() {
         other => panic!("draft with a placeholder was not reported as DRAFT: {other:?}"),
     }
 }
+#[test]
+fn implemented_layer_and_promotion() {
+    assert_eq!(IMPLEMENTED_LAYER, 1);
+    let mut scenario = json!({"status":"ACTIVE", "layer":"02", "when":[{"unknown_active":{}}], "expect":{"results":[{"result":"wrong"}]}});
+    let expected = ScenarioOutcome::ExpectedFailure { reason: "ACTIVE scenario, layer 02 above Rust implemented layer 01 (conformance/README.md Implemented layers rule)".into() };
+    assert_eq!(run_scenario(&scenario), Ok(expected));
+    assert!(
+        run_scenario_at_layer(&scenario, 2)
+            .unwrap_err()
+            .contains("unsupported ACTIVE operation")
+    );
+    scenario["when"] = json!([{"compare_versions":{"a":1,"b":2}}]);
+    assert!(matches!(
+        run_scenario(&scenario),
+        Ok(ScenarioOutcome::ExpectedFailure { .. })
+    ));
+    assert!(
+        run_scenario_at_layer(&scenario, 2)
+            .unwrap_err()
+            .contains("observed")
+    );
+    scenario["expect"]["results"] = json!([{"result":"less"}]);
+    assert_eq!(
+        run_scenario_at_layer(&scenario, 2),
+        Ok(ScenarioOutcome::Active { steps: 1 })
+    );
+    scenario["layer"] = json!("01");
+    assert_eq!(
+        run_scenario(&scenario),
+        Ok(ScenarioOutcome::Active { steps: 1 })
+    );
+    scenario["layer"] = json!("00");
+    assert_eq!(
+        run_scenario(&scenario),
+        Ok(ScenarioOutcome::Active { steps: 1 })
+    );
+    scenario["layer"] = json!("02");
+    scenario["when"] = json!([{"unknown_active":{"x":"TO_BE_OPERATION"}}]);
+    assert!(
+        run_scenario(&scenario)
+            .unwrap_err()
+            .contains("ACTIVE must not have TO_BE_")
+    );
+    scenario["when"] = json!([]);
+    scenario["layer"] = json!("xx");
+    assert!(run_scenario(&scenario).is_err());
+}
+
 #[test]
 fn runner_self_controls() {
     assert!(support::placeholder(
