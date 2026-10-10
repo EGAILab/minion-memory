@@ -4,7 +4,7 @@ family: core
 layer: '02'
 status: DRAFT
 title: A record is visible only when every facet it declares matches the allowed scope; omission never widens
-description: SCOPE-003/006 Layer 02 matching; Owner G-056..G-063 (reference/governance/2026-10-11-owner-wp02s-memoryscope.md).
+description: SCOPE-003/006 Layer 02 matching; Owner G-056..G-064 (reference/governance/2026-10-11-owner-wp02s-memoryscope.md).
 requirements:
 - SCOPE-003
 - SCOPE-006
@@ -142,6 +142,14 @@ when:
     query:
       agent.mood: x
 - scope_visible:
+    case: well-formed device-like unknown facet hides the record (G-064, G-061)
+    record:
+      scope_state: resolved
+      facets:
+        agent.con: c-1
+    query:
+      agent.principal: u-1
+- scope_visible:
     case: values are compared exactly
     record:
       scope_state: resolved
@@ -189,6 +197,8 @@ expect:
   - case: invalid record before invalid query (declared order)
     error: scope.invalid
     argument: record
+  - case: well-formed device-like unknown facet hides the record (G-064, G-061)
+    result: false
   - case: values are compared exactly
     result: false
 negative_controls:
