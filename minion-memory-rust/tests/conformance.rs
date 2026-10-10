@@ -5,7 +5,11 @@ use serde_json::{Value as Json, json};
 use std::path::{Path, PathBuf};
 
 // Moves only with a Rust implementation candidate that passes the newly admitted corpus.
-const IMPLEMENTED_LAYER: u8 = 1;
+const IMPLEMENTED_LAYER: u8 = 2;
+
+fn observed_value(value: &Value) -> Result<Json, Error> {
+    Ok(serde_json::from_slice(&canonical_bytes(value)?).expect("normalized public value"))
+}
 
 fn observe(step: &Json) -> Result<Json, String> {
     let step = step.as_object().ok_or("operation must be a map")?;
@@ -47,6 +51,25 @@ fn observe(step: &Json) -> Result<Json, String> {
             let bytes = (0..hex.len()).step_by(2).map(|i| u8::from_str_radix(&hex[i..i+2],16)).collect::<Result<Vec<_>,_>>().map_err(|e|e.to_string())?;
             Ok(json!({"sha256":raw_content_hash(&bytes)}))
         }
+        "admit_history_record" => {
+            let native = if args.get("record_json").is_some() { Value::null() } else { support::native(field("record")?) };
+            let input = if args.get("record_json").is_some() { Input::Text(text("record_json")?) } else { Input::Native(&native) };
+            admit_history_record(Input::Native(&support::native(field("reader")?)), input).and_then(|admission| match admission {
+                HistoryAdmission::Decode(envelope) => Ok(json!({"outcome":"decode", "envelope":observed_value(&envelope)?})),
+                HistoryAdmission::Skip => Ok(json!({"outcome":"skip"})),
+                HistoryAdmission::Excluded => Ok(json!({"outcome":"excluded"})),
+            })
+        }
+        "compare_history_boundaries" => compare_history_boundaries(Input::Native(&support::native(field("a")?)), Input::Native(&support::native(field("b")?)))
+            .map(|order| json!({"result": match order {std::cmp::Ordering::Less=>"less",std::cmp::Ordering::Equal=>"equal",std::cmp::Ordering::Greater=>"greater"}})),
+        "history_boundaries_equal" => history_boundaries_equal(Input::Native(&support::native(field("a")?)), Input::Native(&support::native(field("b")?)))
+            .map(|equal| json!({"result":equal})),
+        "validate_scope" => validate_scope(Input::Native(&support::native(field("scope")?)))
+            .and_then(|scope| Ok(json!({"result":observed_value(&scope)?}))),
+        "scopes_equal" => scopes_equal(Input::Native(&support::native(field("a")?)), Input::Native(&support::native(field("b")?)))
+            .map(|equal| json!({"result":equal})),
+        "scope_visible" => scope_visible(Input::Native(&support::native(field("record")?)), Input::Native(&support::native(field("query")?)))
+            .map(|visible| json!({"result":visible})),
         _ => return Err(format!("unsupported ACTIVE operation {operation}")),
     };
     Ok(result.unwrap_or_else(|e| {
@@ -273,12 +296,17 @@ fn draft_rule_and_active_promotion() {
 }
 #[test]
 fn implemented_layer_and_promotion() {
-    assert_eq!(IMPLEMENTED_LAYER, 1);
-    let mut scenario = json!({"status":"ACTIVE", "layer":"02", "when":[{"unknown_active":{}}], "expect":{"results":[{"result":"wrong"}]}});
-    let expected = ScenarioOutcome::ExpectedFailure { reason: "ACTIVE scenario, layer 02 above Rust implemented layer 01 (conformance/README.md Implemented layers rule)".into() };
+    assert_eq!(IMPLEMENTED_LAYER, 2);
+    let future = IMPLEMENTED_LAYER + 1;
+    let mut scenario = json!({"status":"ACTIVE", "layer":format!("{future:02}"), "when":[{"unknown_active":{}}], "expect":{"results":[{"result":"wrong"}]}});
+    let expected = ScenarioOutcome::ExpectedFailure {
+        reason: format!(
+            "ACTIVE scenario, layer {future:02} above Rust implemented layer {IMPLEMENTED_LAYER:02} (conformance/README.md Implemented layers rule)"
+        ),
+    };
     assert_eq!(run_scenario(&scenario), Ok(expected));
     assert!(
-        run_scenario_at_layer(&scenario, 2)
+        run_scenario_at_layer(&scenario, future)
             .unwrap_err()
             .contains("unsupported ACTIVE operation")
     );
@@ -288,13 +316,13 @@ fn implemented_layer_and_promotion() {
         Ok(ScenarioOutcome::ExpectedFailure { .. })
     ));
     assert!(
-        run_scenario_at_layer(&scenario, 2)
+        run_scenario_at_layer(&scenario, future)
             .unwrap_err()
             .contains("observed")
     );
     scenario["expect"]["results"] = json!([{"result":"less"}]);
     assert_eq!(
-        run_scenario_at_layer(&scenario, 2),
+        run_scenario_at_layer(&scenario, future),
         Ok(ScenarioOutcome::Active { steps: 1 })
     );
     scenario["layer"] = json!("01");

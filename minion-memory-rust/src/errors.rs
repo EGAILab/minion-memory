@@ -31,6 +31,20 @@ pub enum ErrorCode {
     RevisionInvalid,
     /// Different canonical content for the same immutable revision.
     RevisionConflict,
+    /// Stage 3: invalid history reader configuration or duplicate recognized pairs.
+    HistoryReaderInvalid,
+    /// Stage 3: invalid gated history envelope.
+    HistoryEnvelopeInvalid,
+    /// An admitted, unrecognized schema marked required; replay must stop.
+    HistoryUnknownRequired,
+    /// Stage 3: malformed store-local boundary.
+    HistoryBoundaryInvalid,
+    /// Relation: valid boundaries from different stores cannot be ordered.
+    HistoryBoundaryIncomparable,
+    /// Stage 3: malformed MemoryScope.
+    ScopeInvalid,
+    /// Stage 3: malformed or unknown-facet allowed-scope query.
+    ScopeQueryInvalid,
 }
 
 impl ErrorCode {
@@ -50,6 +64,13 @@ impl ErrorCode {
             Self::OperationIdentityInvalid => "operation_identity.invalid",
             Self::RevisionInvalid => "artifact.revision_invalid",
             Self::RevisionConflict => "artifact.revision_conflict",
+            Self::HistoryReaderInvalid => "history.reader_invalid",
+            Self::HistoryEnvelopeInvalid => "history.envelope_invalid",
+            Self::HistoryUnknownRequired => "history.unknown_required",
+            Self::HistoryBoundaryInvalid => "history.boundary_invalid",
+            Self::HistoryBoundaryIncomparable => "history.boundary_incomparable",
+            Self::ScopeInvalid => "scope.invalid",
+            Self::ScopeQueryInvalid => "scope.query_invalid",
         }
     }
 }

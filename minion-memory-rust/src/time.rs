@@ -1,14 +1,18 @@
 //! HIST-004: the contract grammar guards every use of calendar arithmetic.
 
-use crate::{Error, ErrorCode, Input, identity::staged};
+use crate::{Error, ErrorCode, Input, Value, identity::staged};
 use chrono::{Datelike, NaiveDate, TimeDelta, Timelike};
 
 /// Normalize exactly the shared timestamp input grammar to six-digit uppercase UTC.
 /// Unknown time is field absence, not a null/sentinel accepted by this primitive.
 pub fn normalize_timestamp(input: Input<'_>) -> Result<String, Error> {
     let values = staged(&[("timestamp", input)])?;
+    timestamp_rule(&values[0])
+}
+
+pub(crate) fn timestamp_rule(value: &Value) -> Result<String, Error> {
     let invalid = || Error::new(ErrorCode::TimestampInvalid);
-    let text = values[0].as_str().ok_or_else(invalid)?;
+    let text = value.as_str().ok_or_else(invalid)?;
     if !text.is_ascii() || text.len() < 20 {
         return Err(invalid());
     }

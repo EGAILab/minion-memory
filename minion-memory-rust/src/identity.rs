@@ -19,7 +19,7 @@ pub(crate) fn typed<T>(
         .collect()
 }
 
-fn id_rule(value: &Value) -> Result<String, Error> {
+pub(crate) fn id_rule(value: &Value) -> Result<String, Error> {
     let text = value
         .as_str()
         .ok_or_else(|| Error::new(ErrorCode::IdInvalid))?;

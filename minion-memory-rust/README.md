@@ -1,9 +1,10 @@
-# minion-memory-rust — Layer 01
+# minion-memory-rust — Layers 01–02
 
 **Owner: Codex.** Implements the accepted shared contract and unchanged canonical corpus;
 the Python implementation is not an oracle. Workspace/package `minion-memory`, public crate
 `minion_memory`, Rust **1.97.1** pinned in `rust-toolchain.toml`, dependencies pinned in
-`Cargo.toml` and `Cargo.lock`. No persistence or Layer 02+ behavior.
+`Cargo.toml` and `Cargo.lock`. Layer 02 includes history admission, store-local boundary relations and MemoryScope.
+No persistence or Layer 03+ behavior.
 
 ## Public seams
 
@@ -61,11 +62,11 @@ its outputs and all caches must still stay inside the project.
 `tests/conformance.rs` discovers the unchanged `../conformance/{core,learning,agent}` corpus,
 loads it using an equivalent portable YAML profile, validates each envelope with its shared
 Draft 2020-12 schema, and calls public operations. It performs no canonicalization or repair.
-It reports the discovered ACTIVE scenario/step counts and explicit expected failures; the Layer 01
-base currently has 8 ACTIVE scenarios / 146 steps and 5 recursive `TO_BE_` expected failures.
+It reports the discovered ACTIVE scenario/step counts and explicit expected failures; this Layer 01
+and Layer 02 candidate has 15 ACTIVE scenarios / 289 steps and 5 recursive `TO_BE_` expected failures.
 Every DRAFT scenario reports xfail with its layer and the corpus rule as the reason. Drafts never
-execute as evidence. The Rust runner declares `IMPLEMENTED_LAYER = 1`: ACTIVE scenarios above
-Layer 01 report xfail naming their layer, Rust and the Implemented layers rule. This declaration
+execute as evidence. The Rust runner declares `IMPLEMENTED_LAYER = 2`: ACTIVE scenarios above
+Layer 02 report xfail naming their layer, Rust and the Implemented layers rule. This declaration
 moves only with a Rust implementation candidate. At or below the declared layer, promotion to
 ACTIVE executes every step and fails on unsupported operations or wrong results. Counts derive
 from dispatch, not a pinned inventory. Unknown eligible ACTIVE operations fail. Native scenario integers are constructed exactly as Rust `i128`;
@@ -74,3 +75,37 @@ JSON-text inputs are handed to the library untouched.
 `tests/layer01.rs` covers source/stage/canonical precedence, native values, typed rules, timestamps,
 deep trees and realistic known-bad controls. `tests/vectors/` contains an independently generated
 ECMAScript number oracle and its reproducible generator. No Node or network is needed at test time.
+
+
+## Layer 02 operations
+
+`admit_history_record(reader, record)` takes two explicit `Input` seams. Generic
+stages run across both before typed rules. The closed reader validates its exact
+profile and duplicate-free recognized `(record_type, schema_version)` pairs. The
+record passes the four accepted gates: routing triple, profile/compatibility/recognition,
+closed recognized shape, then typed fields in canonical order. Only HIST-004 timestamps
+are rewritten; normalized payload and provenance survive unchanged.
+
+`HistoryAdmission::Decode(Value)` carries the admitted envelope;
+`Skip` identifies unknown ignorable schemas and `Excluded` identifies foreign
+profiles. Unknown required schemas return the unnamed `history.unknown_required`
+error. All argument-validation errors name `reader` or `record`.
+
+`compare_history_boundaries(a, b)` returns `std::cmp::Ordering` only for a common
+store, otherwise unnamed `history.boundary_incomparable`. `history_boundaries_equal`
+compares the complete pair, returning false for different stores. Position zero is
+valid and precedes the first physical record. Neither operation implements persistence,
+range reads or a global/causal/cross-device order.
+
+`validate_scope`, `scopes_equal` and `scope_visible` accept the same explicit seams.
+A scope is the exact resolved-with-facets or unresolved record; unresolved is distinct
+from global. G-064 facet names are not paths or CORE-001 values. `AGENT_FACETS` is the
+six-name constant vocabulary. Stored unknown names survive validation but hide records;
+unknown query names are rejected, including for otherwise hidden records. Matching
+uses every explicitly declared record constraint, with no inferred hierarchy or
+wildcard for query omissions. Capture, retrieval absence and Learning adoption remain
+at their owning later layers.
+
+`tests/layer02.rs` supplies independent public-seam controls, including all typed-field
+source permutations, generic-stage precedence, a 20,000-level payload and 46,656
+six-facet matching cases. No Python outputs are used as expectations.

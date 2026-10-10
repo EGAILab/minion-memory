@@ -1545,7 +1545,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/core/history.py
   rust:
-    location: null
+    location: minion-memory-rust/src/history.rs
   evidence: []
   findings: []
 - id: HIST-003
@@ -1612,7 +1612,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/core/history.py
   rust:
-    location: null
+    location: minion-memory-rust/src/history.rs
   evidence: []
   findings:
   - NF-016
@@ -1724,7 +1724,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/core/history.py
   rust:
-    location: null
+    location: minion-memory-rust/src/history.rs
   evidence: []
   findings: []
 - id: PROJ-001
@@ -4227,7 +4227,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/core/scope.py
   rust:
-    location: null
+    location: minion-memory-rust/src/scope.rs
   evidence: []
   findings:
   - NF-018
@@ -4250,7 +4250,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/core/scope.py
   rust:
-    location: null
+    location: minion-memory-rust/src/scope.rs
   evidence: []
   findings:
   - NF-018
@@ -4271,7 +4271,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/core/scope.py
   rust:
-    location: null
+    location: minion-memory-rust/src/scope.rs
   evidence: []
   findings: []
 - id: SCOPE-004
@@ -4291,7 +4291,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/core/scope.py
   rust:
-    location: null
+    location: minion-memory-rust/src/scope.rs
   evidence: []
   findings:
   - NF-018
@@ -4334,7 +4334,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/core/scope.py
   rust:
-    location: null
+    location: minion-memory-rust/src/scope.rs
   evidence: []
   findings:
   - NF-018
@@ -4442,7 +4442,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/core/history.py
   rust:
-    location: null
+    location: minion-memory-rust/src/history.rs
   evidence: []
   findings: []
 - id: SER-006
@@ -4463,7 +4463,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/core/history.py
   rust:
-    location: null
+    location: minion-memory-rust/src/history.rs
   evidence: []
   findings: []
 - id: SER-007
