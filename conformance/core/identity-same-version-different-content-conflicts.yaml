@@ -1,19 +1,119 @@
 scenario_format: 1
 id: core.identity.same-version-different-content-conflicts
 family: core
-layer: "01"
-status: PLACEHOLDER
-title: Same ID and same version with different content is a visible conflict
-description: >
-  Pins CORE-003 (FND §8, R00 §10, R04 §7). The operation vocabulary, content-normalization rule
-  and conflict observation are defined by the Layer 01 contract (NF-012, NF-013).
-requirements: [CORE-003]
-given:
-  existing_artifact: TO_BE_DEFINED_IN_LAYER_01
+layer: '01'
+status: DRAFT
+title: Same ID and same version with different canonical content is a visible conflict
+description: 'CORE-003 as scoped by Owner G-021: compared on (stable_id, artifact_version, supplied semantic-content projection); identical vs conflict by SER-009 canonical bytes (rfc8785 0.1.4).'
+requirements:
+- CORE-003
+- SER-009
+given: {}
 when:
-  - offer_artifact: TO_BE_DEFINED_IN_LAYER_01
+- compare_artifact_revisions:
+    case: same projection
+    a:
+      stable_id: ku-1
+      projection:
+        front: q
+        back: a
+      artifact_version: 3
+    b:
+      stable_id: ku-1
+      projection:
+        back: a
+        front: q
+      artifact_version: 3
+- compare_artifact_revisions:
+    case: equivalent numeric spelling is identical (G-023)
+    a:
+      stable_id: ku-1
+      projection:
+        n: 1
+      artifact_version: 3
+    b:
+      stable_id: ku-1
+      projection:
+        n: 1.0
+      artifact_version: 3
+- compare_artifact_revisions:
+    case: whole-number version spelling is the same edition
+    a:
+      stable_id: ku-1
+      projection:
+        t: x
+      artifact_version: 2
+    b:
+      stable_id: ku-1
+      projection:
+        t: x
+      artifact_version: 2.0
+- compare_artifact_revisions:
+    case: same id and version, different content
+    a:
+      stable_id: ku-1
+      projection:
+        t: x
+      artifact_version: 3
+    b:
+      stable_id: ku-1
+      projection:
+        t: y
+      artifact_version: 3
+- compare_artifact_revisions:
+    case: different version
+    a:
+      stable_id: ku-1
+      projection:
+        t: x
+      artifact_version: 3
+    b:
+      stable_id: ku-1
+      projection:
+        t: y
+      artifact_version: 4
+- compare_artifact_revisions:
+    case: different id
+    a:
+      stable_id: ku-1
+      projection:
+        t: x
+      artifact_version: 3
+    b:
+      stable_id: ku-2
+      projection:
+        t: y
+      artifact_version: 3
+- compare_artifact_revisions:
+    case: schema version alone does not invoke the rule
+    a:
+      stable_id: rec-1
+      projection:
+        schema_version: 2
+        t: x
+    b:
+      stable_id: rec-1
+      projection:
+        schema_version: 2
+        t: y
 expect:
-  outcome: TO_BE_DEFINED_IN_LAYER_01
+  results:
+  - case: same projection
+    result: identical
+  - case: equivalent numeric spelling is identical (G-023)
+    result: identical
+  - case: whole-number version spelling is the same edition
+    result: identical
+  - case: same id and version, different content
+    error: artifact.revision_conflict
+  - case: different version
+    result: distinct
+  - case: different id
+    result: distinct
+  - case: schema version alone does not invoke the rule
+    result: not_applicable
 negative_controls:
-  - last-write-wins overwrite at the same version
-  - silent merge of the two contents
+- last-write-wins overwrite at the same version
+- silent merge of the two contents
+- comparing raw input bytes instead of canonical bytes (1 vs 1.0 would conflict)
+- applying the rule to artifacts that only carry a schema version

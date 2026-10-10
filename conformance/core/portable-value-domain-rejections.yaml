@@ -25,6 +25,12 @@ when:
     case: large exponent value is integral (G-025)
     value_json: '{"v":1e21}'
 - canonicalize:
+    case: rounds up to 2^53 (G-025 after binary64 rounding)
+    value_json: '{"v":9007199254740991.5}'
+- canonicalize:
+    case: binary64 overflow of a valid numeral
+    value_json: '{"v":1e400}'
+- canonicalize:
     case: lone high surrogate
     value_json: '{"v":"\ud800"}'
 - canonicalize:
@@ -34,8 +40,29 @@ when:
     case: duplicate object key
     value_json: '{"a":1,"a":2}'
 - canonicalize:
+    case: duplicate after escape decoding
+    value_json: '{"a":1,"\u0061":2}'
+- canonicalize:
     case: non-finite number literal
     value_json: '{"v":Infinity}'
+- canonicalize:
+    case: NaN literal
+    value_json: '{"v":NaN}'
+- canonicalize:
+    case: leading zero
+    value_json: '{"v":01}'
+- canonicalize:
+    case: trailing content
+    value_json: '{"v":1} x'
+- canonicalize:
+    case: 'precedence: stage-1 duplicate before stage-2 range'
+    value_json: '{"a":1,"a":9007199254740992}'
+- canonicalize:
+    case: 'precedence: stage-1 order is source order'
+    value_json: '{"a":"\ud800","a":1}'
+- canonicalize:
+    case: 'precedence: stage-2 order is canonical member order'
+    value_json: '{"b":9007199254740992,"a":1e400}'
 expect:
   results:
   - case: integer above the safe bound
@@ -48,14 +75,32 @@ expect:
     error: value.integer_out_of_range
   - case: large exponent value is integral (G-025)
     error: value.integer_out_of_range
+  - case: rounds up to 2^53 (G-025 after binary64 rounding)
+    error: value.integer_out_of_range
+  - case: binary64 overflow of a valid numeral
+    error: value.number_not_finite
   - case: lone high surrogate
     error: value.lone_surrogate
   - case: lone low surrogate in a key
     error: value.lone_surrogate
   - case: duplicate object key
     error: value.duplicate_key
+  - case: duplicate after escape decoding
+    error: value.duplicate_key
   - case: non-finite number literal
     error: value.invalid_json
+  - case: NaN literal
+    error: value.invalid_json
+  - case: leading zero
+    error: value.invalid_json
+  - case: trailing content
+    error: value.invalid_json
+  - case: 'precedence: stage-1 duplicate before stage-2 range'
+    error: value.duplicate_key
+  - case: 'precedence: stage-1 order is source order'
+    error: value.lone_surrogate
+  - case: 'precedence: stage-2 order is canonical member order'
+    error: value.number_not_finite
 negative_controls:
 - accepting 2^53 because the host integer type can hold it (Python int, Rust i64)
 - replacing a lone surrogate with U+FFFD instead of rejecting

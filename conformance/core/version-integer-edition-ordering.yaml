@@ -38,13 +38,25 @@ when:
     a: -1
     b: 1
 - compare_versions:
-    case: invalid above safe bound
-    a: 9007199254740992
-    b: 1
-- compare_versions:
     case: invalid non-integral
     a: 1.5
     b: 1
+- compare_versions:
+    case: invalid boolean
+    a: true
+    b: 1
+- compare_versions:
+    case: invalid string
+    a: '1'
+    b: 1
+- compare_versions:
+    case: invalid above safe bound fails the value domain first (G-031)
+    a: 9007199254740992
+    b: 1
+- compare_versions:
+    case: first argument reported first (G-031)
+    a: 0
+    b: -1
 expect:
   results:
   - case: higher edition
@@ -61,10 +73,17 @@ expect:
     error: version.invalid
   - case: invalid negative
     error: version.invalid
-  - case: invalid above safe bound
-    error: version.invalid
   - case: invalid non-integral
     error: version.invalid
+  - case: invalid boolean
+    error: version.invalid
+  - case: invalid string
+    error: version.invalid
+  - case: invalid above safe bound fails the value domain first (G-031)
+    error: value.integer_out_of_range
+  - case: first argument reported first (G-031)
+    error: version.invalid
+    argument: a
 negative_controls:
 - lexical comparison ('10' < '9')
 - accepting 0 or negative editions

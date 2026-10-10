@@ -1472,6 +1472,7 @@ rows:
   disposition: adopted
   scenarios:
   - core.history.same-operation-retry-commits-once
+  - core.identity.operation-identity-namespaced-pair
   python:
     location: null
   rust:
@@ -4508,6 +4509,7 @@ rows:
   disposition: adopted
   scenarios:
   - core.serialization.canonical-bytes-and-content-hash
+  - core.identity.same-version-different-content-conflicts
   python:
     location: null
   rust:

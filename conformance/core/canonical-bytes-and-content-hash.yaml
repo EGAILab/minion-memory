@@ -27,6 +27,18 @@ when:
     case: decimal float shortest form
     value_json: '{"v":0.1}'
 - canonicalize:
+    case: 'binary64 rounding: 1.0000000000000001 is 1'
+    value_json: '{"v":1.0000000000000001}'
+- canonicalize:
+    case: underflow rounds to zero
+    value_json: '{"v":1e-400}'
+- canonicalize:
+    case: negative underflow is negative zero, normalized
+    value_json: '{"v":-1e-400}'
+- canonicalize:
+    case: smallest subnormal is kept
+    value_json: '{"v":5e-324}'
+- canonicalize:
     case: negative zero normalized
     value_json: '{"v":-0.0}'
 - canonicalize:
@@ -55,6 +67,18 @@ expect:
   - case: decimal float shortest form
     canonical: '{"v":0.1}'
     sha256: 8ec9c466832e74cab1700269790aa649b06fb67989ecf3ac8e6e3c2e5cde2b3a
+  - case: 'binary64 rounding: 1.0000000000000001 is 1'
+    canonical: '{"v":1}'
+    sha256: afbf9d0f3560b0fd7795e81c42a0a79ee6b6fc67e064f77826aee642cad28d91
+  - case: underflow rounds to zero
+    canonical: '{"v":0}'
+    sha256: ec4f95abcb4e2e3dbe856c3eb2f81995eacb3823d40aa2e78ed4c5e1798f664d
+  - case: negative underflow is negative zero, normalized
+    canonical: '{"v":0}'
+    sha256: ec4f95abcb4e2e3dbe856c3eb2f81995eacb3823d40aa2e78ed4c5e1798f664d
+  - case: smallest subnormal is kept
+    canonical: '{"v":5e-324}'
+    sha256: 8a00b7e065be3a20529e22853424bb565596997d86ddd6c27f9aff1b5c2222f8
   - case: negative zero normalized
     canonical: '{"v":0}'
     sha256: ec4f95abcb4e2e3dbe856c3eb2f81995eacb3823d40aa2e78ed4c5e1798f664d

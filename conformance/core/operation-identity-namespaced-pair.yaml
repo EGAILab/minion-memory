@@ -1,0 +1,113 @@
+scenario_format: 1
+id: core.identity.operation-identity-namespaced-pair
+family: core
+layer: '01'
+status: DRAFT
+title: An operation identity is a {source_namespace, source_operation_id} pair compared exactly
+description: Owner G-032 and G-033; stage precedence G-031. Persistence and retry behaviour are Layer 04.
+requirements:
+- CORE-012
+given: {}
+when:
+- validate_operation_identity:
+    case: namespaced pair
+    value_json: '{"source_namespace": "minion-agent.prod", "source_operation_id": "cap-01HXYZ"}'
+- validate_operation_identity:
+    case: URL-like identifier
+    value_json: '{"source_namespace": "flashcard.app", "source_operation_id": "https://example.org/ops/7?a=b#c"}'
+- validate_operation_identity:
+    case: whitespace is part of the identifier
+    value_json: '{"source_namespace": "ns", "source_operation_id": " a b "}'
+- validate_operation_identity:
+    case: 256 ASCII bytes
+    value_json: '{"source_namespace": "ns", "source_operation_id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}'
+- validate_operation_identity:
+    case: 255 bytes of three-byte characters
+    value_json: '{"source_namespace": "ns", "source_operation_id": "\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac"}'
+- validate_operation_identity:
+    case: 257 ASCII bytes
+    value_json: '{"source_namespace": "ns", "source_operation_id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}'
+- validate_operation_identity:
+    case: 258 bytes of three-byte characters
+    value_json: '{"source_namespace": "ns", "source_operation_id": "\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac\u20ac"}'
+- validate_operation_identity:
+    case: empty identifier
+    value_json: '{"source_namespace": "ns", "source_operation_id": ""}'
+- validate_operation_identity:
+    case: identifier is not a string
+    value_json: '{"source_namespace": "ns", "source_operation_id": 7}'
+- validate_operation_identity:
+    case: namespace not a stable-ID token
+    value_json: '{"source_namespace": "Minion", "source_operation_id": "x"}'
+- validate_operation_identity:
+    case: namespace is a device name
+    value_json: '{"source_namespace": "con", "source_operation_id": "x"}'
+- validate_operation_identity:
+    case: missing namespace
+    value_json: '{"source_operation_id": "x"}'
+- validate_operation_identity:
+    case: lone surrogate fails the value domain first (G-031)
+    value_json: '{"source_namespace":"ns","source_operation_id":"\ud800"}'
+- compare_operation_identities:
+    case: same pair
+    a_json: '{"source_namespace": "ns", "source_operation_id": "a"}'
+    b_json: '{"source_namespace": "ns", "source_operation_id": "a"}'
+- compare_operation_identities:
+    case: same identifier, different namespace
+    a_json: '{"source_namespace": "ns-one", "source_operation_id": "a"}'
+    b_json: '{"source_namespace": "ns-two", "source_operation_id": "a"}'
+- compare_operation_identities:
+    case: letter case differs
+    a_json: '{"source_namespace": "ns", "source_operation_id": "A"}'
+    b_json: '{"source_namespace": "ns", "source_operation_id": "a"}'
+- compare_operation_identities:
+    case: trailing space differs
+    a_json: '{"source_namespace": "ns", "source_operation_id": "a "}'
+    b_json: '{"source_namespace": "ns", "source_operation_id": "a"}'
+- compare_operation_identities:
+    case: NFC versus NFD differs
+    a_json: '{"source_namespace": "ns", "source_operation_id": "\u00e9"}'
+    b_json: '{"source_namespace": "ns", "source_operation_id": "e\u0301"}'
+expect:
+  results:
+  - case: namespaced pair
+    result: valid
+  - case: URL-like identifier
+    result: valid
+  - case: whitespace is part of the identifier
+    result: valid
+  - case: 256 ASCII bytes
+    result: valid
+  - case: 255 bytes of three-byte characters
+    result: valid
+  - case: 257 ASCII bytes
+    error: operation_identity.invalid
+  - case: 258 bytes of three-byte characters
+    error: operation_identity.invalid
+  - case: empty identifier
+    error: operation_identity.invalid
+  - case: identifier is not a string
+    error: operation_identity.invalid
+  - case: namespace not a stable-ID token
+    error: operation_identity.invalid
+  - case: namespace is a device name
+    error: operation_identity.invalid
+  - case: missing namespace
+    error: operation_identity.invalid
+  - case: lone surrogate fails the value domain first (G-031)
+    error: value.lone_surrogate
+  - case: same pair
+    result: same
+  - case: same identifier, different namespace
+    result: different
+  - case: letter case differs
+    result: different
+  - case: trailing space differs
+    result: different
+  - case: NFC versus NFD differs
+    result: different
+negative_controls:
+- joining namespace and identifier into one delimited string
+- trimming, case folding or normalizing the identifier
+- counting characters instead of UTF-8 bytes for the 256 limit
+- truncating or hashing an over-long identifier
