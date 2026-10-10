@@ -1,0 +1,69 @@
+scenario_format: 1
+id: core.serialization.canonical-bytes-and-content-hash
+family: core
+layer: '01'
+status: DRAFT
+title: Canonical bytes are RFC 8785 JCS of the portable value; content hash is SHA-256 lowercase hex
+description: Expectations derived from the RFC 8785 reference library (rfc8785 0.1.4) and SHA-256, not from any Minion-Memory implementation. The UTF-16 key-order case discriminates RFC 8785 from code-point ordering (serde_jcs 0.1 orders by code point and fails it).
+requirements:
+- SER-009
+- SER-008
+- CORE-011
+given: {}
+when:
+- canonicalize:
+    case: integer at the safe bound
+    value_json: '{"v":9007199254740991}'
+- canonicalize:
+    case: whole-number float
+    value_json: '{"v":1.0}'
+- canonicalize:
+    case: large float uses exponent form
+    value_json: '{"v":1e21}'
+- canonicalize:
+    case: decimal float shortest form
+    value_json: '{"v":0.1}'
+- canonicalize:
+    case: negative zero normalized
+    value_json: '{"v":-0.0}'
+- canonicalize:
+    case: keys sorted by UTF-16 code units
+    value_json: '{"\uff61":1,"\ud83d\ude00":2,"b":3,"a":4}'
+- canonicalize:
+    case: nested containers and literals
+    value_json: '{"z":[true,false,null,"x"],"a":{"c":1,"b":"\u00e9"}}'
+- canonicalize:
+    case: string escaping
+    value_json: '{"s":"line\nbreak \"quoted\" tab\t\u0001"}'
+expect:
+  results:
+  - case: integer at the safe bound
+    canonical: '{"v":9007199254740991}'
+    sha256: 210e9afd5b97d46616c53c7bc51eb7349d44183691bb0866ae2ef6a2b798823f
+  - case: whole-number float
+    canonical: '{"v":1}'
+    sha256: afbf9d0f3560b0fd7795e81c42a0a79ee6b6fc67e064f77826aee642cad28d91
+  - case: large float uses exponent form
+    canonical: '{"v":1e+21}'
+    sha256: 9e24d139b060bd89f98e510a1e34d48fade6aeb668a016e6fb2e296762a3aefa
+  - case: decimal float shortest form
+    canonical: '{"v":0.1}'
+    sha256: 8ec9c466832e74cab1700269790aa649b06fb67989ecf3ac8e6e3c2e5cde2b3a
+  - case: negative zero normalized
+    canonical: '{"v":0}'
+    sha256: ec4f95abcb4e2e3dbe856c3eb2f81995eacb3823d40aa2e78ed4c5e1798f664d
+  - case: keys sorted by UTF-16 code units
+    canonical: '{"a":4,"b":3,"😀":2,"｡":1}'
+    sha256: fd1c2455e650903b956c6ce4788b1766e7b4510c58b7ea25b563c79ed7fd122c
+  - case: nested containers and literals
+    canonical: '{"a":{"b":"é","c":1},"z":[true,false,null,"x"]}'
+    sha256: 20592524fafb98820e1bd7e2bfec6f41764b5bbafad6d540517028b74fe8cd0d
+  - case: string escaping
+    canonical: '{"s":"line\nbreak \"quoted\" tab\t\u0001"}'
+    sha256: 5f7e309c4fb7d8422d636303ba73e11933c77530e5a3489eb6da77c969d4b8b4
+negative_controls:
+- keys sorted by code point / UTF-8 bytes instead of UTF-16 code units
+- -0.0 serialized as -0
+- floats printed with Python repr or Rust Display instead of ECMAScript number form
+- hash over pretty-printed or insertion-ordered JSON
+- uppercase hex digest

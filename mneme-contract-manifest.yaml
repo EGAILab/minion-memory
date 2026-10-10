@@ -1255,7 +1255,8 @@ rows:
   spec: spec/core.md#core-002
   source_status: FROZEN
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.identity.version-integer-edition-ordering
   python:
     location: null
   rust:
@@ -1287,6 +1288,7 @@ rows:
   findings:
   - NF-012
   - NF-013
+  - NF-022
 - id: CORE-004
   title: Edits version; replacement, split and merge create identities with lineage
   family: CORE
@@ -1442,7 +1444,8 @@ rows:
   spec: spec/core.md#core-011
   source_status: NORMATIVE
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.serialization.canonical-bytes-and-content-hash
   python:
     location: null
   rust:
@@ -4463,3 +4466,48 @@ rows:
     location: null
   evidence: []
   findings: []
+- id: SER-008
+  title: Portable value domain
+  family: SER
+  profile: core
+  layer: '01'
+  sources:
+  - '[R04 §6]'
+  - '[R03 §6]'
+  - '[R05 §5.1]'
+  - '[MVP §18.1]'
+  spec: spec/serialization.md#ser-008
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios:
+  - core.serialization.canonical-bytes-and-content-hash
+  - core.serialization.portable-value-domain-rejections
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-022
+- id: SER-009
+  title: Canonical bytes and content hash
+  family: SER
+  profile: core
+  layer: '01'
+  sources:
+  - '[MVP §18.1]'
+  - '[R04 §7]'
+  - '[R01 §8]'
+  - '[R01 §9]'
+  spec: spec/serialization.md#ser-009
+  source_status: NORMATIVE
+  disposition: adopted
+  scenarios:
+  - core.serialization.canonical-bytes-and-content-hash
+  python:
+    location: null
+  rust:
+    location: null
+  evidence: []
+  findings:
+  - NF-022

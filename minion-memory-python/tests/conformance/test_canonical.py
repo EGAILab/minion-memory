@@ -52,4 +52,8 @@ def test_canonical_scenario(path: Path) -> None:
     jsonschema.validate(scenario, schema)
     if _has_placeholder(scenario):
         pytest.xfail("TO_BE_ placeholder scenario (conformance/README.md)")
+    if scenario["status"] == "DRAFT":
+        # Contract under review: no implementation may exist before the layer's contract checkpoint.
+        layer, sid = scenario["layer"], scenario["id"]
+        pytest.xfail(f"DRAFT scenario, layer {layer} contract not yet reviewed ({sid})")
     pytest.fail(f"no operation vocabulary implemented for layer {scenario['layer']} ({scenario['id']})")

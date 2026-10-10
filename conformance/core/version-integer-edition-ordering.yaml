@@ -1,0 +1,64 @@
+scenario_format: 1
+id: core.identity.version-integer-edition-ordering
+family: core
+layer: '01'
+status: DRAFT
+title: Versions are positive integer editions compared numerically
+description: Owner G-012; integer domain per G-016. Expectations follow directly from the decision.
+requirements:
+- CORE-002
+given: {}
+when:
+- compare_versions:
+    case: higher edition
+    a: 4
+    b: 3
+- compare_versions:
+    case: equal edition
+    a: 3
+    b: 3
+- compare_versions:
+    case: numeric not lexical
+    a: 10
+    b: 9
+- compare_versions:
+    case: lower edition
+    a: 1
+    b: 2
+- compare_versions:
+    case: invalid zero
+    a: 0
+    b: 1
+- compare_versions:
+    case: invalid negative
+    a: -1
+    b: 1
+- compare_versions:
+    case: invalid above safe bound
+    a: 9007199254740992
+    b: 1
+- compare_versions:
+    case: invalid float
+    a: 1.5
+    b: 1
+expect:
+  results:
+  - case: higher edition
+    result: greater
+  - case: equal edition
+    result: equal
+  - case: numeric not lexical
+    result: greater
+  - case: lower edition
+    result: less
+  - case: invalid zero
+    error: version.invalid
+  - case: invalid negative
+    error: version.invalid
+  - case: invalid above safe bound
+    error: version.invalid
+  - case: invalid float
+    error: version.invalid
+negative_controls:
+- lexical comparison ('10' < '9')
+- accepting 0 or negative editions

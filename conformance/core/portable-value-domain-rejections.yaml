@@ -1,0 +1,47 @@
+scenario_format: 1
+id: core.serialization.portable-value-domain-rejections
+family: core
+layer: '01'
+status: DRAFT
+title: Values outside the portable domain are rejected at the seam with a stable error code
+description: Domain per Owner G-015 as amended by G-016 (integers within +/-(2^53-1)) and G-017. Error codes are a DRAFT contract vocabulary for review.
+requirements:
+- SER-008
+given: {}
+when:
+- canonicalize:
+    case: integer above the safe bound
+    value_json: '{"v":9007199254740992}'
+- canonicalize:
+    case: integer below the safe bound
+    value_json: '{"v":-9007199254740992}'
+- canonicalize:
+    case: lone high surrogate
+    value_json: '{"v":"\ud800"}'
+- canonicalize:
+    case: lone low surrogate in a key
+    value_json: '{"\udc00":1}'
+- canonicalize:
+    case: duplicate object key
+    value_json: '{"a":1,"a":2}'
+- canonicalize:
+    case: non-finite number literal
+    value_json: '{"v":Infinity}'
+expect:
+  results:
+  - case: integer above the safe bound
+    error: value.integer_out_of_range
+  - case: integer below the safe bound
+    error: value.integer_out_of_range
+  - case: lone high surrogate
+    error: value.lone_surrogate
+  - case: lone low surrogate in a key
+    error: value.lone_surrogate
+  - case: duplicate object key
+    error: value.duplicate_key
+  - case: non-finite number literal
+    error: value.invalid_json
+negative_controls:
+- accepting 2^53 because the host integer type can hold it (Python int, Rust i64)
+- replacing a lone surrogate with U+FFFD instead of rejecting
+- last-key-wins on duplicate keys (default of Python json and serde_json)
