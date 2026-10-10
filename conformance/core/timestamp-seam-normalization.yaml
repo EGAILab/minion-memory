@@ -76,8 +76,8 @@ when:
     case: non-leap century day
     input: '1900-02-29T00:00:00Z'
 - normalize_timestamp:
-    case: year zero (G-029)
-    input: '0000-01-01T00:00:00Z'
+    case: local year 0000 whose UTC instant is in year 0001 (G-029)
+    input: '0000-12-31T23:30:00-01:00'
 - normalize_timestamp:
     case: UTC result before year 0001 (G-029)
     input: '0001-01-01T00:00:00+00:01'
@@ -184,7 +184,7 @@ expect:
     error: timestamp.invalid
   - case: non-leap century day
     error: timestamp.invalid
-  - case: year zero (G-029)
+  - case: local year 0000 whose UTC instant is in year 0001 (G-029)
     error: timestamp.invalid
   - case: UTC result before year 0001 (G-029)
     error: timestamp.invalid
