@@ -4,7 +4,7 @@ family: core
 layer: '02'
 status: DRAFT
 title: A MemoryScope is a resolved single-valued facet map or explicitly unresolved; equality is exact
-description: SCOPE-001/002 Layer 02 value; Owner G-056..G-063 (reference/governance/2026-10-11-owner-wp02s-memoryscope.md).
+description: SCOPE-001/002 Layer 02 value; Owner G-056..G-064 (reference/governance/2026-10-11-owner-wp02s-memoryscope.md).
 requirements:
 - SCOPE-001
 - SCOPE-002
@@ -76,6 +76,25 @@ when:
       scope_state: resolved
       facets:
         Agent.session: s-1
+- validate_scope:
+    case: 'device-like facet segment is well formed (G-064): preserved'
+    scope:
+      scope_state: resolved
+      facets:
+        agent.con: c-1
+- validate_scope:
+    case: facet segment longer than 128 bytes (G-064)
+    scope:
+      scope_state: resolved
+      facets:
+        ? agent.sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
+        : s-1
+- validate_scope:
+    case: facet name with a non-ASCII segment (G-064)
+    scope:
+      scope_state: resolved
+      facets:
+        agent.séance: s-1
 - validate_scope:
     case: facet value outside the token grammar
     scope:
@@ -169,37 +188,35 @@ expect:
         learning.course: c-1
   - case: unresolved carries no facets
     error: scope.invalid
-    argument: scope
   - case: resolved without facets member
     error: scope.invalid
-    argument: scope
   - case: unknown scope_state
     error: scope.invalid
-    argument: scope
   - case: extra member
     error: scope.invalid
-    argument: scope
   - case: facet name without profile
     error: scope.invalid
-    argument: scope
   - case: facet name with two dots
     error: scope.invalid
-    argument: scope
   - case: facet name outside the token grammar
     error: scope.invalid
-    argument: scope
+  - case: 'device-like facet segment is well formed (G-064): preserved'
+    result:
+      scope_state: resolved
+      facets:
+        agent.con: c-1
+  - case: facet segment longer than 128 bytes (G-064)
+    error: scope.invalid
+  - case: facet name with a non-ASCII segment (G-064)
+    error: scope.invalid
   - case: facet value outside the token grammar
     error: scope.invalid
-    argument: scope
   - case: multi-valued facet is not part of the contract
     error: scope.invalid
-    argument: scope
   - case: numeric facet value
     error: scope.invalid
-    argument: scope
   - case: non-object scope
     error: scope.invalid
-    argument: scope
   - case: member order is irrelevant
     result: true
   - case: an absent facet differs from a present one
