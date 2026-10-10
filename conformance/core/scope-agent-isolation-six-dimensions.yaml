@@ -4,7 +4,7 @@ family: core
 layer: '02'
 status: DRAFT
 title: Agent scope isolation holds in each of the six dimensions and in composition
-description: SCOPE-004/006; Owner G-061, G-063; R04 §42 four dimensions are a subset; Owner G-056..G-063 (reference/governance/2026-10-11-owner-wp02s-memoryscope.md).
+description: SCOPE-004/006; Owner G-061, G-063; R04 §42 four dimensions are a subset; Owner G-056..G-064 (reference/governance/2026-10-11-owner-wp02s-memoryscope.md).
 requirements:
 - SCOPE-004
 - SCOPE-006
