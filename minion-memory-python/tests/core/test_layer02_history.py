@@ -173,3 +173,59 @@ def test_cross_store_incomparability_names_no_argument() -> None:
 def test_boundary_json_text_seam() -> None:
     a = core.JsonText('{"store_id":"s","position":2.0}')
     assert core.compare_history_boundaries(a, {"store_id": "s", "position": 2}) == "equal"
+
+
+# ------------------------------------------------- WP02-CR-006: gate 4 order is canonical, not source
+# JSON-text decoding keeps source member order, so gate 4 must sort (G-034, G-055). Every source
+# order of the typed fields, with every combination of two or three invalid ones, must report the
+# first invalid field in canonical order: occurred_at, then record_id, then recorded_at.
+
+_TYPED_ORDER = ("occurred_at", "record_id", "recorded_at")
+_BAD: dict[str, tuple[str, Any]] = {
+    "occurred_at": ("timestamp.invalid", None),
+    "record_id": ("id.invalid", "BAD"),
+    "recorded_at": ("timestamp.invalid", "now"),
+}
+_GOOD = {"occurred_at": "2026-10-11T07:00:00Z", "record_id": "ev-1", "recorded_at": "2026-10-11T08:00:00Z"}
+_ROUTING = {"profile": "learning", "record_type": "attempt", "schema_version": 1, "compatibility": "required"}
+
+
+def _cases() -> list[tuple[tuple[str, ...], frozenset[str], str]]:
+    from itertools import combinations, permutations
+
+    cases = []
+    for order in permutations(_TYPED_ORDER):
+        for size in (2, 3):
+            for bad in combinations(_TYPED_ORDER, size):
+                first = next(name for name in _TYPED_ORDER if name in bad)
+                cases.append((order, frozenset(bad), _BAD[first][0]))
+    return cases
+
+
+@pytest.mark.parametrize("seam", ["json-text", "native"])
+@pytest.mark.parametrize(
+    ("order", "bad", "expected"),
+    _cases(),
+    ids=lambda v: "-".join(sorted(v)) if isinstance(v, frozenset) else str(v),
+)
+def test_gate4_reports_the_first_invalid_field_in_canonical_order(
+    seam: str, order: tuple[str, ...], bad: frozenset[str], expected: str
+) -> None:
+    import json
+
+    members: list[tuple[str, Any]] = [(name, _BAD[name][1] if name in bad else _GOOD[name]) for name in order]
+    members[1:1] = list(_ROUTING.items())  # routing members between typed ones: source order is mixed
+    if seam == "json-text":
+        text = "{" + ",".join(f"{json.dumps(k)}:{json.dumps(v)}" for k, v in members) + "}"
+        record: object = core.JsonText(text)
+    else:
+        record = dict(members)
+    assert code(lambda: admit(record)) == (expected, "record")
+
+
+def test_codex_witness_json_text_null_occurred_at_after_invalid_record_id() -> None:
+    text = (
+        '{"record_id":"BAD","profile":"learning","record_type":"attempt","schema_version":1,'
+        '"compatibility":"required","recorded_at":"2026-10-11T08:00:00Z","occurred_at":null}'
+    )
+    assert code(lambda: admit(core.JsonText(text))) == ("timestamp.invalid", "record")
