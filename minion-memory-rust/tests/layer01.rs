@@ -458,8 +458,9 @@ fn realistic_known_bad_controls_have_passing_baselines() {
         decode_text(r#"{"a":1e400,"b":1,"b":2}"#),
         ErrorCode::DuplicateKey,
     );
+    code(decode_text("[1e400,]"), ErrorCode::InvalidJson);
     assert!(
-        serde_json::from_str::<Vec<f64>>("[1e400,1]")
+        serde_json::from_str::<Vec<f64>>("[1e400,]")
             .unwrap_err()
             .to_string()
             .contains("number out of range"),
