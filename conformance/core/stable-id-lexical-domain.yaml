@@ -2,7 +2,7 @@ scenario_format: 1
 id: core.identity.stable-id-lexical-domain
 family: core
 layer: '01'
-status: DRAFT
+status: ACTIVE
 title: Stable IDs are portable lowercase ASCII tokens compared byte for byte
 description: Owner G-020. Expectations follow directly from the decision text.
 requirements:

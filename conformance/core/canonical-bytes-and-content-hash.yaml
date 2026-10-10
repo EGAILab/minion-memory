@@ -2,7 +2,7 @@ scenario_format: 1
 id: core.serialization.canonical-bytes-and-content-hash
 family: core
 layer: '01'
-status: DRAFT
+status: ACTIVE
 title: Canonical bytes are RFC 8785 JCS of the portable value; content hash is SHA-256 lowercase hex
 description: Expectations derived from the RFC 8785 reference library (rfc8785 0.1.4) and SHA-256, not from any Minion-Memory implementation. The UTF-16 key-order case discriminates RFC 8785 from code-point ordering (serde_jcs 0.1 orders by code point and fails it).
 requirements:

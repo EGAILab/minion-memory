@@ -2,7 +2,7 @@ scenario_format: 1
 id: core.serialization.portable-value-domain-rejections
 family: core
 layer: '01'
-status: DRAFT
+status: ACTIVE
 title: Values outside the portable domain are rejected at the seam with a stable error code
 description: Domain per Owner G-015 as amended by G-016 (integers within +/-(2^53-1)) and G-017. Error codes are a DRAFT contract vocabulary for review.
 requirements:
