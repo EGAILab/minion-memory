@@ -61,7 +61,11 @@ its outputs and all caches must still stay inside the project.
 `tests/conformance.rs` discovers the unchanged `../conformance/{core,learning,agent}` corpus,
 loads it using an equivalent portable YAML profile, validates each envelope with its shared
 Draft 2020-12 schema, and calls public operations. It performs no canonicalization or repair.
-It reports 8 ACTIVE scenarios / 146 steps and 5 explicit recursive `TO_BE_` expected failures.
+It reports the discovered ACTIVE scenario/step counts and explicit expected failures; the Layer 01
+base currently has 8 ACTIVE scenarios / 146 steps and 5 recursive `TO_BE_` expected failures.
+Every DRAFT scenario reports xfail with its layer and the corpus rule as the reason. Drafts never
+execute as evidence; promotion to ACTIVE executes every step and fails on unsupported operations
+or wrong results. Counts are derived from dispatch, not pinned to the Layer 01 inventory.
 Unknown ACTIVE operations fail. Native scenario integers are constructed exactly as Rust `i128`;
 JSON-text inputs are handed to the library untouched.
 
