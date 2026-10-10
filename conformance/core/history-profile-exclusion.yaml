@@ -4,7 +4,7 @@ family: core
 layer: '02'
 status: DRAFT
 title: A profile reader excludes other-profile records without decoding or compatibility classification
-description: SER-006 / HIST-002; Owner G-050; Owner G-048..G-051 (reference/governance/2026-10-11-owner-layer02-start.md).
+description: SER-006 / HIST-002; Owner G-050; Owner G-048..G-055 (reference/governance/2026-10-11-owner-layer02-start.md).
 requirements:
 - SER-006
 - HIST-002
@@ -106,6 +106,53 @@ when:
       compatibility: required
       recorded_at: '2026-10-11T08:00:00Z'
 - admit_history_record:
+    case: 'other profile with invalid record_type: gate 1 envelope error (G-052, G-055)'
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: agent
+      record_type: Observation
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: 'other profile with invalid compatibility: excluded; compatibility is not validated (G-050)'
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: agent
+      record_type: attempt
+      schema_version: 1
+      compatibility: bogus
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: 'other profile without compatibility: excluded (G-050)'
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: agent
+      record_type: attempt
+      schema_version: 1
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
     case: generic stages apply before exclusion (G-031)
     reader:
       profile: learning
@@ -132,6 +179,13 @@ expect:
   - case: 'other profile with invalid identity: envelope error'
     error: history.envelope_invalid
     argument: record
+  - case: 'other profile with invalid record_type: gate 1 envelope error (G-052, G-055)'
+    error: history.envelope_invalid
+    argument: record
+  - case: 'other profile with invalid compatibility: excluded; compatibility is not validated (G-050)'
+    outcome: excluded
+  - case: 'other profile without compatibility: excluded (G-050)'
+    outcome: excluded
   - case: generic stages apply before exclusion (G-031)
     error: value.number_not_finite
     argument: record

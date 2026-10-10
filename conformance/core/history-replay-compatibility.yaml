@@ -4,7 +4,7 @@ family: core
 layer: '02'
 status: DRAFT
 title: Unrecognized records are skipped only when declared ignorable; unrecognized required records stop replay
-description: SER-005 replay admission; Owner G-048..G-051 (reference/governance/2026-10-11-owner-layer02-start.md).
+description: SER-005 replay admission; Owner G-048..G-055 (reference/governance/2026-10-11-owner-layer02-start.md).
 requirements:
 - SER-005
 given: {}
@@ -184,6 +184,62 @@ when:
       compatibility: required
       recorded_at: '2026-10-11T08:00:00Z'
       extra: 1
+- admit_history_record:
+    case: reader without recognized (G-053)
+    reader:
+      profile: learning
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: recognized entry with an unknown member (G-053)
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+        since: 1
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: recognized entry with schema_version 0 (G-052)
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 0
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: same-profile unrecognized record with invalid compatibility
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: telemetry-ping
+      schema_version: 1
+      compatibility: bogus
+      recorded_at: '2026-10-11T08:00:00Z'
 expect:
   results:
   - case: 'unrecognized type, ignorable: skip'
@@ -219,6 +275,18 @@ expect:
   - case: reader errors precede record errors (declared order)
     error: history.reader_invalid
     argument: reader
+  - case: reader without recognized (G-053)
+    error: history.reader_invalid
+    argument: reader
+  - case: recognized entry with an unknown member (G-053)
+    error: history.reader_invalid
+    argument: reader
+  - case: recognized entry with schema_version 0 (G-052)
+    error: history.reader_invalid
+    argument: reader
+  - case: same-profile unrecognized record with invalid compatibility
+    error: history.envelope_invalid
+    argument: record
 negative_controls:
 - skipping an unknown required record
 - treating a missing compatibility as ignorable

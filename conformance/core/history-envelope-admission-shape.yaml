@@ -4,7 +4,7 @@ family: core
 layer: '02'
 status: DRAFT
 title: A recognized history envelope is closed, carries recorded_at, and is decoded to normalized values
-description: HIST-002 envelope; Owner G-048..G-051 (reference/governance/2026-10-11-owner-layer02-start.md); stage precedence SER-008 G-031/G-034.
+description: HIST-002 envelope; Owner G-048..G-055 (reference/governance/2026-10-11-owner-layer02-start.md); stage precedence SER-008 G-031/G-034.
 requirements:
 - HIST-002
 - HIST-010
@@ -336,6 +336,56 @@ when:
       schema_version: 1
       compatibility: required
       recorded_at: '2026-10-11T08:00:00Z'
+- admit_history_record:
+    case: 'gate 3 before gate 4: unknown member wins over an invalid occurred_at (G-055)'
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+      occurred_at: yesterday
+      zz_extra: 1
+- admit_history_record:
+    case: 'gate 1 before gate 4: invalid record_type wins over an invalid occurred_at (G-055)'
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: Attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+      occurred_at: yesterday
+- admit_history_record:
+    case: recognized record without compatibility
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: exposure
+        schema_version: 2
+    record:
+      record_id: ev-0001
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      recorded_at: '2026-10-11T08:00:00Z'
 expect:
   results:
   - case: minimal recognized envelope
@@ -431,6 +481,15 @@ expect:
     error: history.envelope_invalid
     argument: record
   - case: record_type outside the token domain
+    error: history.envelope_invalid
+    argument: record
+  - case: 'gate 3 before gate 4: unknown member wins over an invalid occurred_at (G-055)'
+    error: history.envelope_invalid
+    argument: record
+  - case: 'gate 1 before gate 4: invalid record_type wins over an invalid occurred_at (G-055)'
+    error: history.envelope_invalid
+    argument: record
+  - case: recognized record without compatibility
     error: history.envelope_invalid
     argument: record
 negative_controls:

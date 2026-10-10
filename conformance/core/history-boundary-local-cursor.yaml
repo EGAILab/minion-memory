@@ -4,7 +4,7 @@ family: core
 layer: '02'
 status: DRAFT
 title: A HistoryBoundary orders positions only within one store; cross-store ordering is incomparable
-description: HIST-005; NF-016 resolved under Owner G-047 and G-051; Owner G-048..G-051 (reference/governance/2026-10-11-owner-layer02-start.md).
+description: HIST-005; NF-016 resolved under Owner G-047 and G-051; Owner G-048..G-055 (reference/governance/2026-10-11-owner-layer02-start.md).
 requirements:
 - HIST-005
 given: {}
@@ -49,6 +49,14 @@ when:
     b:
       store_id: store-1
       position: 2
+- compare_history_boundaries:
+    case: largest position against position 0 (G-054)
+    a:
+      store_id: store-1
+      position: 9007199254740991
+    b:
+      store_id: store-1
+      position: 0
 - compare_history_boundaries:
     case: different stores are incomparable even at equal positions (G-051)
     a:
@@ -181,6 +189,8 @@ expect:
     result: less
   - case: position 2.0 is 2 (one numeric kind)
     result: equal
+  - case: largest position against position 0 (G-054)
+    result: greater
   - case: different stores are incomparable even at equal positions (G-051)
     error: history.boundary_incomparable
   - case: no order is derived from store IDs
