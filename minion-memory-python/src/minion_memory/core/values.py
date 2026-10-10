@@ -13,10 +13,11 @@ within +/-(2^53-1) (G-016, G-025) and every other number a finite non-integral `
 from __future__ import annotations
 
 import hashlib
+import itertools
 import math
-from collections.abc import Iterator, Mapping
-from dataclasses import dataclass
+from collections.abc import Iterator
 from decimal import Decimal
+from typing import Any
 
 from .errors import MnemeValidationError, describe
 
@@ -264,17 +265,101 @@ def _decode_text(text: str | bytes) -> object:
     return _Parser(text, cutoff).parse()
 
 
-def _check_native_kinds(value: object) -> None:
-    """Stage 1 for native values: only JSON data-model kinds (G-034 canonical traversal)."""
-    for item in _canonical_walk(value, native=True):
-        if isinstance(item, dict):
-            for name in item:
-                if not isinstance(name, str):
-                    raise MnemeValidationError(
-                        "value.unsupported_type", f"member name {describe(name)} is not a string"
-                    )
-        elif not (item is None or isinstance(item, (bool, int, float, str, list, tuple))):
-            raise MnemeValidationError("value.unsupported_type", f"{type(item).__name__} is not a JSON value")
+# ------------------------------------------------------------- native binding (G-037..G-043)
+#
+# Native input is converted to exact built-ins in one iterative stage-1 pass before anything else
+# reads it. Kinds come from genuine ancestry (`issubclass(type(x), base)`: never `isinstance`, which
+# consults `__class__`, and never `__mro__`, which a metaclass can intercept). Contents come only
+# through the built-in bases' own slots, so no subclass override is ever invoked (G-037/G-041).
+
+_NATIVE_BASES: tuple[type, ...] = (int, float, str, list, tuple, dict)
+
+
+def _native_family(value: object) -> type | None:
+    """The admitted built-in family of a native value by genuine ancestry, or None."""
+    if value is None:
+        return type(None)
+    kind = type(value)
+    if kind is bool:
+        return bool
+    for base in _NATIVE_BASES:
+        if issubclass(kind, base):
+            return base
+    return None
+
+
+def _extract_native(value: object) -> object:
+    """Stage 1 for a native value: exact built-in tree in canonical traversal (G-034).
+
+    Reports `value.unsupported_type` (a kind outside the families, including `__class__` spoofs),
+    `value.duplicate_key` (equal base member names in one map, G-039) and `value.cyclic` (a container
+    re-entered on the active path, G-040). Shared non-cyclic references are copied, not rejected.
+    Caller objects are typed `Any`: they are only ever read through built-in base slots.
+    """
+    root: list[Any] = [None]
+    active: set[int] = set()
+    # Work items: ("visit", value, target, key) or ("leave", container id, None, None).
+    work: list[tuple[str, Any, Any, Any]] = [("visit", value, root, 0)]
+    while work:
+        action, item, target, key = work.pop()
+        if action == "leave":
+            active.discard(item)
+            continue
+        family = _native_family(item)
+        result: Any
+        children: list[tuple[Any, Any]] = []
+        if family is None:
+            raise MnemeValidationError("value.unsupported_type", "a native value outside the JSON data model")
+        if family is type(None) or family is bool:
+            result = item
+        elif family is int:
+            result = int.__int__(item)
+        elif family is float:
+            result = float.__float__(item)
+        elif family is str:
+            result = str.__str__(item)
+        else:
+            if id(item) in active:
+                raise MnemeValidationError("value.cyclic", "a native container contains itself")
+            if family is dict:
+                names: list[tuple[str, Any]] = []
+                for name, member in list(dict.items(item)):
+                    if _native_family(name) is not str:
+                        raise MnemeValidationError(
+                            "value.unsupported_type", "a native member name is not a string"
+                        )
+                    names.append((str.__str__(name), member))
+                names.sort(key=lambda entry: _utf16_key(entry[0]))
+                for previous, current in itertools.pairwise(names):
+                    if previous[0] == current[0]:
+                        raise MnemeValidationError("value.duplicate_key", "two native member names are equal")
+                result = {name: None for name, _member in names}  # canonical insertion order
+                children = names
+            elif family is list:
+                result = [None] * list.__len__(item)
+                children = [(index, list.__getitem__(item, index)) for index in range(len(result))]
+            else:
+                result = [None] * tuple.__len__(item)
+                children = [(index, tuple.__getitem__(item, index)) for index in range(len(result))]
+            active.add(id(item))
+            work.append(("leave", id(item), None, None))
+            for child_key, child in reversed(children):
+                work.append(("visit", child, result, child_key))
+        target[key] = result
+    return root[0]
+
+
+def _text_input(value: Any) -> str | bytes:
+    """Read JSON text from str or byte-buffer families by base protocol (G-041); else TypeError."""
+    family = _native_family(value)
+    if family is str:
+        return str.__str__(value)
+    kind = type(value)
+    if issubclass(kind, bytes):
+        return bytes.__bytes__(value)
+    if issubclass(kind, bytearray):
+        return bytes(bytearray.copy(value))
+    raise TypeError("JSON text is a str, bytes or bytearray")
 
 
 # ----------------------------------------------------------------------------------------- stage 2
@@ -285,8 +370,11 @@ def _utf16_key(name: str) -> bytes:
     return name.encode("utf-16-be", errors="surrogatepass")
 
 
-def _canonical_walk(value: object, *, native: bool = False) -> Iterator[object]:
-    """Depth-first pre-order in canonical order; a member name is yielded before its value."""
+def _canonical_walk(value: object) -> Iterator[object]:
+    """Depth-first pre-order in canonical order; a member name is yielded before its value.
+
+    Only ever walks exact built-ins or decoder-internal tokens (native input is extracted first).
+    """
     stack: list[object] = [value]
     while stack:
         item = stack.pop()
@@ -294,8 +382,6 @@ def _canonical_walk(value: object, *, native: bool = False) -> Iterator[object]:
         if isinstance(item, (list, tuple)):  # G-036: list and tuple are the canonical array
             stack.extend(reversed(item))
         elif isinstance(item, dict):
-            if native and not all(isinstance(name, str) for name in item):
-                continue  # reported by the stage-1 native check before ordering is possible
             members = sorted(item.items(), key=lambda kv: _utf16_key(kv[0]))
             for name, member in reversed(members):
                 stack.append(member)
@@ -374,54 +460,97 @@ def _normalize(value: object) -> Value:
     return root
 
 
-@dataclass(frozen=True)
 class JsonText:
-    """An argument given as JSON text rather than as a native value (both seams, SER-008)."""
+    """An argument given as JSON text rather than as a native value (both seams, SER-008).
 
-    text: str | bytes
+    The text lives in a slot written and read only through the base class's own storage descriptor,
+    so a subclass's `text` property, `__dict__` property or `__getattribute__` is never invoked when
+    the library reads it (G-041).
+    """
+
+    __slots__ = ("_text",)
+
+    def __init__(self, text: str | bytes | bytearray) -> None:
+        _JSON_TEXT.__set__(self, text)
+
+    @property
+    def text(self) -> str | bytes | bytearray:
+        return _JSON_TEXT.__get__(self, JsonText)  # type: ignore[no-any-return]
+
+    def __setattr__(self, name: str, value: object) -> None:
+        raise AttributeError("JsonText is immutable")
+
+    def __repr__(self) -> str:
+        return "JsonText(...)"
 
 
-def validate_arguments(arguments: Mapping[str, object]) -> dict[str, Value]:
+_JSON_TEXT = JsonText.__dict__["_text"]
+
+
+def _stored_json_text(wrapper: JsonText) -> str | bytes:
+    try:
+        stored = _JSON_TEXT.__get__(wrapper, JsonText)
+    except AttributeError:
+        raise TypeError("JsonText holds no stored text") from None
+    return _text_input(stored)
+
+
+def validate_arguments(arguments: dict[str, object]) -> dict[str, Value]:
     """Stages 1 and 2 for a primitive's arguments: each stage runs over **all** arguments in
     declared order before the next stage starts (G-031), so a stage-1 failure in a later argument
     outranks a stage-2 failure in an earlier one (WP01-PY-001). With several arguments the failing
     one is named on the error.
+
+    The argument map is a `dict` (or subclass) read through base entries; any other mapping is a
+    caller programming error, `TypeError`, raised before any argument is inspected (G-043).
     """
-    several = len(arguments) > 1
+    if not issubclass(type(arguments), dict):
+        raise TypeError("an argument map is a dict (G-043)")
+    entries: list[tuple[str, object]] = []
+    for name, value in list(dict.items(arguments)):
+        if _native_family(name) is not str:
+            raise TypeError("argument names are strings")
+        entries.append((str.__str__(name), value))
+    several = len(entries) > 1
 
     def named(error: MnemeValidationError, name: str) -> MnemeValidationError:
         return error.for_argument(name) if several else error
 
-    decoded: dict[str, object] = {}
-    for name, value in arguments.items():
+    decoded: list[tuple[str, object]] = []
+    for name, value in entries:
         try:
-            if isinstance(value, JsonText):
-                decoded[name] = _decode_text(value.text)
+            if issubclass(type(value), JsonText):
+                decoded.append((name, _decode_text(_stored_json_text(value))))  # type: ignore[arg-type]
             else:
-                _check_native_kinds(value)
-                decoded[name] = value
+                decoded.append((name, _extract_native(value)))
         except MnemeValidationError as error:
             raise named(error, name) from None
-    for name, value in decoded.items():
+    for name, value in decoded:
         try:
             _check_domain(value)
         except MnemeValidationError as error:
             raise named(error, name) from None
-    return {name: _normalize(value) for name, value in decoded.items()}
+    return {name: _normalize(value) for name, value in decoded}
 
 
-def decode_json(text: str | bytes) -> Value:
-    """Decode JSON text into a normalized value: stage 1 (source order), then stage 2."""
-    decoded = _decode_text(text)
+def decode_json(text: str | bytes | bytearray) -> Value:
+    """Decode JSON text into a normalized value: stage 1 (source order), then stage 2.
+
+    Byte buffers (bytes, bytearray and their subclasses) are read as their underlying bytes (G-041).
+    """
+    decoded = _decode_text(_text_input(text))
     _check_domain(decoded)
     return _normalize(decoded)
 
 
 def validate_value(value: object) -> Value:
-    """Validate a native value: stage 1 (kinds), then stage 2; return the normalized value."""
-    _check_native_kinds(value)
-    _check_domain(value)
-    return _normalize(value)
+    """Validate a native value: stage 1 (extraction to exact built-ins), then stage 2.
+
+    The result is recursively exact built-ins, without subclass identity or added state (G-042).
+    """
+    extracted = _extract_native(value)
+    _check_domain(extracted)
+    return _normalize(extracted)
 
 
 # --------------------------------------------------------------------- canonical bytes (SER-009)
@@ -529,6 +658,13 @@ def raw_content_hash(data: bytes | bytearray | memoryview) -> str:
 
     No Unicode normalization and no line-ending conversion; text must be supplied already encoded.
     """
-    if not isinstance(data, (bytes, bytearray, memoryview)):
+    kind = type(data)
+    if issubclass(kind, bytes):
+        raw = bytes.__bytes__(data)  # type: ignore[arg-type]
+    elif issubclass(kind, bytearray):
+        raw = bytes(bytearray.copy(data))  # type: ignore[arg-type]
+    elif kind is memoryview:
+        raw = memoryview.tobytes(data)  # type: ignore[arg-type]
+    else:
         raise TypeError("raw content is hashed over bytes as given; encode text explicitly")
-    return hashlib.sha256(bytes(data)).hexdigest()
+    return hashlib.sha256(raw).hexdigest()

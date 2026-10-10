@@ -9,7 +9,7 @@ member order (G-034). With several arguments the failing one is named on the err
 from __future__ import annotations
 
 import re
-from collections.abc import Callable, Mapping
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Literal
 
@@ -20,7 +20,7 @@ _STABLE_ID = re.compile(r"[a-z0-9][a-z0-9._-]{0,127}", re.ASCII)
 _DEVICE = re.compile(r"(con|prn|aux|nul|com[1-9]|lpt[1-9])", re.ASCII)
 
 
-def _staged[T](arguments: Mapping[str, object], rule: Callable[[Value], T]) -> list[T]:
+def _staged[T](arguments: dict[str, object], rule: Callable[[Value], T]) -> list[T]:
     """Stages 1-2 over all arguments, then the stage-3 `rule` over each in declared order."""
     values = validate_arguments(arguments)
     several = len(values) > 1
