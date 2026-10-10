@@ -1,0 +1,26 @@
+[workspace]
+members = ["."]
+resolver = "3"
+
+[package]
+name = "minion-memory"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.97"
+description = "Project Mneme Layer 01: portable values, canonical bytes and typed core primitives"
+publish = false
+
+[dependencies]
+sha2 = "=0.10.9"
+ryu-js = "=0.2.2"
+chrono = { version = "=0.4.45", default-features = false, features = ["std"] }
+
+[dev-dependencies]
+regex = "=1.13.1"
+serde_json = { version = "=1.0.151", features = ["float_roundtrip", "arbitrary_precision"] }
+yaml-rust2 = "=0.13.0"
+jsonschema = { version = "=0.33.0", default-features = false }
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"

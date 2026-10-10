@@ -1,9 +1,70 @@
-# minion-memory-rust
+# minion-memory-rust — Layer 01
 
-**Owner: Codex.** Claude does not create or modify Rust code here (process/roles/claude-role.md).
+**Owner: Codex.** Implements the accepted shared contract and unchanged canonical corpus;
+the Python implementation is not an oracle. Workspace/package `minion-memory`, public crate
+`minion_memory`, Rust **1.97.1** pinned in `rust-toolchain.toml`, dependencies pinned in
+`Cargo.toml` and `Cargo.lock`. No persistence or Layer 02+ behavior.
 
-This directory holds only this ownership README; no Cargo workspace exists yet. The Cargo workspace, crate layout, pinned toolchain (`rust-toolchain.toml`) and
-the thin canonical runner are created by Codex in its first `RUST_IMPLEMENTATION` pass, against the
-accepted shared contract and `../conformance/`, never against the Python implementation. Toolchain
-proposal for Codex to confirm or counter: `../../minion-memory-docs/plans/toolchain-proposal.md`.
-OWN-001: `CARGO_TARGET_DIR` under the project-root `.tmp/cache/cargo-target/<platform>`.
+## Public seams
+
+`Value` is an owned JSON-shaped tree with a flat arena. Construct native nulls, booleans,
+exact `i128` integers, binary64 numbers, strings, arrays and objects through its constructors.
+`array(Vec<Value>)` and `array_from_slice(&[Value])` bind Vec, slices and arrays in element order.
+Objects retain duplicate names until validation. Negative zero and whole-number floats normalize
+at the seam; exact native integers are checked without binary64 rounding.
+
+`Input::Native`, `Input::Text` and `Input::Bytes` make the native/JSON-text/UTF-8-byte boundary
+explicit. `decode_text`/`decode_json` own JSON decoding. `validate_arguments` runs each generic
+stage across every argument before the next stage. The comparison primitives declare `a`, then
+`b`; their validation errors carry that argument name. `ErrorCode::as_str()` exposes the stable
+contract vocabulary; diagnostic detail is bounded and never formats an input value.
+
+`validate_value`, `canonical_bytes`, `content_hash` and `raw_content_hash` provide SER-008/009
+and CORE-011. Typed operations are `validate_stable_id`, `validate_version`, `compare_versions`,
+`operation_identity`, `compare_operation_identities`, `compare_artifact_revisions` and
+`normalize_timestamp`. A revision conflict is an error, never an overwrite result.
+
+Rust strings cannot hold surrogates. This owned tree cannot contain cycles, non-string keys or
+arbitrary host objects; those are prevented by the binding's types. There are no trait-based
+conversion callbacks, subclasses or dynamic argument maps at the validation seam. Duplicate
+names and invalid numeric values remain constructible and are rejected by validation.
+
+The iterative, duplicate-aware decoder keeps numeric tokens uninterpreted until all structural
+decoding succeeds. It selects JSON errors in source order, including invalid UTF-8, and then
+validates numbers in canonical traversal order. Native traversal, serialization, clone, debug
+and drop also avoid recursive tree descent. Memory allocation remains bounded by available memory;
+no contract depth limit is added. Native construction by repeatedly wrapping existing arrays
+copies arenas; use the decoder for large textual trees.
+
+Canonical serialization explicitly sorts UTF-16 units and escapes strings per RFC 8785.
+`ryu-js` supplies ECMAScript binary64 formatting; `sha2` hashes bytes. `chrono` is used only for
+checked calendar arithmetic after the HIST-004 ASCII grammar and year bounds have passed.
+`serde_jcs` is not used. `serde_json`, YAML, regex and JSON Schema dependencies are test-only.
+
+## Gates and canonical runner
+
+Source `minion-memory-docs/process/environment/project-environment.ps1` (or `.sh`) before each
+shell. Set `CARGO_HOME` and `CARGO_TARGET_DIR` to project-local `.tmp/cache/` directories.
+Keep Rustup's home project-local too when installing a toolchain. With the pinned toolchain:
+
+```text
+cargo fmt --check
+cargo clippy --locked --offline --workspace --all-targets -- -D warnings
+cargo test --locked --offline -- --nocapture
+cargo doc --locked --offline --no-deps
+```
+
+Set `RUSTDOCFLAGS=-D warnings` for the documentation gate. Fetch locked dependencies before
+offline gates. On Windows an already-installed compiler outside the project may be executed;
+its outputs and all caches must still stay inside the project.
+
+`tests/conformance.rs` discovers the unchanged `../conformance/{core,learning,agent}` corpus,
+loads it using an equivalent portable YAML profile, validates each envelope with its shared
+Draft 2020-12 schema, and calls public operations. It performs no canonicalization or repair.
+It reports 8 ACTIVE scenarios / 146 steps and 5 explicit recursive `TO_BE_` expected failures.
+Unknown ACTIVE operations fail. Native scenario integers are constructed exactly as Rust `i128`;
+JSON-text inputs are handed to the library untouched.
+
+`tests/layer01.rs` covers source/stage/canonical precedence, native values, typed rules, timestamps,
+deep trees and realistic known-bad controls. `tests/vectors/` contains an independently generated
+ECMAScript number oracle and its reproducible generator. No Node or network is needed at test time.
