@@ -560,8 +560,9 @@ def _format_number(number: int | float) -> str:
     """ECMAScript Number::toString of a finite binary64 value (RFC 8785 section 3.2.2.3)."""
     if isinstance(number, int):
         return str(number)
-    if number == 0:
-        return "0"
+    # A normalized float is finite and non-integral (one numeric kind, G-023): zero and every other
+    # integral value is an `int` by now, so ECMAScript's integral-float forms cannot occur here.
+    assert math.isfinite(number) and not number.is_integer()
     if number < 0:
         return "-" + _format_number(-number)
     # repr() yields the shortest round-tripping digits; Decimal exposes them as digits x 10^exp.
@@ -572,9 +573,7 @@ def _format_number(number: int | float) -> str:
     exponent += len(digits) - len(stripped)
     digits = stripped
     k = len(digits)
-    n = exponent + k  # value = 0.digits x 10^n
-    if k <= n <= 21:
-        return digits + "0" * (n - k)
+    n = exponent + k  # value = 0.digits x 10^n; n < k because the value is non-integral
     if 0 < n <= 21:
         return digits[:n] + "." + digits[n:]
     if -6 < n <= 0:

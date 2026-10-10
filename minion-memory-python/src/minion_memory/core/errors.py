@@ -26,7 +26,8 @@ _LIMIT = 40
 def describe(value: object) -> str:
     """A bounded, non-recursive description of a rejected value for diagnostics (WP01-PY-004).
 
-    Never `repr` of an arbitrary value: deep containers would recurse and huge integers exceed the
+    Only ever called with exact built-ins or decoder tokens (native input is extracted first, G-042):
+    never `repr` of a container, since deep containers would recurse, and huge integers exceed the
     host's int-to-string limit. Building a diagnostic must never replace the stable error code.
     """
     if value is None or isinstance(value, bool):
@@ -37,6 +38,5 @@ def describe(value: object) -> str:
         return repr(value)
     if isinstance(value, str):
         return repr(value[:_LIMIT]) + (f"... ({len(value)} characters)" if len(value) > _LIMIT else "")
-    if isinstance(value, (list, tuple, dict)):
-        return f"{type(value).__name__} of {len(value)} items"
-    return type(value).__name__
+    assert isinstance(value, (list, dict)), "describe() receives exact built-ins only"
+    return f"{type(value).__name__} of {len(value)} items"

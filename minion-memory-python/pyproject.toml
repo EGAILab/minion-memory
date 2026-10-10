@@ -15,6 +15,7 @@ dev = [
     "types-PyYAML",
     "types-jsonschema",
     "rfc8785==0.1.4",
+    "coverage==7.16.2",
 ]
 
 [build-system]
