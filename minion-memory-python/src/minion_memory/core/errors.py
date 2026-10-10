@@ -18,3 +18,25 @@ class MnemeValidationError(ValueError):
 
     def for_argument(self, argument: str) -> MnemeValidationError:
         return MnemeValidationError(self.code, self.detail, argument)
+
+
+_LIMIT = 40
+
+
+def describe(value: object) -> str:
+    """A bounded, non-recursive description of a rejected value for diagnostics (WP01-PY-004).
+
+    Never `repr` of an arbitrary value: deep containers would recurse and huge integers exceed the
+    host's int-to-string limit. Building a diagnostic must never replace the stable error code.
+    """
+    if value is None or isinstance(value, bool):
+        return repr(value)
+    if isinstance(value, int):
+        return f"integer of {value.bit_length()} bits" if value.bit_length() > 64 else str(value)
+    if isinstance(value, float):
+        return repr(value)
+    if isinstance(value, str):
+        return repr(value[:_LIMIT]) + (f"... ({len(value)} characters)" if len(value) > _LIMIT else "")
+    if isinstance(value, (list, tuple, dict)):
+        return f"{type(value).__name__} of {len(value)} items"
+    return type(value).__name__

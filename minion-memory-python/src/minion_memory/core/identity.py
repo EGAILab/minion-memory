@@ -1,8 +1,9 @@
 """Identity, versions, operation identity and revision comparison (CORE-001/002/003/012).
 
-Typed field rules are stage 3 of SER-008 (G-031). A primitive with several arguments validates all
-of them through stages 1-2 first, in declared order, and only then applies stage-3 rules in declared
-order (G-034); the failing argument is named on the error.
+Typed field rules are stage 3 of SER-008 (G-031). A primitive's arguments pass stage 1 and then
+stage 2 together, each stage over all arguments in declared order (`validate_arguments`); only then
+are stage-3 rules applied, argument by argument in declared order, and within a record in canonical
+member order (G-034). With several arguments the failing one is named on the error.
 """
 
 from __future__ import annotations
@@ -12,32 +13,23 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import Literal
 
-from .errors import MnemeValidationError
-from .values import SAFE_INTEGER_MAX, Value, canonical_bytes, validate_value
+from .errors import MnemeValidationError, describe
+from .values import SAFE_INTEGER_MAX, Value, _utf16_key, canonical_bytes, validate_arguments
 
 _STABLE_ID = re.compile(r"[a-z0-9][a-z0-9._-]{0,127}", re.ASCII)
 _DEVICE = re.compile(r"(con|prn|aux|nul|com[1-9]|lpt[1-9])", re.ASCII)
 
 
-def _domain(arguments: Mapping[str, object]) -> dict[str, Value]:
-    """Stages 1-2 for every argument in declared order; returns the normalized values."""
-    values: dict[str, Value] = {}
-    for name, value in arguments.items():
-        try:
-            values[name] = validate_value(value)
-        except MnemeValidationError as error:
-            raise error.for_argument(name) from None
-    return values
-
-
-def _typed[T](arguments: Mapping[str, Value], rule: Callable[[Value], T]) -> list[T]:
-    """Stage 3 for every argument in declared order."""
+def _staged[T](arguments: Mapping[str, object], rule: Callable[[Value], T]) -> list[T]:
+    """Stages 1-2 over all arguments, then the stage-3 `rule` over each in declared order."""
+    values = validate_arguments(arguments)
+    several = len(values) > 1
     results: list[T] = []
-    for name, value in arguments.items():
+    for name, value in values.items():
         try:
             results.append(rule(value))
         except MnemeValidationError as error:
-            raise error.for_argument(name) from None
+            raise (error.for_argument(name) if several else error) from None
     return results
 
 
@@ -46,17 +38,17 @@ def _typed[T](arguments: Mapping[str, Value], rule: Callable[[Value], T]) -> lis
 
 def _stable_id_rule(value: Value) -> str:
     if not isinstance(value, str):
-        raise MnemeValidationError("id.invalid", "a stable ID is a string")
+        raise MnemeValidationError("id.invalid", f"a stable ID is a string, not {describe(value)}")
     if not _STABLE_ID.fullmatch(value) or value.endswith("."):
-        raise MnemeValidationError("id.invalid", f"{value!r} is not a portable lowercase token")
+        raise MnemeValidationError("id.invalid", f"{describe(value)} is not a portable lowercase token")
     if _DEVICE.fullmatch(value.split(".", 1)[0]):
-        raise MnemeValidationError("id.invalid", f"{value!r} has a reserved device basename")
+        raise MnemeValidationError("id.invalid", f"{describe(value)} has a reserved device basename")
     return value
 
 
 def validate_stable_id(value: object) -> str:
     """CORE-001 (G-020): 1-128 ASCII bytes `[a-z0-9][a-z0-9._-]*`, no trailing `.`, no device basename."""
-    return _typed(_domain({"id": value}), _stable_id_rule)[0]
+    return _staged({"id": value}, _stable_id_rule)[0]
 
 
 # ------------------------------------------------------------------------- CORE-002 version (G-012)
@@ -65,17 +57,17 @@ def validate_stable_id(value: object) -> str:
 def _version_rule(value: Value) -> int:
     # A normalized number is an `int` exactly when it is integral (one numeric kind, G-023).
     if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= SAFE_INTEGER_MAX:
-        raise MnemeValidationError("version.invalid", f"{value!r} is not a positive integer edition")
+        raise MnemeValidationError("version.invalid", f"{describe(value)} is not a positive integer edition")
     return value
 
 
 def validate_version(value: object) -> int:
-    return _typed(_domain({"version": value}), _version_rule)[0]
+    return _staged({"version": value}, _version_rule)[0]
 
 
 def compare_versions(a: object, b: object) -> Literal["greater", "equal", "less"]:
     """CORE-002: positive integer editions compared numerically."""
-    first, second = _typed(_domain({"a": a, "b": b}), _version_rule)
+    first, second = _staged({"a": a, "b": b}, _version_rule)
     return "greater" if first > second else "less" if first < second else "equal"
 
 
@@ -99,6 +91,7 @@ def _operation_rule(value: Value) -> OperationIdentity:
             "operation_identity.invalid",
             "an operation identity is exactly {source_namespace, source_operation_id}",
         )
+    # Fields in canonical member order (G-034): source_namespace, then source_operation_id.
     namespace, operation_id = value["source_namespace"], value["source_operation_id"]
     try:
         _stable_id_rule(namespace)
@@ -116,32 +109,48 @@ def _operation_rule(value: Value) -> OperationIdentity:
 
 def operation_identity(value: object) -> OperationIdentity:
     """Validate an operation identity (G-032/G-033); compared exactly, never normalized."""
-    return _typed(_domain({"identity": value}), _operation_rule)[0]
+    return _staged({"identity": value}, _operation_rule)[0]
 
 
 def compare_operation_identities(a: object, b: object) -> Literal["same", "different"]:
-    first, second = _typed(_domain({"a": a, "b": b}), _operation_rule)
+    first, second = _staged({"a": a, "b": b}, _operation_rule)
     return "same" if first == second else "different"
 
 
 # ------------------------------------------------------------ CORE-003 revision comparison (G-021)
 
+_REVISION_REQUIRED = frozenset({"stable_id", "projection"})
+_REVISION_ALLOWED = _REVISION_REQUIRED | {"artifact_version"}
+_REVISION_FIELD_RULES: dict[str, Callable[[Value], object]] = {
+    "artifact_version": _version_rule,
+    "stable_id": _stable_id_rule,
+}
+
 
 def _revision_rule(value: Value) -> tuple[str, int | None, Value]:
-    if not isinstance(value, dict) or "stable_id" not in value or "projection" not in value:
-        raise MnemeValidationError("id.invalid", "a revision carries stable_id and projection")
-    stable_id = _stable_id_rule(value["stable_id"])
-    version = _version_rule(value["artifact_version"]) if "artifact_version" in value else None
+    """G-035: the closed record shape first, then present typed fields in canonical member order."""
+    if not isinstance(value, dict) or not set(value) >= _REVISION_REQUIRED or set(value) - _REVISION_ALLOWED:
+        raise MnemeValidationError(
+            "artifact.revision_invalid",
+            "a revision record is exactly {stable_id, projection, artifact_version?}",
+        )
+    for name in sorted(value, key=_utf16_key):
+        rule = _REVISION_FIELD_RULES.get(name)
+        if rule is not None:
+            rule(value[name])
+    stable_id = value["stable_id"]
+    version = value.get("artifact_version")
+    assert isinstance(stable_id, str) and (version is None or isinstance(version, int))
     return stable_id, version, value["projection"]
 
 
 def compare_artifact_revisions(a: object, b: object) -> Literal["identical", "distinct", "not_applicable"]:
     """CORE-003 Layer 01 comparison; raises `artifact.revision_conflict` on a visible conflict."""
-    (id_a, version_a, projection_a), (id_b, version_b, projection_b) = _typed(
-        _domain({"a": a, "b": b}), _revision_rule
+    (id_a, version_a, projection_a), (id_b, version_b, projection_b) = _staged(
+        {"a": a, "b": b}, _revision_rule
     )
     if version_a is None or version_b is None:
-        return "not_applicable"  # only immutable semantically versioned artifacts (G-021)
+        return "not_applicable"  # only immutable semantically versioned artifacts (G-021, G-035)
     if id_a != id_b or version_a != version_b:
         return "distinct"
     if canonical_bytes(projection_a) == canonical_bytes(projection_b):

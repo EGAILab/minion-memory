@@ -16,9 +16,19 @@ from .identity import (
     validate_version,
 )
 from .time import normalize_timestamp
-from .values import Value, canonical_bytes, content_hash, decode_json, validate_value
+from .values import (
+    JsonText,
+    Value,
+    canonical_bytes,
+    content_hash,
+    decode_json,
+    raw_content_hash,
+    validate_arguments,
+    validate_value,
+)
 
 __all__ = [
+    "JsonText",
     "MnemeValidationError",
     "OperationIdentity",
     "Value",
@@ -30,6 +40,8 @@ __all__ = [
     "decode_json",
     "normalize_timestamp",
     "operation_identity",
+    "raw_content_hash",
+    "validate_arguments",
     "validate_stable_id",
     "validate_value",
     "validate_version",

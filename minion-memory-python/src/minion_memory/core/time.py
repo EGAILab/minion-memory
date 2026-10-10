@@ -10,8 +10,8 @@ import calendar
 import re
 from datetime import datetime, timedelta
 
-from .errors import MnemeValidationError
-from .identity import _domain, _typed
+from .errors import MnemeValidationError, describe
+from .identity import _staged
 from .values import Value
 
 _GRAMMAR = re.compile(
@@ -27,10 +27,10 @@ def _invalid(detail: str) -> MnemeValidationError:
 
 def _timestamp_rule(value: Value) -> str:
     if not isinstance(value, str):
-        raise _invalid("a timestamp is a string")
+        raise _invalid(f"a timestamp is a string, not {describe(value)}")
     match = _GRAMMAR.fullmatch(value)
     if match is None:
-        raise _invalid(f"{value!r} is not in the timestamp grammar")
+        raise _invalid(f"{describe(value)} is not in the timestamp grammar")
     year, month, day, hour, minute, second = (int(part) for part in match.groups()[:6])
     fraction, offset = match.group(7), match.group(8)
     if not (1 <= year <= 9999 and 1 <= month <= 12):
@@ -59,4 +59,4 @@ def _timestamp_rule(value: Value) -> str:
 
 def normalize_timestamp(value: object) -> str:
     """Accept exactly the shared grammar and return `YYYY-MM-DDTHH:MM:SS.ffffffZ`."""
-    return _typed(_domain({"timestamp": value}), _timestamp_rule)[0]
+    return _staged({"timestamp": value}, _timestamp_rule)[0]

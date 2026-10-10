@@ -96,6 +96,87 @@ when:
       projection:
         schema_version: 2
         t: y
+- compare_artifact_revisions:
+    case: missing projection
+    a:
+      stable_id: ku-1
+      artifact_version: 1
+    b:
+      stable_id: ku-1
+      projection:
+        t: x
+      artifact_version: 1
+- compare_artifact_revisions:
+    case: missing stable_id
+    a:
+      artifact_version: 1
+      projection: {}
+    b:
+      stable_id: ku-1
+      projection:
+        t: x
+      artifact_version: 1
+- compare_artifact_revisions:
+    case: absent version does not bypass a missing projection
+    a:
+      stable_id: ku-1
+    b:
+      stable_id: ku-1
+      projection:
+        t: x
+      artifact_version: 1
+- compare_artifact_revisions:
+    case: extra member
+    a:
+      stable_id: ku-1
+      projection: {}
+      extra: 1
+    b:
+      stable_id: ku-1
+      projection:
+        t: x
+      artifact_version: 1
+- compare_artifact_revisions:
+    case: shape before typed fields
+    a:
+      stable_id: BAD
+      projection: {}
+      extra: 1
+    b:
+      stable_id: ku-1
+      projection:
+        t: x
+      artifact_version: 1
+- compare_artifact_revisions:
+    case: not an object
+    a:
+    - ku-1
+    b:
+      stable_id: ku-1
+      projection:
+        t: x
+      artifact_version: 1
+- compare_artifact_revisions:
+    case: 'typed fields in canonical order: version before id'
+    a:
+      stable_id: BAD
+      artifact_version: 0
+      projection: null
+    b:
+      stable_id: ku-1
+      projection:
+        t: x
+      artifact_version: 1
+- compare_artifact_revisions:
+    case: invalid id after a valid shape
+    a:
+      stable_id: BAD
+      projection: {}
+    b:
+      stable_id: ku-1
+      projection:
+        t: x
+      artifact_version: 1
 expect:
   results:
   - case: same projection
@@ -112,6 +193,30 @@ expect:
     result: distinct
   - case: schema version alone does not invoke the rule
     result: not_applicable
+  - case: missing projection
+    error: artifact.revision_invalid
+    argument: a
+  - case: missing stable_id
+    error: artifact.revision_invalid
+    argument: a
+  - case: absent version does not bypass a missing projection
+    error: artifact.revision_invalid
+    argument: a
+  - case: extra member
+    error: artifact.revision_invalid
+    argument: a
+  - case: shape before typed fields
+    error: artifact.revision_invalid
+    argument: a
+  - case: not an object
+    error: artifact.revision_invalid
+    argument: a
+  - case: 'typed fields in canonical order: version before id'
+    error: version.invalid
+    argument: a
+  - case: invalid id after a valid shape
+    error: id.invalid
+    argument: a
 negative_controls:
 - last-write-wins overwrite at the same version
 - silent merge of the two contents

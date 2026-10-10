@@ -69,6 +69,9 @@ when:
 - canonicalize:
     case: canonical order across nesting levels (G-034)
     value_json: '{"b":{"a":1e400},"a":[9007199254740992]}'
+- canonicalize:
+    case: unpaired high escape before a malformed escape (source order)
+    value_json: '"\ud800\uZZZZ"'
 expect:
   results:
   - case: integer above the safe bound
@@ -111,6 +114,8 @@ expect:
     error: value.number_not_finite
   - case: canonical order across nesting levels (G-034)
     error: value.integer_out_of_range
+  - case: unpaired high escape before a malformed escape (source order)
+    error: value.lone_surrogate
 negative_controls:
 - accepting 2^53 because the host integer type can hold it (Python int, Rust i64)
 - replacing a lone surrogate with U+FFFD instead of rejecting

@@ -14,10 +14,11 @@ from __future__ import annotations
 
 import hashlib
 import math
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
+from dataclasses import dataclass
 from decimal import Decimal
 
-from .errors import MnemeValidationError
+from .errors import MnemeValidationError, describe
 
 type Value = bool | int | float | str | list[Value] | dict[str, Value] | None
 
@@ -44,11 +45,17 @@ class _Parser:
     `value.lone_surrogate`; every other deviation from RFC 8259 is `value.invalid_json`.
     """
 
-    def __init__(self, text: str) -> None:
+    def __init__(self, text: str, cutoff: MnemeValidationError | None = None) -> None:
+        # `text` is the input up to its first representation defect (invalid UTF-8 or a raw
+        # surrogate); `cutoff` is that defect's error. Any failure reaching the cutoff reports the
+        # cutoff error, so an earlier source-order violation always wins (WP01-PY-003).
         self.text = text
         self.pos = 0
+        self.cutoff = cutoff
 
     def fail(self, code: str, detail: str) -> MnemeValidationError:
+        if self.cutoff is not None and self.pos >= len(self.text):
+            return self.cutoff
         return MnemeValidationError(code, f"{detail} at offset {self.pos}")
 
     def skip_ws(self) -> None:
@@ -79,6 +86,8 @@ class _Parser:
                     self.skip_ws()
                     if self.pos != len(self.text):
                         raise self.fail("value.invalid_json", "trailing content")
+                    if self.cutoff is not None:
+                        raise self.cutoff
                     return result
                 container, name = stack[-1]
                 if isinstance(container, list):
@@ -119,7 +128,7 @@ class _Parser:
         name = self.parse_string()
         if name in container:
             self.pos = start
-            raise self.fail("value.duplicate_key", f"duplicate member name {name!r}")
+            raise self.fail("value.duplicate_key", f"duplicate member name {describe(name)}")
         self.skip_ws()
         if self.peek() != ":":
             raise self.fail("value.invalid_json", "expected ':'")
@@ -213,7 +222,8 @@ class _Parser:
             if 0xDC00 <= unit <= 0xDFFF:
                 raise self.fail("value.lone_surrogate", "unpaired low surrogate escape")
             if 0xD800 <= unit <= 0xDBFF:
-                low = self.hex4(self.pos + 8) if text[self.pos + 6 : self.pos + 8] == "\\u" else None
+                # A non-raising lookahead: an unpaired high escape is reported before anything after it.
+                low = self.peek_hex4(self.pos + 8) if text[self.pos + 6 : self.pos + 8] == "\\u" else None
                 if low is None or not 0xDC00 <= low <= 0xDFFF:
                     raise self.fail("value.lone_surrogate", "unpaired high surrogate escape")
                 parts.append(chr(0x10000 + ((unit - 0xD800) << 10) + (low - 0xDC00)))
@@ -221,6 +231,10 @@ class _Parser:
                 continue
             parts.append(chr(unit))
             self.pos += 6
+
+    def peek_hex4(self, at: int) -> int | None:
+        chunk = self.text[at : at + 4]
+        return int(chunk, 16) if len(chunk) == 4 and all(c in _HEX for c in chunk) else None
 
     def hex4(self, at: int) -> int:
         chunk = self.text[at : at + 4]
@@ -231,17 +245,23 @@ class _Parser:
 
 
 def _decode_text(text: str | bytes) -> object:
+    cutoff: MnemeValidationError | None = None
     if isinstance(text, bytes):
+        data = text
         try:
-            text = text.decode("utf-8")
+            text = data.decode("utf-8")
         except UnicodeDecodeError as error:
-            raise MnemeValidationError("value.invalid_json", f"not UTF-8 ({error})") from None
-    # A raw surrogate code point cannot come from UTF-8 text (SER-008: raw surrogate bytes are
-    # invalid UTF-8), so it is a stage-1 text error, not an escape.
-    for offset, char in enumerate(text):
-        if "\ud800" <= char <= "\udfff":
-            raise MnemeValidationError("value.invalid_json", f"raw surrogate at offset {offset}")
-    return _Parser(text).parse()
+            cutoff = MnemeValidationError("value.invalid_json", f"invalid UTF-8 at byte {error.start}")
+            text = data[: error.start].decode("utf-8")
+    else:
+        # A raw surrogate code point cannot come from UTF-8 text (SER-008: raw surrogate bytes are
+        # invalid UTF-8): it is a representation defect at its position, not an escape.
+        for offset, char in enumerate(text):
+            if "\ud800" <= char <= "\udfff":
+                cutoff = MnemeValidationError("value.invalid_json", f"raw surrogate at offset {offset}")
+                text = text[:offset]
+                break
+    return _Parser(text, cutoff).parse()
 
 
 def _check_native_kinds(value: object) -> None:
@@ -251,9 +271,9 @@ def _check_native_kinds(value: object) -> None:
             for name in item:
                 if not isinstance(name, str):
                     raise MnemeValidationError(
-                        "value.unsupported_type", f"member name {name!r} is not a string"
+                        "value.unsupported_type", f"member name {describe(name)} is not a string"
                     )
-        elif not (item is None or isinstance(item, (bool, int, float, str, list))):
+        elif not (item is None or isinstance(item, (bool, int, float, str, list, tuple))):
             raise MnemeValidationError("value.unsupported_type", f"{type(item).__name__} is not a JSON value")
 
 
@@ -271,7 +291,7 @@ def _canonical_walk(value: object, *, native: bool = False) -> Iterator[object]:
     while stack:
         item = stack.pop()
         yield item
-        if isinstance(item, list):
+        if isinstance(item, (list, tuple)):  # G-036: list and tuple are the canonical array
             stack.extend(reversed(item))
         elif isinstance(item, dict):
             if native and not all(isinstance(name, str) for name in item):
@@ -301,11 +321,11 @@ def _number(value: float | int | _Numeral) -> int | float:
         number = value
     if isinstance(number, float):
         if not math.isfinite(number):
-            raise MnemeValidationError("value.number_not_finite", repr(value))
+            raise MnemeValidationError("value.number_not_finite", describe(value))
         if number.is_integer():
             number = int(number)  # one numeric kind (G-023); -0.0 becomes 0 (G-017)
     if isinstance(number, int) and not -SAFE_INTEGER_MAX <= number <= SAFE_INTEGER_MAX:
-        raise MnemeValidationError("value.integer_out_of_range", repr(value))
+        raise MnemeValidationError("value.integer_out_of_range", describe(value))
     return number
 
 
@@ -332,17 +352,17 @@ def _normalize_scalar(value: object) -> Value:
 
 def _normalize(value: object) -> Value:
     """Build the normalized value (only after stage 2 has passed); iterative, so total on depth."""
-    if not isinstance(value, (list, dict)):
+    if not isinstance(value, (list, tuple, dict)):
         return _normalize_scalar(value)
-    root: list[Value] | dict[str, Value] = [] if isinstance(value, list) else {}
+    root: list[Value] | dict[str, Value] = {} if isinstance(value, dict) else []
     # Each entry: a source container and the target container it fills.
-    work: list[tuple[list[object] | dict[str, object], list[Value] | dict[str, Value]]] = [(value, root)]
+    work: list[tuple[object, list[Value] | dict[str, Value]]] = [(value, root)]
     while work:
         source, target = work.pop()
-        items = enumerate(source) if isinstance(source, list) else source.items()
+        items = source.items() if isinstance(source, dict) else enumerate(source)  # type: ignore[arg-type]
         for key, item in items:
-            if isinstance(item, (list, dict)):
-                child: list[Value] | dict[str, Value] = [] if isinstance(item, list) else {}
+            if isinstance(item, (list, tuple, dict)):
+                child: list[Value] | dict[str, Value] = {} if isinstance(item, dict) else []
                 work.append((item, child))
                 converted: Value = child
             else:
@@ -352,6 +372,42 @@ def _normalize(value: object) -> Value:
             else:
                 target[str(key)] = converted
     return root
+
+
+@dataclass(frozen=True)
+class JsonText:
+    """An argument given as JSON text rather than as a native value (both seams, SER-008)."""
+
+    text: str | bytes
+
+
+def validate_arguments(arguments: Mapping[str, object]) -> dict[str, Value]:
+    """Stages 1 and 2 for a primitive's arguments: each stage runs over **all** arguments in
+    declared order before the next stage starts (G-031), so a stage-1 failure in a later argument
+    outranks a stage-2 failure in an earlier one (WP01-PY-001). With several arguments the failing
+    one is named on the error.
+    """
+    several = len(arguments) > 1
+
+    def named(error: MnemeValidationError, name: str) -> MnemeValidationError:
+        return error.for_argument(name) if several else error
+
+    decoded: dict[str, object] = {}
+    for name, value in arguments.items():
+        try:
+            if isinstance(value, JsonText):
+                decoded[name] = _decode_text(value.text)
+            else:
+                _check_native_kinds(value)
+                decoded[name] = value
+        except MnemeValidationError as error:
+            raise named(error, name) from None
+    for name, value in decoded.items():
+        try:
+            _check_domain(value)
+        except MnemeValidationError as error:
+            raise named(error, name) from None
+    return {name: _normalize(value) for name, value in decoded.items()}
 
 
 def decode_json(text: str | bytes) -> Value:
@@ -466,3 +522,13 @@ def canonical_bytes(value: object) -> bytes:
 def content_hash(value: object) -> str:
     """SHA-256 of the canonical bytes, 64 lowercase hex digits (SER-009, G-014)."""
     return hashlib.sha256(canonical_bytes(value)).hexdigest()
+
+
+def raw_content_hash(data: bytes | bytearray | memoryview) -> str:
+    """SHA-256 of text or binary content over its bytes exactly as given (CORE-011, SER-009, G-014).
+
+    No Unicode normalization and no line-ending conversion; text must be supplied already encoded.
+    """
+    if not isinstance(data, (bytes, bytearray, memoryview)):
+        raise TypeError("raw content is hashed over bytes as given; encode text explicitly")
+    return hashlib.sha256(bytes(data)).hexdigest()

@@ -68,6 +68,10 @@ when:
     case: NFC versus NFD differs
     a_json: '{"source_namespace": "ns", "source_operation_id": "\u00e9"}'
     b_json: '{"source_namespace": "ns", "source_operation_id": "e\u0301"}'
+- compare_operation_identities:
+    case: stage-1 failure in b outranks stage-2 failure in a (G-031)
+    a_json: '1e400'
+    b_json: '{"a":1,"a":2}'
 expect:
   results:
   - case: namespaced pair
@@ -106,6 +110,9 @@ expect:
     result: different
   - case: NFC versus NFD differs
     result: different
+  - case: stage-1 failure in b outranks stage-2 failure in a (G-031)
+    error: value.duplicate_key
+    argument: b
 negative_controls:
 - joining namespace and identifier into one delimited string
 - trimming, case folding or normalizing the identifier

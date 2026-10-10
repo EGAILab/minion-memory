@@ -49,8 +49,9 @@ def _has_placeholder(value: Any) -> bool:
 
 
 def _input(params: dict[str, Any], native: str, text: str) -> object:
-    """A step input given either as a native YAML value or as JSON text decoded by the library."""
-    return core.decode_json(params[text]) if text in params else params[native]
+    """A step input given either as a native YAML value or as JSON text. JSON text is handed to the
+    library as `core.JsonText`, so the library alone applies stage precedence across arguments."""
+    return core.JsonText(params[text]) if text in params else params[native]
 
 
 def _canonicalize(params: dict[str, Any]) -> dict[str, Any]:
@@ -68,14 +69,13 @@ OPERATIONS: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] = {
         "canonical": core.normalize_timestamp(_input(p, "input", "value_json"))
     },
     "validate_operation_identity": lambda p: (
-        core.operation_identity(core.decode_json(p["value_json"])),
+        core.operation_identity(core.JsonText(p["value_json"])),
         {"result": "valid"},
     )[1],
     "compare_operation_identities": lambda p: {
-        "result": core.compare_operation_identities(
-            core.decode_json(p["a_json"]), core.decode_json(p["b_json"])
-        )
+        "result": core.compare_operation_identities(core.JsonText(p["a_json"]), core.JsonText(p["b_json"]))
     },
+    "hash_content": lambda p: {"sha256": core.raw_content_hash(bytes.fromhex(p["hex"]))},
     "compare_artifact_revisions": lambda p: {"result": core.compare_artifact_revisions(p["a"], p["b"])},
 }
 

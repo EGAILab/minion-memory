@@ -1,0 +1,53 @@
+scenario_format: 1
+id: core.serialization.raw-content-hash
+family: core
+layer: '01'
+status: ACTIVE
+title: Text and binary content are hashed with SHA-256 over their bytes exactly as given
+description: 'CORE-011 / SER-009 (G-014): no Unicode normalization and no line-ending conversion. Inputs are hex-encoded bytes.'
+requirements:
+- CORE-011
+- SER-009
+given: {}
+when:
+- hash_content:
+    case: ASCII text
+    hex: '616263'
+- hash_content:
+    case: CRLF line ending
+    hex: 6c696e650d0a
+- hash_content:
+    case: LF line ending differs from CRLF
+    hex: 6c696e650a
+- hash_content:
+    case: NFC e-acute
+    hex: c3a9
+- hash_content:
+    case: NFD e plus combining acute differs from NFC
+    hex: 65cc81
+- hash_content:
+    case: empty content
+    hex: ''
+- hash_content:
+    case: binary bytes
+    hex: ff0001
+expect:
+  results:
+  - case: ASCII text
+    sha256: ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
+  - case: CRLF line ending
+    sha256: 893e89e669b5a4f9e5136d565f51e341a0c5e5531816c9c1a806d90df66a45f4
+  - case: LF line ending differs from CRLF
+    sha256: c73b73af8851e9e91bc6b4dc12e7dace0a2bfb931c1d0b8b36ef367319f58cd1
+  - case: NFC e-acute
+    sha256: 4a99557e4033c3539de2eb65472017cad5f9557f7a0625a09f1c3f6e2ba69c4c
+  - case: NFD e plus combining acute differs from NFC
+    sha256: bf12767b0f2a56b2190075bae8169f656e3ce8d6357d4aff184bc6c7ea48f9f6
+  - case: empty content
+    sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  - case: binary bytes
+    sha256: 942e1e2a66a427b6551732f758bc314f22b9cdec9365a3425c9184de299392b5
+negative_controls:
+- normalizing text to NFC before hashing
+- converting CRLF to LF before hashing
+- hashing a JSON string encoding instead of the raw bytes

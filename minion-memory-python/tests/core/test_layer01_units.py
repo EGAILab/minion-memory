@@ -31,8 +31,8 @@ def code(call: Any, *args: Any) -> str:
 
 @pytest.mark.parametrize(
     "value",
-    [b"bytes", {1, 2}, (1, 2), datetime(2026, 1, 1), {1: "non-string key"}, [object()], {"a": {"b": b"x"}}],
-    ids=["bytes", "set", "tuple", "datetime", "int-key", "object", "nested-bytes"],
+    [b"bytes", {1, 2}, range(2), datetime(2026, 1, 1), {1: "non-string key"}, [object()], {"a": {"b": b"x"}}],
+    ids=["bytes", "set", "range", "datetime", "int-key", "object", "nested-bytes"],
 )
 def test_native_kinds_outside_json_are_unsupported(value: object) -> None:
     assert code(core.validate_value, value) == "value.unsupported_type"

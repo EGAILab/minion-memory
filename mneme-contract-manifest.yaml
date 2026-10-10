@@ -1447,6 +1447,7 @@ rows:
   disposition: adopted
   scenarios:
   - core.serialization.canonical-bytes-and-content-hash
+  - core.serialization.raw-content-hash
   python:
     location: minion-memory-python/src/minion_memory/core/values.py
   rust:
@@ -4510,6 +4511,7 @@ rows:
   scenarios:
   - core.serialization.canonical-bytes-and-content-hash
   - core.identity.same-version-different-content-conflicts
+  - core.serialization.raw-content-hash
   python:
     location: minion-memory-python/src/minion_memory/core/values.py
   rust:
