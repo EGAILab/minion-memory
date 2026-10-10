@@ -2,7 +2,7 @@ scenario_format: 1
 id: core.scope.value-shape
 family: core
 layer: '02'
-status: DRAFT
+status: ACTIVE
 title: A MemoryScope is a resolved single-valued facet map or explicitly unresolved; equality is exact
 description: SCOPE-001/002 Layer 02 value; Owner G-056..G-064 (reference/governance/2026-10-11-owner-wp02s-memoryscope.md).
 requirements:
