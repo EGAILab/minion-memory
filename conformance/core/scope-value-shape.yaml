@@ -1,0 +1,218 @@
+scenario_format: 1
+id: core.scope.value-shape
+family: core
+layer: '02'
+status: DRAFT
+title: A MemoryScope is a resolved single-valued facet map or explicitly unresolved; equality is exact
+description: SCOPE-001/002 Layer 02 value; Owner G-056..G-063 (reference/governance/2026-10-11-owner-wp02s-memoryscope.md).
+requirements:
+- SCOPE-001
+- SCOPE-002
+given: {}
+when:
+- validate_scope:
+    case: resolved scope with two facets
+    scope:
+      scope_state: resolved
+      facets:
+        agent.principal: u-1
+        agent.session: s-1
+- validate_scope:
+    case: empty resolved map is explicitly global
+    scope:
+      scope_state: resolved
+      facets: {}
+- validate_scope:
+    case: unresolved scope
+    scope:
+      scope_state: unresolved
+- validate_scope:
+    case: well-formed unknown facet is preserved, not dropped
+    scope:
+      scope_state: resolved
+      facets:
+        agent.mood: calm
+- validate_scope:
+    case: learning facet is well formed (vocabulary deferred, G-062)
+    scope:
+      scope_state: resolved
+      facets:
+        learning.course: c-1
+- validate_scope:
+    case: unresolved carries no facets
+    scope:
+      scope_state: unresolved
+      facets: {}
+- validate_scope:
+    case: resolved without facets member
+    scope:
+      scope_state: resolved
+- validate_scope:
+    case: unknown scope_state
+    scope:
+      scope_state: partial
+      facets: {}
+- validate_scope:
+    case: extra member
+    scope:
+      scope_state: resolved
+      facets: {}
+      note: x
+- validate_scope:
+    case: facet name without profile
+    scope:
+      scope_state: resolved
+      facets:
+        session: s-1
+- validate_scope:
+    case: facet name with two dots
+    scope:
+      scope_state: resolved
+      facets:
+        agent.session.x: s-1
+- validate_scope:
+    case: facet name outside the token grammar
+    scope:
+      scope_state: resolved
+      facets:
+        Agent.session: s-1
+- validate_scope:
+    case: facet value outside the token grammar
+    scope:
+      scope_state: resolved
+      facets:
+        agent.session: Sess-1
+- validate_scope:
+    case: multi-valued facet is not part of the contract
+    scope:
+      scope_state: resolved
+      facets:
+        agent.workspace:
+        - w-1
+        - w-2
+- validate_scope:
+    case: numeric facet value
+    scope:
+      scope_state: resolved
+      facets:
+        agent.task: 5
+- validate_scope:
+    case: non-object scope
+    scope: agent.session=s-1
+- scopes_equal:
+    case: member order is irrelevant
+    a:
+      scope_state: resolved
+      facets:
+        agent.principal: u-1
+        agent.session: s-1
+    b:
+      facets:
+        agent.session: s-1
+        agent.principal: u-1
+      scope_state: resolved
+- scopes_equal:
+    case: an absent facet differs from a present one
+    a:
+      scope_state: resolved
+      facets:
+        agent.principal: u-1
+    b:
+      scope_state: resolved
+      facets:
+        agent.principal: u-1
+        agent.session: s-1
+- scopes_equal:
+    case: global is not unresolved
+    a:
+      scope_state: resolved
+      facets: {}
+    b:
+      scope_state: unresolved
+- scopes_equal:
+    case: two unresolved scopes are equal values
+    a:
+      scope_state: unresolved
+    b:
+      scope_state: unresolved
+- scopes_equal:
+    case: argument errors name the argument
+    a:
+      scope_state: resolved
+      facets: {}
+    b:
+      scope_state: resolved
+expect:
+  results:
+  - case: resolved scope with two facets
+    result:
+      scope_state: resolved
+      facets:
+        agent.principal: u-1
+        agent.session: s-1
+  - case: empty resolved map is explicitly global
+    result:
+      scope_state: resolved
+      facets: {}
+  - case: unresolved scope
+    result:
+      scope_state: unresolved
+  - case: well-formed unknown facet is preserved, not dropped
+    result:
+      scope_state: resolved
+      facets:
+        agent.mood: calm
+  - case: learning facet is well formed (vocabulary deferred, G-062)
+    result:
+      scope_state: resolved
+      facets:
+        learning.course: c-1
+  - case: unresolved carries no facets
+    error: scope.invalid
+    argument: scope
+  - case: resolved without facets member
+    error: scope.invalid
+    argument: scope
+  - case: unknown scope_state
+    error: scope.invalid
+    argument: scope
+  - case: extra member
+    error: scope.invalid
+    argument: scope
+  - case: facet name without profile
+    error: scope.invalid
+    argument: scope
+  - case: facet name with two dots
+    error: scope.invalid
+    argument: scope
+  - case: facet name outside the token grammar
+    error: scope.invalid
+    argument: scope
+  - case: facet value outside the token grammar
+    error: scope.invalid
+    argument: scope
+  - case: multi-valued facet is not part of the contract
+    error: scope.invalid
+    argument: scope
+  - case: numeric facet value
+    error: scope.invalid
+    argument: scope
+  - case: non-object scope
+    error: scope.invalid
+    argument: scope
+  - case: member order is irrelevant
+    result: true
+  - case: an absent facet differs from a present one
+    result: false
+  - case: global is not unresolved
+    result: false
+  - case: two unresolved scopes are equal values
+    result: true
+  - case: argument errors name the argument
+    error: scope.invalid
+    argument: b
+negative_controls:
+- treating unresolved as empty/global
+- dropping unknown facets on validation
+- accepting multi-valued facets
+- inferring hierarchy from dotted names

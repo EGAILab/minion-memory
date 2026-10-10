@@ -4222,7 +4222,8 @@ rows:
   spec: spec/scope.md#scope-001
   source_status: FROZEN
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.scope.value-shape
   python:
     location: null
   rust:
@@ -4244,7 +4245,8 @@ rows:
   spec: spec/scope.md#scope-002
   source_status: FROZEN
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.scope.value-shape
   python:
     location: null
   rust:
@@ -4264,7 +4266,8 @@ rows:
   spec: spec/scope.md#scope-003
   source_status: NORMATIVE
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.scope.applicability-matching
   python:
     location: null
   rust:
@@ -4283,7 +4286,8 @@ rows:
   spec: spec/scope.md#scope-004
   source_status: NORMATIVE
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.scope.agent-isolation-six-dimensions
   python:
     location: null
   rust:
@@ -4324,6 +4328,8 @@ rows:
   source_status: NORMATIVE
   disposition: adopted
   scenarios:
+  - core.scope.applicability-matching
+  - core.scope.agent-isolation-six-dimensions
   - agent.retrieval.scope-blocks-out-of-scope-similar-memory
   python:
     location: null
