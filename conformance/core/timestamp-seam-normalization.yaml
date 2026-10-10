@@ -1,0 +1,73 @@
+scenario_format: 1
+id: core.history.timestamp-seam-normalization
+family: core
+layer: '01'
+status: DRAFT
+title: Timestamps are normalized to RFC 3339 UTC with six fractional digits; lossy forms are rejected
+description: Owner G-022 and G-026. The accepted grammar is the shared contract's, not a host parser's.
+requirements:
+- HIST-004
+given: {}
+when:
+- normalize_timestamp:
+    case: canonical form unchanged
+    input: '2026-10-10T05:30:00.123456Z'
+- normalize_timestamp:
+    case: no fraction padded
+    input: '2026-10-10T05:30:00Z'
+- normalize_timestamp:
+    case: short fraction right-padded
+    input: '2026-10-10T05:30:00.5Z'
+- normalize_timestamp:
+    case: positive offset to UTC
+    input: '2026-10-10T16:30:00+11:00'
+- normalize_timestamp:
+    case: negative offset crosses the date
+    input: '2026-10-09T22:30:00.25-07:00'
+- normalize_timestamp:
+    case: offset crosses a leap day
+    input: '2028-03-01T03:00:00+05:00'
+- normalize_timestamp:
+    case: no timezone
+    input: '2026-10-10T05:30:00'
+- normalize_timestamp:
+    case: seven fractional digits
+    input: '2026-10-10T05:30:00.1234567Z'
+- normalize_timestamp:
+    case: leap second
+    input: '2026-12-31T23:59:60Z'
+- normalize_timestamp:
+    case: invalid calendar day
+    input: '2026-02-30T00:00:00Z'
+- normalize_timestamp:
+    case: space instead of T
+    input: '2026-10-10 05:30:00Z'
+expect:
+  results:
+  - case: canonical form unchanged
+    canonical: '2026-10-10T05:30:00.123456Z'
+  - case: no fraction padded
+    canonical: '2026-10-10T05:30:00.000000Z'
+  - case: short fraction right-padded
+    canonical: '2026-10-10T05:30:00.500000Z'
+  - case: positive offset to UTC
+    canonical: '2026-10-10T05:30:00.000000Z'
+  - case: negative offset crosses the date
+    canonical: '2026-10-10T05:30:00.250000Z'
+  - case: offset crosses a leap day
+    canonical: '2028-02-29T22:00:00.000000Z'
+  - case: no timezone
+    error: timestamp.invalid
+  - case: seven fractional digits
+    error: timestamp.invalid
+  - case: leap second
+    error: timestamp.invalid
+  - case: invalid calendar day
+    error: timestamp.invalid
+  - case: space instead of T
+    error: timestamp.invalid
+negative_controls:
+- accepting a timezone-less timestamp as local time
+- rounding or truncating a seventh fractional digit
+- preserving the input offset in the stored value
+- relying on a host parser that accepts ' ' for 'T' or ':60'

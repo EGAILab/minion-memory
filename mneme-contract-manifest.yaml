@@ -1233,7 +1233,8 @@ rows:
   spec: spec/core.md#core-001
   source_status: FROZEN
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.identity.stable-id-lexical-domain
   python:
     location: null
   rust:
@@ -1579,7 +1580,8 @@ rows:
   spec: spec/core.md#hist-004
   source_status: FROZEN
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.history.timestamp-seam-normalization
   python:
     location: null
   rust:
@@ -1587,6 +1589,7 @@ rows:
   evidence: []
   findings:
   - NF-015
+  - NF-025
 - id: HIST-005
   title: No global total order is assumed
   family: HIST
@@ -4489,6 +4492,7 @@ rows:
   evidence: []
   findings:
   - NF-022
+  - NF-024
 - id: SER-009
   title: Canonical bytes and content hash
   family: SER
@@ -4511,3 +4515,4 @@ rows:
   evidence: []
   findings:
   - NF-022
+  - NF-024

@@ -26,6 +26,10 @@ when:
     a: 1
     b: 2
 - compare_versions:
+    case: whole-number float spelling is the same edition (G-023)
+    a: 2.0
+    b: 2
+- compare_versions:
     case: invalid zero
     a: 0
     b: 1
@@ -38,7 +42,7 @@ when:
     a: 9007199254740992
     b: 1
 - compare_versions:
-    case: invalid float
+    case: invalid non-integral
     a: 1.5
     b: 1
 expect:
@@ -51,13 +55,15 @@ expect:
     result: greater
   - case: lower edition
     result: less
+  - case: whole-number float spelling is the same edition (G-023)
+    result: equal
   - case: invalid zero
     error: version.invalid
   - case: invalid negative
     error: version.invalid
   - case: invalid above safe bound
     error: version.invalid
-  - case: invalid float
+  - case: invalid non-integral
     error: version.invalid
 negative_controls:
 - lexical comparison ('10' < '9')

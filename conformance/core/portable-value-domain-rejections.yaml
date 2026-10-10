@@ -16,6 +16,15 @@ when:
     case: integer below the safe bound
     value_json: '{"v":-9007199254740992}'
 - canonicalize:
+    case: whole number above the bound in float spelling (G-025)
+    value_json: '{"v":9007199254740992.0}'
+- canonicalize:
+    case: whole number above the bound in exponent spelling (G-025)
+    value_json: '{"v":9.007199254740992e15}'
+- canonicalize:
+    case: large exponent value is integral (G-025)
+    value_json: '{"v":1e21}'
+- canonicalize:
     case: lone high surrogate
     value_json: '{"v":"\ud800"}'
 - canonicalize:
@@ -32,6 +41,12 @@ expect:
   - case: integer above the safe bound
     error: value.integer_out_of_range
   - case: integer below the safe bound
+    error: value.integer_out_of_range
+  - case: whole number above the bound in float spelling (G-025)
+    error: value.integer_out_of_range
+  - case: whole number above the bound in exponent spelling (G-025)
+    error: value.integer_out_of_range
+  - case: large exponent value is integral (G-025)
     error: value.integer_out_of_range
   - case: lone high surrogate
     error: value.lone_surrogate

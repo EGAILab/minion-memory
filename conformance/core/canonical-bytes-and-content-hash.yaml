@@ -15,11 +15,14 @@ when:
     case: integer at the safe bound
     value_json: '{"v":9007199254740991}'
 - canonicalize:
-    case: whole-number float
+    case: whole-number float is the integer value (one numeric kind, G-023)
     value_json: '{"v":1.0}'
 - canonicalize:
-    case: large float uses exponent form
-    value_json: '{"v":1e21}'
+    case: exponent spelling of a whole number is the same value
+    value_json: '{"v":1e0}'
+- canonicalize:
+    case: small exponent float uses shortest form
+    value_json: '{"v":1.5e-7}'
 - canonicalize:
     case: decimal float shortest form
     value_json: '{"v":0.1}'
@@ -40,12 +43,15 @@ expect:
   - case: integer at the safe bound
     canonical: '{"v":9007199254740991}'
     sha256: 210e9afd5b97d46616c53c7bc51eb7349d44183691bb0866ae2ef6a2b798823f
-  - case: whole-number float
+  - case: whole-number float is the integer value (one numeric kind, G-023)
     canonical: '{"v":1}'
     sha256: afbf9d0f3560b0fd7795e81c42a0a79ee6b6fc67e064f77826aee642cad28d91
-  - case: large float uses exponent form
-    canonical: '{"v":1e+21}'
-    sha256: 9e24d139b060bd89f98e510a1e34d48fade6aeb668a016e6fb2e296762a3aefa
+  - case: exponent spelling of a whole number is the same value
+    canonical: '{"v":1}'
+    sha256: afbf9d0f3560b0fd7795e81c42a0a79ee6b6fc67e064f77826aee642cad28d91
+  - case: small exponent float uses shortest form
+    canonical: '{"v":1.5e-7}'
+    sha256: 19483b7698a39932b8442d9bcf9baa0640a5d4f6ee91947e4383fdca21ed4236
   - case: decimal float shortest form
     canonical: '{"v":0.1}'
     sha256: 8ec9c466832e74cab1700269790aa649b06fb67989ecf3ac8e6e3c2e5cde2b3a
