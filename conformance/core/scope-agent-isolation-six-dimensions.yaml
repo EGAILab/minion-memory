@@ -1,0 +1,536 @@
+scenario_format: 1
+id: core.scope.agent-isolation-six-dimensions
+family: core
+layer: '02'
+status: DRAFT
+title: Agent scope isolation holds in each of the six dimensions and in composition
+description: SCOPE-004/006; Owner G-061, G-063; R04 §42 four dimensions are a subset; Owner G-056..G-063 (reference/governance/2026-10-11-owner-wp02s-memoryscope.md).
+requirements:
+- SCOPE-004
+- SCOPE-006
+given: {}
+when:
+- scope_visible:
+    case: 'principal: match'
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: p-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'principal: mismatch'
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: p-1x
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'principal: record omits it (unconstrained)'
+    record:
+      scope_state: resolved
+      facets:
+        agent.agent: a-1
+        agent.workspace: w-1
+        agent.conversation: c-1
+        agent.session: s-1
+        agent.task: t-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'principal: query omits it (never widens)'
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: p-1
+    query:
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'agent: match'
+    record:
+      scope_state: resolved
+      facets:
+        agent.agent: a-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'agent: mismatch'
+    record:
+      scope_state: resolved
+      facets:
+        agent.agent: a-1x
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'agent: record omits it (unconstrained)'
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: p-1
+        agent.workspace: w-1
+        agent.conversation: c-1
+        agent.session: s-1
+        agent.task: t-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'agent: query omits it (never widens)'
+    record:
+      scope_state: resolved
+      facets:
+        agent.agent: a-1
+    query:
+      agent.principal: p-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'workspace: match'
+    record:
+      scope_state: resolved
+      facets:
+        agent.workspace: w-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'workspace: mismatch'
+    record:
+      scope_state: resolved
+      facets:
+        agent.workspace: w-1x
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'workspace: record omits it (unconstrained)'
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: p-1
+        agent.agent: a-1
+        agent.conversation: c-1
+        agent.session: s-1
+        agent.task: t-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'workspace: query omits it (never widens)'
+    record:
+      scope_state: resolved
+      facets:
+        agent.workspace: w-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'conversation: match'
+    record:
+      scope_state: resolved
+      facets:
+        agent.conversation: c-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'conversation: mismatch'
+    record:
+      scope_state: resolved
+      facets:
+        agent.conversation: c-1x
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'conversation: record omits it (unconstrained)'
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: p-1
+        agent.agent: a-1
+        agent.workspace: w-1
+        agent.session: s-1
+        agent.task: t-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'conversation: query omits it (never widens)'
+    record:
+      scope_state: resolved
+      facets:
+        agent.conversation: c-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'session: match'
+    record:
+      scope_state: resolved
+      facets:
+        agent.session: s-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'session: mismatch'
+    record:
+      scope_state: resolved
+      facets:
+        agent.session: s-1x
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'session: record omits it (unconstrained)'
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: p-1
+        agent.agent: a-1
+        agent.workspace: w-1
+        agent.conversation: c-1
+        agent.task: t-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'session: query omits it (never widens)'
+    record:
+      scope_state: resolved
+      facets:
+        agent.session: s-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.task: t-1
+- scope_visible:
+    case: 'task: match'
+    record:
+      scope_state: resolved
+      facets:
+        agent.task: t-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'task: mismatch'
+    record:
+      scope_state: resolved
+      facets:
+        agent.task: t-1x
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'task: record omits it (unconstrained)'
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: p-1
+        agent.agent: a-1
+        agent.workspace: w-1
+        agent.conversation: c-1
+        agent.session: s-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'task: query omits it (never widens)'
+    record:
+      scope_state: resolved
+      facets:
+        agent.task: t-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+- scope_visible:
+    case: 'composed: all six declared, only principal mismatched'
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: p-1x
+        agent.agent: a-1
+        agent.workspace: w-1
+        agent.conversation: c-1
+        agent.session: s-1
+        agent.task: t-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'composed: all six declared, only agent mismatched'
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: p-1
+        agent.agent: a-1x
+        agent.workspace: w-1
+        agent.conversation: c-1
+        agent.session: s-1
+        agent.task: t-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'composed: all six declared, only workspace mismatched'
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: p-1
+        agent.agent: a-1
+        agent.workspace: w-1x
+        agent.conversation: c-1
+        agent.session: s-1
+        agent.task: t-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'composed: all six declared, only conversation mismatched'
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: p-1
+        agent.agent: a-1
+        agent.workspace: w-1
+        agent.conversation: c-1x
+        agent.session: s-1
+        agent.task: t-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'composed: all six declared, only session mismatched'
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: p-1
+        agent.agent: a-1
+        agent.workspace: w-1
+        agent.conversation: c-1
+        agent.session: s-1x
+        agent.task: t-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'composed: all six declared, only task mismatched'
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: p-1
+        agent.agent: a-1
+        agent.workspace: w-1
+        agent.conversation: c-1
+        agent.session: s-1
+        agent.task: t-1x
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+- scope_visible:
+    case: 'composed: all six declared and matching'
+    record:
+      scope_state: resolved
+      facets:
+        agent.principal: p-1
+        agent.agent: a-1
+        agent.workspace: w-1
+        agent.conversation: c-1
+        agent.session: s-1
+        agent.task: t-1
+    query:
+      agent.principal: p-1
+      agent.agent: a-1
+      agent.workspace: w-1
+      agent.conversation: c-1
+      agent.session: s-1
+      agent.task: t-1
+expect:
+  results:
+  - case: 'principal: match'
+    result: true
+  - case: 'principal: mismatch'
+    result: false
+  - case: 'principal: record omits it (unconstrained)'
+    result: true
+  - case: 'principal: query omits it (never widens)'
+    result: false
+  - case: 'agent: match'
+    result: true
+  - case: 'agent: mismatch'
+    result: false
+  - case: 'agent: record omits it (unconstrained)'
+    result: true
+  - case: 'agent: query omits it (never widens)'
+    result: false
+  - case: 'workspace: match'
+    result: true
+  - case: 'workspace: mismatch'
+    result: false
+  - case: 'workspace: record omits it (unconstrained)'
+    result: true
+  - case: 'workspace: query omits it (never widens)'
+    result: false
+  - case: 'conversation: match'
+    result: true
+  - case: 'conversation: mismatch'
+    result: false
+  - case: 'conversation: record omits it (unconstrained)'
+    result: true
+  - case: 'conversation: query omits it (never widens)'
+    result: false
+  - case: 'session: match'
+    result: true
+  - case: 'session: mismatch'
+    result: false
+  - case: 'session: record omits it (unconstrained)'
+    result: true
+  - case: 'session: query omits it (never widens)'
+    result: false
+  - case: 'task: match'
+    result: true
+  - case: 'task: mismatch'
+    result: false
+  - case: 'task: record omits it (unconstrained)'
+    result: true
+  - case: 'task: query omits it (never widens)'
+    result: false
+  - case: 'composed: all six declared, only principal mismatched'
+    result: false
+  - case: 'composed: all six declared, only agent mismatched'
+    result: false
+  - case: 'composed: all six declared, only workspace mismatched'
+    result: false
+  - case: 'composed: all six declared, only conversation mismatched'
+    result: false
+  - case: 'composed: all six declared, only session mismatched'
+    result: false
+  - case: 'composed: all six declared, only task mismatched'
+    result: false
+  - case: 'composed: all six declared and matching'
+    result: true
+negative_controls:
+- testing only principal/agent/project/conversation
+- session or task ignored by the matcher
+- any single mismatched facet tolerated
