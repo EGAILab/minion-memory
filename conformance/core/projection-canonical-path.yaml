@@ -4,7 +4,7 @@ family: core
 layer: '03'
 status: DRAFT
 title: One deterministic, fail-safe projection from admitted records; atomic failure names the position
-description: PROJ-001, HIST-001; Owner G-066..G-070 (reference/governance/2026-10-11-owner-layer03-start.md).
+description: PROJ-001, HIST-001; Owner G-066..G-074 (reference/governance/2026-10-11-owner-layer03-start.md).
 requirements:
 - PROJ-001
 - HIST-001
@@ -424,7 +424,7 @@ when:
           recorded_at: '2026-10-11T08:00:00Z'
     relations: []
 - project_history:
-    case: duplicate decoded record_id is corrupt history
+    case: identical repeated record coalesces at its first position (G-073)
     reader:
       profile: learning
       recognized:
@@ -458,6 +458,115 @@ when:
           record_id: o-1
           profile: learning
           record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+    relations: []
+- project_history:
+    case: same record_id with different content fails at the later position (G-073)
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: correction
+        schema_version: 1
+    stream:
+      store_id: store-1
+      entries:
+      - position: 1
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 2
+        record:
+          record_id: e-1
+          profile: learning
+          record_type: evaluation
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 3
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T09:00:00Z'
+    relations: []
+- project_history:
+    case: equal content under different ids is never deduplicated (G-073)
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: correction
+        schema_version: 1
+    stream:
+      store_id: store-1
+      entries:
+      - position: 1
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 2
+        record:
+          record_id: o-2
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+    relations: []
+- project_history:
+    case: a conflicting reuse is an entry error and precedes later entries
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: correction
+        schema_version: 1
+    stream:
+      store_id: store-1
+      entries:
+      - position: 1
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 2
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: evaluation
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 3
+        record:
+          record_id: u-1
+          profile: learning
+          record_type: mystery
           schema_version: 1
           compatibility: required
           recorded_at: '2026-10-11T08:00:00Z'
@@ -506,7 +615,9 @@ expect:
         recorded_at: '2026-10-11T08:00:00.000000Z'
       skipped: []
       excluded: []
+      duplicates: []
       relations: []
+      unresolved_derivations: []
       current:
       - o-1
       - e-1
@@ -520,7 +631,9 @@ expect:
       records: []
       skipped: []
       excluded: []
+      duplicates: []
       relations: []
+      unresolved_derivations: []
       current: []
       interpretations: []
   - case: excluded and skipped records advance the boundary but are not history (G-050, G-051)
@@ -545,7 +658,9 @@ expect:
       - 3
       excluded:
       - 2
+      duplicates: []
       relations: []
+      unresolved_derivations: []
       current:
       - o-1
       - e-1
@@ -576,7 +691,9 @@ expect:
         recorded_at: '2026-10-11T08:00:00.000000Z'
       skipped: []
       excluded: []
+      duplicates: []
       relations: []
+      unresolved_derivations: []
       current:
       - o-1
       - e-1
@@ -610,10 +727,70 @@ expect:
   - case: store_id outside the stable-ID domain
     error: history.stream_invalid
     argument: stream
-  - case: duplicate decoded record_id is corrupt history
+  - case: identical repeated record coalesces at its first position (G-073)
+    projection:
+      through:
+        store_id: store-1
+        position: 3
+      records:
+      - record_id: o-1
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00.000000Z'
+      - record_id: e-1
+        profile: learning
+        record_type: evaluation
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00.000000Z'
+      skipped: []
+      excluded: []
+      duplicates:
+      - position: 3
+        record_id: o-1
+      relations: []
+      unresolved_derivations: []
+      current:
+      - o-1
+      - e-1
+      interpretations: []
+  - case: same record_id with different content fails at the later position (G-073)
     error: history.duplicate_record_id
     argument: stream
     position: 3
+  - case: equal content under different ids is never deduplicated (G-073)
+    projection:
+      through:
+        store_id: store-1
+        position: 2
+      records:
+      - record_id: o-1
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00.000000Z'
+      - record_id: o-2
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00.000000Z'
+      skipped: []
+      excluded: []
+      duplicates: []
+      relations: []
+      unresolved_derivations: []
+      current:
+      - o-1
+      - o-2
+      interpretations: []
+  - case: a conflicting reuse is an entry error and precedes later entries
+    error: history.duplicate_record_id
+    argument: stream
+    position: 2
   - case: reader errors precede stream errors
     error: history.reader_invalid
     argument: reader
