@@ -1,0 +1,112 @@
+scenario_format: 1
+id: core.store.no-semantic-dedup
+family: core
+layer: '04'
+status: DRAFT
+title: Equal content under different record IDs and operations stays two canonical records
+description: HIST-008, PERS-006; Owner G-077..G-084 (reference/governance/2026-10-11-owner-layer04-start.md);
+  spec/persistence.md Layer 04. Each scenario starts with no stores; steps run in order against one fresh
+  backend.
+requirements:
+- HIST-008
+- PERS-006
+given: {}
+when:
+- create_store:
+    case: create store
+    store_id: store-1
+    clock:
+    - '2026-10-11T08:00:00Z'
+    - '2026-10-11T09:00:00Z'
+- commit_history:
+    case: first observation
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: d-1
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      payload:
+        answer: Paris
+- commit_history:
+    case: an identical observation later is new evidence, never merged
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: d-2
+    records:
+    - record_id: o-2
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      payload:
+        answer: Paris
+- store_tail:
+    case: both are canonical
+    store_id: store-1
+expect:
+  results:
+  - case: create store
+    result: created
+  - case: first observation
+    receipt:
+      store_id: store-1
+      operation:
+        source_namespace: app
+        source_operation_id: d-1
+      first_position: 1
+      last_position: 1
+      recorded_at: '2026-10-11T08:00:00Z'
+      records:
+      - record_id: o-1
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        payload:
+          answer: Paris
+        recorded_at: '2026-10-11T08:00:00Z'
+  - case: an identical observation later is new evidence, never merged
+    receipt:
+      store_id: store-1
+      operation:
+        source_namespace: app
+        source_operation_id: d-2
+      first_position: 2
+      last_position: 2
+      recorded_at: '2026-10-11T09:00:00Z'
+      records:
+      - record_id: o-2
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        payload:
+          answer: Paris
+        recorded_at: '2026-10-11T09:00:00Z'
+  - case: both are canonical
+    boundary:
+      store_id: store-1
+      position: 2
+negative_controls:
+- the store merges records with equal payloads
+- the store drops the later identical observation

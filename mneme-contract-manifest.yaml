@@ -1610,6 +1610,7 @@ rows:
   disposition: adopted
   scenarios:
   - core.history.boundary-local-cursor
+  - core.store.bounded-read
   python:
     location: minion-memory-python/src/minion_memory/core/history.py
   rust:
@@ -1684,6 +1685,9 @@ rows:
   disposition: adopted
   scenarios:
   - learning.history.similar-reviews-remain-distinct
+  - core.history.same-operation-retry-commits-once
+  - core.store.commit-strict-writer
+  - core.store.no-semantic-dedup
   python:
     location: null
   rust:
@@ -3878,7 +3882,9 @@ rows:
   spec: spec/persistence.md#pers-005
   source_status: NORMATIVE
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.store.commit-gapless-positions
+  - core.store.commit-strict-writer
   python:
     location: null
   rust:
@@ -3900,6 +3906,7 @@ rows:
   disposition: adopted
   scenarios:
   - core.history.same-operation-retry-commits-once
+  - core.store.no-semantic-dedup
   python:
     location: null
   rust:
@@ -3922,7 +3929,9 @@ rows:
   spec: spec/persistence.md#pers-007
   source_status: NORMATIVE
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.store.bounded-read
+  - core.store.commit-gapless-positions
   python:
     location: null
   rust:
@@ -3942,7 +3951,9 @@ rows:
   spec: spec/persistence.md#pers-008
   source_status: NORMATIVE
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.store.bounded-read
+  - core.store.commit-gapless-positions
   python:
     location: null
   rust:
@@ -4020,7 +4031,9 @@ rows:
   spec: spec/persistence.md#pers-012
   source_status: NORMATIVE
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.store.commit-gapless-positions
+  - core.store.commit-strict-writer
   python:
     location: null
   rust:
@@ -4059,7 +4072,9 @@ rows:
   spec: spec/persistence.md#pers-014
   source_status: NORMATIVE
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.store.commit-gapless-positions
+  - core.store.commit-strict-writer
   python:
     location: null
   rust:

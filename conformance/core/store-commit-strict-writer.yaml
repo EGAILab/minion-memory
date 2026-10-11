@@ -1,0 +1,342 @@
+scenario_format: 1
+id: core.store.commit-strict-writer
+family: core
+layer: '04'
+status: DRAFT
+title: Only records the writer fully recognizes can become canonical; record IDs are unique across the
+  store
+description: PERS-005, PERS-012, PERS-014, HIST-008; Owner G-077..G-084 (reference/governance/2026-10-11-owner-layer04-start.md);
+  spec/persistence.md Layer 04. Each scenario starts with no stores; steps run in order against one fresh
+  backend.
+requirements:
+- PERS-005
+- PERS-012
+- PERS-014
+- HIST-008
+given: {}
+when:
+- create_store:
+    case: create store
+    store_id: store-1
+    clock:
+    - '2026-10-11T08:00:00Z'
+    - '2026-10-11T09:00:00Z'
+- commit_history:
+    case: a draft carrying recorded_at is invalid; the store owns it (G-082)
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: v-1
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00Z'
+- commit_history:
+    case: a foreign-profile draft is not an acceptable write (excluded is a reader outcome)
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: v-2
+    records:
+    - record_id: o-1
+      profile: agent
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+- commit_history:
+    case: an unrecognized required type is rejected
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: v-3
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: mystery
+      schema_version: 1
+      compatibility: required
+- commit_history:
+    case: an unrecognized ignorable type is rejected too (skip is a reader outcome)
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: v-4
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: mystery
+      schema_version: 1
+      compatibility: ignorable
+- commit_history:
+    case: an unrecognized schema version is rejected
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: v-5
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 2
+      compatibility: required
+- commit_history:
+    case: an empty batch is invalid
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: v-6
+    records: []
+- commit_history:
+    case: a record_id repeated inside one batch is rejected
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: v-7
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+- commit_history:
+    case: an invalid writer is rejected
+    store_id: store-1
+    writer:
+      profile: learning
+    operation:
+      source_namespace: app
+      source_operation_id: v-8
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+- commit_history:
+    case: an invalid operation identity is rejected
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+- store_tail:
+    case: nothing was committed
+    store_id: store-1
+- commit_history:
+    case: a valid batch commits
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: v-9
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+- commit_history:
+    case: reusing a committed record_id under another operation is rejected even with identical content
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: v-10
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+- commit_history:
+    case: 'record IDs are unique across profiles: an agent writer cannot reuse o-1'
+    store_id: store-1
+    writer:
+      profile: agent
+      recognized:
+      - record_type: note
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: v-11
+    records:
+    - record_id: o-1
+      profile: agent
+      record_type: note
+      schema_version: 1
+      compatibility: required
+- commit_history:
+    case: an agent writer shares the store with its own profile explicit (PERS-014)
+    store_id: store-1
+    writer:
+      profile: agent
+      recognized:
+      - record_type: note
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: v-12
+    records:
+    - record_id: n-1
+      profile: agent
+      record_type: note
+      schema_version: 1
+      compatibility: required
+expect:
+  results:
+  - case: create store
+    result: created
+  - case: a draft carrying recorded_at is invalid; the store owns it (G-082)
+    error: history.envelope_invalid
+    argument: records
+  - case: a foreign-profile draft is not an acceptable write (excluded is a reader outcome)
+    error: persistence.record_unrecognized
+    argument: records
+  - case: an unrecognized required type is rejected
+    error: persistence.record_unrecognized
+    argument: records
+  - case: an unrecognized ignorable type is rejected too (skip is a reader outcome)
+    error: persistence.record_unrecognized
+    argument: records
+  - case: an unrecognized schema version is rejected
+    error: persistence.record_unrecognized
+    argument: records
+  - case: an empty batch is invalid
+    error: persistence.batch_invalid
+    argument: records
+  - case: a record_id repeated inside one batch is rejected
+    error: history.duplicate_record_id
+    argument: records
+  - case: an invalid writer is rejected
+    error: history.reader_invalid
+    argument: writer
+  - case: an invalid operation identity is rejected
+    error: operation_identity.invalid
+    argument: operation
+  - case: nothing was committed
+    boundary:
+      store_id: store-1
+      position: 0
+  - case: a valid batch commits
+    receipt:
+      store_id: store-1
+      operation:
+        source_namespace: app
+        source_operation_id: v-9
+      first_position: 1
+      last_position: 1
+      recorded_at: '2026-10-11T08:00:00Z'
+      records:
+      - record_id: o-1
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00Z'
+  - case: reusing a committed record_id under another operation is rejected even with identical content
+    error: history.duplicate_record_id
+    argument: records
+  - case: 'record IDs are unique across profiles: an agent writer cannot reuse o-1'
+    error: history.duplicate_record_id
+    argument: records
+  - case: an agent writer shares the store with its own profile explicit (PERS-014)
+    receipt:
+      store_id: store-1
+      operation:
+        source_namespace: app
+        source_operation_id: v-12
+      first_position: 2
+      last_position: 2
+      recorded_at: '2026-10-11T09:00:00Z'
+      records:
+      - record_id: n-1
+        profile: agent
+        record_type: note
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T09:00:00Z'
+negative_controls:
+- the store accepts records the writer would skip or exclude
+- the store stamps over a caller recorded_at
+- record IDs are unique only per profile
+- identical content under a new operation is treated as a retry

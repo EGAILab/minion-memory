@@ -1,0 +1,229 @@
+scenario_format: 1
+id: core.store.commit-gapless-positions
+family: core
+layer: '04'
+status: DRAFT
+title: A commit appends one consecutive position range with one store-stamped recorded_at; failed commits
+  consume nothing
+description: PERS-005, PERS-007, PERS-008, PERS-012, PERS-014; Owner G-077..G-084 (reference/governance/2026-10-11-owner-layer04-start.md);
+  spec/persistence.md Layer 04. Each scenario starts with no stores; steps run in order against one fresh
+  backend.
+requirements:
+- PERS-005
+- PERS-007
+- PERS-008
+- PERS-012
+- PERS-014
+given: {}
+when:
+- create_store:
+    case: create an empty store with a fixed clock
+    store_id: store-1
+    clock:
+    - '2026-10-11T08:00:00Z'
+    - '2026-10-11T09:00:00Z'
+    - '2026-10-11T10:00:00Z'
+- store_tail:
+    case: an empty store has tail position 0
+    store_id: store-1
+- commit_history:
+    case: a two-record batch takes positions 1-2 in draft order and one clock instant
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: c-1
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+    - record_id: e-1
+      profile: learning
+      record_type: evaluation
+      schema_version: 1
+      compatibility: required
+- commit_history:
+    case: a rejected batch (one invalid draft) has no effect at all
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: c-2
+    records:
+    - record_id: o-2
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+    - record_id: BAD
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+- store_tail:
+    case: the rejected batch consumed no position
+    store_id: store-1
+- commit_history:
+    case: the next commit takes position 3 and the next clock instant; the rejected one consumed none
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: c-3
+    records:
+    - record_id: o-2
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+- read_history:
+    case: records keep their profile, type and stamped recorded_at
+    store_id: store-1
+    since:
+      store_id: store-1
+      position: 0
+    limit: 10
+- create_store:
+    case: creating an existing store fails
+    store_id: store-1
+    clock:
+    - '2026-10-11T08:00:00Z'
+- store_tail:
+    case: an unknown store fails
+    store_id: store-9
+- commit_history:
+    case: committing to an unknown store fails
+    store_id: store-9
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: c-4
+    records:
+    - record_id: o-9
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+expect:
+  results:
+  - case: create an empty store with a fixed clock
+    result: created
+  - case: an empty store has tail position 0
+    boundary:
+      store_id: store-1
+      position: 0
+  - case: a two-record batch takes positions 1-2 in draft order and one clock instant
+    receipt:
+      store_id: store-1
+      operation:
+        source_namespace: app
+        source_operation_id: c-1
+      first_position: 1
+      last_position: 2
+      recorded_at: '2026-10-11T08:00:00Z'
+      records:
+      - record_id: o-1
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00Z'
+      - record_id: e-1
+        profile: learning
+        record_type: evaluation
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00Z'
+  - case: a rejected batch (one invalid draft) has no effect at all
+    error: id.invalid
+    argument: records
+  - case: the rejected batch consumed no position
+    boundary:
+      store_id: store-1
+      position: 2
+  - case: the next commit takes position 3 and the next clock instant; the rejected one consumed none
+    receipt:
+      store_id: store-1
+      operation:
+        source_namespace: app
+        source_operation_id: c-3
+      first_position: 3
+      last_position: 3
+      recorded_at: '2026-10-11T09:00:00Z'
+      records:
+      - record_id: o-2
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T09:00:00Z'
+  - case: records keep their profile, type and stamped recorded_at
+    page:
+      entries:
+      - position: 1
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 2
+        record:
+          record_id: e-1
+          profile: learning
+          record_type: evaluation
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 3
+        record:
+          record_id: o-2
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T09:00:00Z'
+      through:
+        store_id: store-1
+        position: 3
+      tail:
+        store_id: store-1
+        position: 3
+  - case: creating an existing store fails
+    error: persistence.store_exists
+  - case: an unknown store fails
+    error: persistence.store_unknown
+  - case: committing to an unknown store fails
+    error: persistence.store_unknown
+negative_controls:
+- a failed commit consumes a position or a clock instant
+- positions follow wall-clock order instead of commit order
+- records of one batch get different recorded_at values
+- the store reassigns or reuses positions

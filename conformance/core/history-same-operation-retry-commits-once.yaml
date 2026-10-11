@@ -1,21 +1,259 @@
 scenario_format: 1
 id: core.history.same-operation-retry-commits-once
 family: core
-layer: "04"
-status: PLACEHOLDER
+layer: '04'
+status: DRAFT
 title: Retrying the same durable operation identity commits one historical record
-description: >
-  Pins CORE-012 and PERS-006 (R04 §32, §40; IAA A18; R05 §6, §14). Identity domain and the
-  conflicting-retry outcome are open (NF-014).
-requirements: [CORE-012, PERS-006]
-given:
-  history: TO_BE_DEFINED_IN_LAYER_04
+description: CORE-012, PERS-006, HIST-008; Owner G-077..G-084 (reference/governance/2026-10-11-owner-layer04-start.md);
+  spec/persistence.md Layer 04. Each scenario starts with no stores; steps run in order against one fresh
+  backend.
+requirements:
+- CORE-012
+- PERS-006
+- HIST-008
+given: {}
 when:
-  - commit: TO_BE_DEFINED_IN_LAYER_04
-  - commit_retry_same_operation: TO_BE_DEFINED_IN_LAYER_04
+- create_store:
+    case: create store
+    store_id: store-1
+    clock:
+    - '2026-10-11T08:00:00Z'
+    - '2026-10-11T09:00:00Z'
+- commit_history:
+    case: first commit
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: r-1
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+    - record_id: e-1
+      profile: learning
+      record_type: evaluation
+      schema_version: 1
+      compatibility: required
+- commit_history:
+    case: an identical retry returns the original receipt, original recorded_at included
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: r-1
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+    - record_id: e-1
+      profile: learning
+      record_type: evaluation
+      schema_version: 1
+      compatibility: required
+- commit_history:
+    case: the retry is compared after normalization; a different writer schema is not part of the mutation
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: attempt
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: r-1
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+    - record_id: e-1
+      profile: learning
+      record_type: evaluation
+      schema_version: 1
+      compatibility: required
+- commit_history:
+    case: a different mutation under the same operation is a visible conflict (G-013)
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: r-1
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+- commit_history:
+    case: reordered drafts are a different mutation
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: r-1
+    records:
+    - record_id: e-1
+      profile: learning
+      record_type: evaluation
+      schema_version: 1
+      compatibility: required
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+- commit_history:
+    case: the same source_operation_id in another namespace is another operation
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: other
+      source_operation_id: r-1
+    records:
+    - record_id: o-2
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+- store_tail:
+    case: retries consumed no positions and no clock instants
+    store_id: store-1
 expect:
-  committed_records: TO_BE_DEFINED_IN_LAYER_04
-  retry_result: TO_BE_DEFINED_IN_LAYER_04
+  results:
+  - case: create store
+    result: created
+  - case: first commit
+    receipt:
+      store_id: store-1
+      operation:
+        source_namespace: app
+        source_operation_id: r-1
+      first_position: 1
+      last_position: 2
+      recorded_at: '2026-10-11T08:00:00Z'
+      records:
+      - record_id: o-1
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00Z'
+      - record_id: e-1
+        profile: learning
+        record_type: evaluation
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00Z'
+  - case: an identical retry returns the original receipt, original recorded_at included
+    receipt:
+      store_id: store-1
+      operation:
+        source_namespace: app
+        source_operation_id: r-1
+      first_position: 1
+      last_position: 2
+      recorded_at: '2026-10-11T08:00:00Z'
+      records:
+      - record_id: o-1
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00Z'
+      - record_id: e-1
+        profile: learning
+        record_type: evaluation
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00Z'
+  - case: the retry is compared after normalization; a different writer schema is not part of the mutation
+    receipt:
+      store_id: store-1
+      operation:
+        source_namespace: app
+        source_operation_id: r-1
+      first_position: 1
+      last_position: 2
+      recorded_at: '2026-10-11T08:00:00Z'
+      records:
+      - record_id: o-1
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00Z'
+      - record_id: e-1
+        profile: learning
+        record_type: evaluation
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00Z'
+  - case: a different mutation under the same operation is a visible conflict (G-013)
+    error: persistence.operation_conflict
+    argument: operation
+  - case: reordered drafts are a different mutation
+    error: persistence.operation_conflict
+    argument: operation
+  - case: the same source_operation_id in another namespace is another operation
+    receipt:
+      store_id: store-1
+      operation:
+        source_namespace: other
+        source_operation_id: r-1
+      first_position: 3
+      last_position: 3
+      recorded_at: '2026-10-11T09:00:00Z'
+      records:
+      - record_id: o-2
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T09:00:00Z'
+  - case: retries consumed no positions and no clock instants
+    boundary:
+      store_id: store-1
+      position: 3
 negative_controls:
-  - retry appends a second record
-  - retry deduplicates by content similarity instead of operation identity
+- retry appends a second record
+- retry deduplicates by content similarity instead of operation identity
+- a retry returns a fresh recorded_at
+- a conflicting retry overwrites (last-write-wins)
