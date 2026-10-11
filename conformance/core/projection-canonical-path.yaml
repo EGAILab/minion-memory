@@ -2,7 +2,7 @@ scenario_format: 1
 id: core.projection.canonical-path
 family: core
 layer: '03'
-status: DRAFT
+status: ACTIVE
 title: One deterministic, fail-safe projection from admitted records; atomic failure names the position
 description: PROJ-001, HIST-001; Owner G-066..G-075 (reference/governance/2026-10-11-owner-layer03-start.md).
 requirements:

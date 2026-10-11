@@ -2,7 +2,7 @@ scenario_format: 1
 id: core.projection.lineage-current-heads
 family: core
 layer: '03'
-status: DRAFT
+status: ACTIVE
 title: Lineage resolves set-valued current heads without any ordering tie-break; invalid lineage is surfaced
 description: HIST-006, HIST-007, PROJ-002; Owner G-066..G-075 (reference/governance/2026-10-11-owner-layer03-start.md).
 requirements:

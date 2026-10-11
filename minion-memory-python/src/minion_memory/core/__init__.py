@@ -4,7 +4,8 @@
 Public API: value validation and canonical bytes (SER-008, SER-009), stable IDs and versions
 (CORE-001, CORE-002), revision comparison (CORE-003), operation identity (CORE-012) and timestamps
 (HIST-004); Layer 02 history envelope admission and HistoryBoundary (HIST-002, HIST-005, SER-005,
-SER-006); Layer 02 MemoryScope value and matching (SCOPE-001..006). Every rejection raises
+SER-006); Layer 02 MemoryScope value and matching (SCOPE-001..006); Layer 03
+HistoryProjector and lineage (PROJ-001, HIST-007). Every rejection raises
 `MnemeValidationError` with one stable code (G-031).
 """
 
@@ -24,6 +25,7 @@ from .identity import (
     validate_stable_id,
     validate_version,
 )
+from .projection import project_history
 from .scope import AGENT_FACETS, scope_visible, scopes_equal, validate_scope
 from .time import normalize_timestamp
 from .values import (
@@ -55,6 +57,7 @@ __all__ = [
     "history_boundaries_equal",
     "normalize_timestamp",
     "operation_identity",
+    "project_history",
     "raw_content_hash",
     "scope_visible",
     "scopes_equal",

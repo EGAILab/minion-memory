@@ -35,7 +35,7 @@ from minion_memory import core
 CORPUS = Path(__file__).resolve().parents[3] / "conformance"
 FAMILIES = ("core", "learning", "agent")
 # Highest layer the Python implementation covers; it moves only with an implementation candidate.
-IMPLEMENTED_LAYER = 2
+IMPLEMENTED_LAYER = 3
 
 
 def _scenario_files() -> list[Path]:
@@ -96,6 +96,9 @@ OPERATIONS: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] = {
     "validate_scope": lambda p: {"result": core.validate_scope(p["scope"])},
     "scopes_equal": lambda p: {"result": core.scopes_equal(p["a"], p["b"])},
     "scope_visible": lambda p: {"result": core.scope_visible(p["record"], p["query"])},
+    "project_history": lambda p: {
+        "projection": core.project_history(p["reader"], p["stream"], p["relations"])
+    },
 }
 
 
@@ -106,6 +109,8 @@ def _observe(operation: str, params: dict[str, Any]) -> dict[str, Any]:
         observed: dict[str, Any] = {"error": error.code}
         if error.argument is not None:
             observed["argument"] = error.argument
+        if error.position is not None:
+            observed["position"] = error.position
         return observed
 
 

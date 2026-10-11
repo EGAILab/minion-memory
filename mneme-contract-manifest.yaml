@@ -1635,7 +1635,7 @@ rows:
   scenarios:
   - core.projection.lineage-current-heads
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/core/projection.py
   rust:
     location: null
   evidence: []
@@ -1659,7 +1659,7 @@ rows:
   scenarios:
   - core.projection.lineage-current-heads
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/core/projection.py
   rust:
     location: null
   evidence: []
@@ -1749,7 +1749,7 @@ rows:
   scenarios:
   - core.projection.canonical-path
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/core/projection.py
   rust:
     location: null
   evidence: []
@@ -1770,7 +1770,7 @@ rows:
   scenarios:
   - core.projection.lineage-current-heads
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/core/projection.py
   rust:
     location: null
   evidence: []

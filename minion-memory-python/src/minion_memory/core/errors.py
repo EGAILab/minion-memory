@@ -7,17 +7,24 @@ class MnemeValidationError(ValueError):
     """A contract rejection carrying one stable error code (SER-008 stage table).
 
     `argument` names the primitive argument that failed when a primitive takes several (G-034:
-    arguments in declared order).
+    arguments in declared order). `position` is the store position of the history entry that failed
+    a projection (PROJ-001, G-070), and is absent otherwise.
     """
 
-    def __init__(self, code: str, detail: str = "", argument: str | None = None) -> None:
+    def __init__(
+        self, code: str, detail: str = "", argument: str | None = None, position: int | None = None
+    ) -> None:
         super().__init__(f"{code}: {detail}" if detail else code)
         self.code = code
         self.detail = detail
         self.argument = argument
+        self.position = position
 
     def for_argument(self, argument: str) -> MnemeValidationError:
-        return MnemeValidationError(self.code, self.detail, argument)
+        return MnemeValidationError(self.code, self.detail, argument, self.position)
+
+    def at_position(self, position: int) -> MnemeValidationError:
+        return MnemeValidationError(self.code, self.detail, self.argument, position)
 
 
 _LIMIT = 40
