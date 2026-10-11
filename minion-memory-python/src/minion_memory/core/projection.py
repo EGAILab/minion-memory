@@ -138,6 +138,16 @@ def _relation_value(relation: _Relation) -> dict[str, Value]:
     return out
 
 
+def _routing_identity(record: Value) -> str:
+    """G-070: the full normalized routing triple (profile, record_type, schema_version). Gate 1 has
+    validated all three before an unknown_required stop can occur."""
+    assert isinstance(record, dict)
+    profile, record_type, schema_version = (
+        record[name] for name in ("profile", "record_type", "schema_version")
+    )
+    return f"({profile}, {record_type}, {schema_version}) is required but not recognized"
+
+
 def project_history(reader: object, stream: object, relations: object) -> dict[str, Any]:
     """PROJ-001 (G-067, G-070): the one deterministic, fail-safe projection of a history stream."""
     values = validate_arguments({"reader": reader, "stream": stream, "relations": relations})
@@ -165,8 +175,10 @@ def project_history(reader: object, stream: object, relations: object) -> dict[s
             admission = _admit(parsed_reader, record)
         except MnemeValidationError as error:
             raise error.for_argument("stream").at_position(position) from None
-        except _UnknownRequired as stop:
-            raise MnemeValidationError("history.unknown_required", str(stop), position=position) from None
+        except _UnknownRequired:
+            raise MnemeValidationError(
+                "history.unknown_required", _routing_identity(record), position=position
+            ) from None
         if admission.outcome == "skip":
             skipped.append(position)
             continue

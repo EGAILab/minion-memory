@@ -79,12 +79,46 @@ def test_long_cycle_is_detected() -> None:
     )
 
 
-def test_unknown_required_carries_position_and_routing_identity() -> None:
+@pytest.mark.parametrize("profile", ["learning", "agent"])
+@pytest.mark.parametrize(
+    ("record_type", "schema_version"),
+    [("mystery", 4), ("attempt", 2)],
+    ids=["unknown-type", "unknown-schema-of-known-type"],
+)
+@pytest.mark.parametrize("seam", ["native", "json-text"])
+def test_unknown_required_carries_position_and_full_routing_identity(
+    profile: str, record_type: str, schema_version: int, seam: str
+) -> None:
+    """WP03-CR-006: the detail names (profile, record_type, schema_version); profiles differ."""
+    import json
+
+    reader = {"profile": profile, "recognized": [{"record_type": "attempt", "schema_version": 1}]}
+    s = {
+        "store_id": "s-1",
+        "entries": [
+            {"position": 3, "record": rec("a", profile=profile)},
+            {
+                "position": 7,
+                "record": rec("u", profile=profile, record_type=record_type, schema_version=schema_version),
+            },
+        ],
+    }
+    reader_arg: object = reader if seam == "native" else core.JsonText(json.dumps(reader))
+    stream_arg: object = s if seam == "native" else core.JsonText(json.dumps(s))
     with pytest.raises(core.MnemeValidationError) as raised:
-        core.project_history(READER, stream(rec("a"), rec("u", record_type="mystery", schema_version=4)), [])
+        core.project_history(reader_arg, stream_arg, [])
     error = raised.value
-    assert (error.code, error.argument, error.position) == ("history.unknown_required", None, 2)
-    assert "mystery" in error.detail and "4" in error.detail
+    assert (error.code, error.argument, error.position) == ("history.unknown_required", None, 7)
+    assert f"({profile}, {record_type}, {schema_version})" in error.detail
+
+
+def test_early_lineage_errors_still_precede_unknown_required() -> None:
+    bad = [{"from_record_id": "a", "relation": "replaces", "to_record_id": "u"}]
+    assert code(lambda: core.project_history(READER, stream(rec("u", record_type="mystery")), bad)) == (
+        "lineage.invalid",
+        "relations",
+        None,
+    )
 
 
 def test_json_text_seams() -> None:
