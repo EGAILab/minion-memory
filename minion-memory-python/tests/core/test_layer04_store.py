@@ -17,13 +17,18 @@ import pytest
 
 from minion_memory.core import JsonText, MnemeValidationError
 from minion_memory.persistence import SCHEMA_OPEN_LOCK_KEY, ClockDefectError, PostgresHistoryStore
-from minion_memory.persistence.postgres import (
-    _COLUMNS_SQL,
-    _CONSTRAINTS_SQL,
-    _DDL,
-    _V1_COLUMNS,
-    _V1_CONSTRAINTS,
-)
+from minion_memory.persistence._v1_catalog import V1_CATALOG
+from minion_memory.persistence.catalog import NAMESPACE_SQL, Catalog, fetch
+from minion_memory.persistence.postgres import DDL, bind
+
+
+def catalog(params: dict[str, str]) -> Catalog:
+    """The current schema's v1 catalog state (CE-04-01 structured fetch)."""
+    with psycopg.connect(autocommit=True, **params) as c:  # type: ignore[arg-type]
+        row = c.execute(NAMESPACE_SQL).fetchone()
+        assert row is not None
+        return fetch(c, row[0])
+
 
 MAX = 2**53 - 1
 T = "2026-10-11T08:00:00.000000Z"
@@ -315,8 +320,9 @@ def test_a_waiting_opener_sees_the_initialization_committed_while_it_waited() ->
             waiter.start()
             waiter.join(1.0)
             assert waiter.is_alive()  # blocked on the shared lock
-            for statement in _DDL:
-                holder.execute(statement)
+            schema = params["options"].split("search_path=")[1]
+            for statement in DDL:
+                holder.execute(bind(statement, schema))
             holder.execute("INSERT INTO mneme_schema (version) VALUES (1)")
             holder.commit()  # releases the lock with the schema committed
         waiter.join(30)
@@ -453,21 +459,18 @@ def test_open_rejects_a_malformed_v1_structure_and_changes_nothing(damage: str) 
         with psycopg.connect(**params) as c:  # type: ignore[arg-type]
             c.execute(damage)
             c.commit()
-            before = c.execute(_COLUMNS_SQL).fetchall(), c.execute(_CONSTRAINTS_SQL).fetchall()
+        before = catalog(params)
         assert (
             code(lambda: PostgresHistoryStore.open(params, CountingClock()))
             == "persistence.schema_incompatible"
         )
-        with psycopg.connect(**params) as c:  # type: ignore[arg-type]
-            assert (c.execute(_COLUMNS_SQL).fetchall(), c.execute(_CONSTRAINTS_SQL).fetchall()) == before
+        assert catalog(params) == before
 
 
 def test_a_fresh_v1_schema_matches_the_pinned_catalog_shape() -> None:
     with pgdb.fresh_backend() as params:
         PostgresHistoryStore.open(params, CountingClock()).close()
-        with psycopg.connect(**params) as c:  # type: ignore[arg-type]
-            assert tuple(tuple(r) for r in c.execute(_COLUMNS_SQL)) == _V1_COLUMNS
-            assert tuple(tuple(r) for r in c.execute(_CONSTRAINTS_SQL)) == _V1_CONSTRAINTS
+        assert catalog(params) == V1_CATALOG
 
 
 class GatedClock(CountingClock):

@@ -14,6 +14,7 @@ minion-memory/
 ├── conformance/                   ONE canonical corpus, consumed by both runners
 │   ├── schema/                    scenario envelope schema (support, not a family)
 │   ├── core/  learning/  agent/
+├── reference-backend/             shared PostgreSQL 14 v1 catalog pins, embedded and tested by both languages
 ├── minion-memory-python/          Claude-owned Python implementation (scaffold only)
 └── minion-memory-rust/            Codex-owned; ownership README only, Cargo workspace not created yet
 ```

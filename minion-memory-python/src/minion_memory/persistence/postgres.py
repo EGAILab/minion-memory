@@ -1,11 +1,17 @@
-"""The Layer 04 canonical history store on the PostgreSQL reference backend (WP-04; Owner G-077..G-087;
+"""The Layer 04 canonical history store on the PostgreSQL reference backend (WP-04; Owner G-077..G-092;
 `spec/persistence.md`, "Layer 04 canonical history store contract").
 
 Validation (commit steps 1-8, read steps 1-4) happens before any database work and has no effect.
 Commit steps 9-13 run in one transaction that first locks the store row: that lock is the store's
 single serialization boundary (G-084). Reads use one REPEATABLE READ READ ONLY snapshot (WP04-CR-004).
 Opening runs in an explicit READ COMMITTED transaction whose first statement takes the shared
-schema-open advisory lock (WP04-CR-007).
+schema-open advisory lock (WP04-CR-007), then checks the database environment (G-090, G-091) and
+initializes, or compares an existing schema with the v1 catalog contract (G-089; `catalog.py`).
+
+Every SQL text names catalog relations, types, functions and operators through `pg_catalog`, and the
+four tables through the namespace open resolved: no user-defined or temporary object can stand in
+for a built-in, whatever the search path (CE-04-01). The handle's connection is private: open
+creates it from connection parameters, and the store creates no temporary objects.
 """
 
 from __future__ import annotations
@@ -16,7 +22,7 @@ from contextlib import contextmanager
 from typing import Any
 
 import psycopg
-from psycopg import IsolationLevel
+from psycopg import IsolationLevel, sql
 from psycopg.conninfo import make_conninfo
 
 from ..core.errors import MnemeValidationError, describe
@@ -24,86 +30,68 @@ from ..core.history import _admit, _boundary_rule, _reader_rule, _UnknownRequire
 from ..core.identity import _operation_rule, _stable_id_rule
 from ..core.time import _timestamp_rule
 from ..core.values import SAFE_INTEGER_MAX, Value, canonical_bytes, decode_json, validate_arguments
+from ._v1_catalog import V1_CATALOG
+from .catalog import ENVIRONMENT_SQL, NAMESPACE_SQL, environment_mismatch, fetch, mismatch
 
 SCHEMA_VERSION = 1
 # First 8 bytes of SHA-256("mneme.schema.open.v1") as a big-endian signed 64-bit integer (CR-007).
 SCHEMA_OPEN_LOCK_KEY = -4695452043516644990
 
-_TABLES = ("mneme_operation", "mneme_record", "mneme_schema", "mneme_store")
-# The catalog shape of schema version 1 created by `_DDL` (WP04-CR-008): per table, its columns in
-# order as (name, type, NOT NULL, default) and its constraints as (kind, definition). Compared before
-# any query relies on a column, so a malformed shape is `persistence.schema_incompatible`, never a
-# leaked catalog error or a usable-looking handle. Constraint text is PostgreSQL's
-# `pg_get_constraintdef` on the reference backend (G-081); if a server release rendered it
-# differently, open fails visibly as incompatible rather than accepting an unverified shape.
-_V1_COLUMNS = (
-    ("mneme_operation", "store_id", "text", True, None),
-    ("mneme_operation", "source_namespace", "text", True, None),
-    ("mneme_operation", "source_operation_id", "bytea", True, None),
-    ("mneme_operation", "mutation", "bytea", True, None),
-    ("mneme_operation", "first_position", "bigint", True, None),
-    ("mneme_operation", "last_position", "bigint", True, None),
-    ("mneme_operation", "recorded_at", "text", True, None),
-    ("mneme_record", "store_id", "text", True, None),
-    ("mneme_record", "position", "bigint", True, None),
-    ("mneme_record", "record_id", "text", True, None),
-    ("mneme_record", "profile", "text", True, None),
-    ("mneme_record", "record_type", "text", True, None),
-    ("mneme_record", "schema_version", "bigint", True, None),
-    ("mneme_record", "envelope", "bytea", True, None),
-    ("mneme_schema", "singleton", "boolean", True, "true"),
-    ("mneme_schema", "version", "integer", True, None),
-    ("mneme_store", "store_id", "text", True, None),
-    ("mneme_store", "tail", "bigint", True, "0"),
+OPEN_LOCK = "SELECT pg_catalog.pg_advisory_xact_lock(%s::pg_catalog.int8)"
+# With no current schema there is nowhere to initialize: this unqualified statement surfaces the
+# engine's own error (3F000) and creates nothing.
+_NO_NAMESPACE = "CREATE TABLE mneme_schema (singleton pg_catalog.bool)"
+_EQ = "OPERATOR(pg_catalog.=)"
+_MAX = "9007199254740991"
+# The normative v1 DDL of `spec/persistence.md`, with every type and operator named through
+# `pg_catalog` and every table through the namespace. Its catalog result must equal V1_CATALOG,
+# which is checked before the initializing transaction commits (CE04-CP-002).
+DDL = (
+    "CREATE TABLE {ns}.mneme_schema (singleton pg_catalog.bool PRIMARY KEY DEFAULT true CHECK (singleton),"
+    " version pg_catalog.int4 NOT NULL)",
+    "CREATE TABLE {ns}.mneme_store (store_id pg_catalog.text PRIMARY KEY,"
+    " tail pg_catalog.int8 NOT NULL DEFAULT 0"
+    f" CHECK (tail OPERATOR(pg_catalog.>=) 0 AND tail OPERATOR(pg_catalog.<=) {_MAX}))",
+    "CREATE TABLE {ns}.mneme_record (store_id pg_catalog.text NOT NULL REFERENCES {ns}.mneme_store,"
+    " position pg_catalog.int8 NOT NULL"
+    f" CHECK (position OPERATOR(pg_catalog.>=) 1 AND position OPERATOR(pg_catalog.<=) {_MAX}),"
+    " record_id pg_catalog.text NOT NULL, profile pg_catalog.text NOT NULL,"
+    " record_type pg_catalog.text NOT NULL, schema_version pg_catalog.int8 NOT NULL,"
+    " envelope pg_catalog.bytea NOT NULL,"
+    " PRIMARY KEY (store_id, position), UNIQUE (store_id, record_id))",
+    "CREATE TABLE {ns}.mneme_operation (store_id pg_catalog.text NOT NULL REFERENCES {ns}.mneme_store,"
+    " source_namespace pg_catalog.text NOT NULL, source_operation_id pg_catalog.bytea NOT NULL,"
+    " mutation pg_catalog.bytea NOT NULL, first_position pg_catalog.int8 NOT NULL,"
+    " last_position pg_catalog.int8 NOT NULL, recorded_at pg_catalog.text NOT NULL,"
+    " PRIMARY KEY (store_id, source_namespace, source_operation_id))",
 )
-_V1_CONSTRAINTS = (
-    ("mneme_operation", "f", "FOREIGN KEY (store_id) REFERENCES mneme_store(store_id)"),
-    ("mneme_operation", "p", "PRIMARY KEY (store_id, source_namespace, source_operation_id)"),
-    ("mneme_record", "c", 'CHECK ((("position" >= 1) AND ("position" <= \'9007199254740991\'::bigint)))'),
-    ("mneme_record", "f", "FOREIGN KEY (store_id) REFERENCES mneme_store(store_id)"),
-    ("mneme_record", "p", 'PRIMARY KEY (store_id, "position")'),
-    ("mneme_record", "u", "UNIQUE (store_id, record_id)"),
-    ("mneme_schema", "c", "CHECK (singleton)"),
-    ("mneme_schema", "p", "PRIMARY KEY (singleton)"),
-    ("mneme_store", "c", "CHECK (((tail >= 0) AND (tail <= '9007199254740991'::bigint)))"),
-    ("mneme_store", "p", "PRIMARY KEY (store_id)"),
-)
-_COLUMNS_SQL = (
-    "SELECT c.relname, a.attname, format_type(a.atttypid, a.atttypmod), a.attnotnull,"
-    " pg_get_expr(d.adbin, d.adrelid) FROM pg_attribute a JOIN pg_class c ON c.oid = a.attrelid"
-    " LEFT JOIN pg_attrdef d ON d.adrelid = a.attrelid AND d.adnum = a.attnum"
-    " WHERE c.relnamespace = current_schema()::regnamespace AND c.relname LIKE 'mneme\\_%'"
-    " AND c.relkind = 'r' AND a.attnum > 0 AND NOT a.attisdropped ORDER BY 1, a.attnum"
-)
-_CONSTRAINTS_SQL = (
-    "SELECT c.relname, con.contype, pg_get_constraintdef(con.oid) FROM pg_constraint con"
-    " JOIN pg_class c ON c.oid = con.conrelid"
-    " WHERE c.relnamespace = current_schema()::regnamespace AND c.relname LIKE 'mneme\\_%'"
-    " ORDER BY 1, 2, 3"
-)
-_DDL = (
-    """CREATE TABLE mneme_schema (singleton boolean PRIMARY KEY DEFAULT true CHECK (singleton),
-                               version integer NOT NULL)""",
-    """CREATE TABLE mneme_store (store_id text PRIMARY KEY,
-                              tail bigint NOT NULL DEFAULT 0
-                                   CHECK (tail BETWEEN 0 AND 9007199254740991))""",
-    """CREATE TABLE mneme_record (store_id text NOT NULL REFERENCES mneme_store,
-                               position bigint NOT NULL
-                                    CHECK (position BETWEEN 1 AND 9007199254740991),
-                               record_id text NOT NULL,
-                               profile text NOT NULL, record_type text NOT NULL,
-                               schema_version bigint NOT NULL,
-                               envelope bytea NOT NULL,
-                               PRIMARY KEY (store_id, position),
-                               UNIQUE (store_id, record_id))""",
-    """CREATE TABLE mneme_operation (store_id text NOT NULL REFERENCES mneme_store,
-                                  source_namespace text NOT NULL,
-                                  source_operation_id bytea NOT NULL,
-                                  mutation bytea NOT NULL,
-                                  first_position bigint NOT NULL, last_position bigint NOT NULL,
-                                  recorded_at text NOT NULL,
-                                  PRIMARY KEY (store_id, source_namespace, source_operation_id))""",
-)
+_HEADER = "INSERT INTO {ns}.mneme_schema (version) VALUES (%s)"
+_VERSION = "SELECT version FROM {ns}.mneme_schema"
+# The operations' statements, bound to the namespace at open.
+STATEMENTS = {
+    "create": "INSERT INTO {ns}.mneme_store (store_id) VALUES (%s) ON CONFLICT DO NOTHING RETURNING store_id",
+    "tail": f"SELECT tail FROM {{ns}}.mneme_store WHERE store_id {_EQ} %s",
+    "lock": f"SELECT tail FROM {{ns}}.mneme_store WHERE store_id {_EQ} %s FOR UPDATE",
+    "prior": "SELECT mutation, first_position, last_position, recorded_at FROM {ns}.mneme_operation"
+    f" WHERE store_id {_EQ} %s AND source_namespace {_EQ} %s AND source_operation_id {_EQ} %s",
+    "range": f"SELECT envelope FROM {{ns}}.mneme_record WHERE store_id {_EQ} %s"
+    " AND position OPERATOR(pg_catalog.>=) %s AND position OPERATOR(pg_catalog.<=) %s ORDER BY position",
+    "taken": f"SELECT record_id FROM {{ns}}.mneme_record WHERE store_id {_EQ} %s AND record_id {_EQ} ANY (%s)"
+    " ORDER BY position LIMIT 1",
+    "record": "INSERT INTO {ns}.mneme_record (store_id, position, record_id, profile, record_type,"
+    " schema_version, envelope) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+    "operation": "INSERT INTO {ns}.mneme_operation (store_id, source_namespace, source_operation_id,"
+    " mutation, first_position, last_position, recorded_at) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+    "advance": f"UPDATE {{ns}}.mneme_store SET tail = %s WHERE store_id {_EQ} %s",
+    "page": f"SELECT position, envelope FROM {{ns}}.mneme_record WHERE store_id {_EQ} %s"
+    " AND position OPERATOR(pg_catalog.>) %s ORDER BY position LIMIT %s",
+}
+
+
+def bind(statement: str, namespace: str) -> sql.Composed:
+    """A statement with `{ns}` bound to the namespace as a quoted identifier."""
+    return sql.SQL(statement).format(ns=sql.Identifier(namespace))
+
 
 Clock = Callable[[str], object]
 """`clock(store_id)` yields a HIST-004 timestamp; the store stamps its canonical form (G-082)."""
@@ -183,12 +171,17 @@ def _receipt(
     }
 
 
+def _incompatible(reason: str) -> MnemeValidationError:
+    return MnemeValidationError("persistence.schema_incompatible", reason)
+
+
 class PostgresHistoryStore:
     """One backend handle on one PostgreSQL database holding any number of stores (G-079)."""
 
-    def __init__(self, connection: psycopg.Connection[Any], clock: Clock) -> None:
+    def __init__(self, connection: psycopg.Connection[Any], clock: Clock, namespace: str) -> None:
         self._connection = connection
         self._clock = clock
+        self._sql = {name: bind(text, namespace) for name, text in STATEMENTS.items()}
         # One connection serves the handle, so overlapping public calls on it are serialized over
         # their whole transaction lifecycle (isolation setup to commit or rollback); the store-row
         # lock then serializes across handles (G-084, WP04-CR-009).
@@ -198,39 +191,52 @@ class PostgresHistoryStore:
 
     @classmethod
     def open(cls, conninfo: str | Mapping[str, str], clock: Clock) -> PostgresHistoryStore:
-        """Open (and on an empty database, initialize) the shared schema version 1."""
+        """Open (and in an empty namespace, initialize) the shared schema version 1."""
         info = conninfo if isinstance(conninfo, str) else make_conninfo("", **conninfo)
         connection = psycopg.connect(info, autocommit=True)
         try:
+            connection.execute("SET client_encoding = 'UTF8'")  # never the ambient setting (G-090)
             connection.execute("SET synchronous_commit = on")
             connection.isolation_level = IsolationLevel.READ_COMMITTED  # explicit, never the default
             with connection.transaction():
-                connection.execute("SELECT pg_advisory_xact_lock(%s)", (SCHEMA_OPEN_LOCK_KEY,))
-                names = sorted(
-                    row[0]
-                    for row in connection.execute(
-                        "SELECT tablename FROM pg_tables"
-                        " WHERE schemaname = current_schema() AND tablename LIKE 'mneme\\_%'"
-                    )
-                )
-                if not names:
-                    for statement in _DDL:
-                        connection.execute(statement)
-                    connection.execute("INSERT INTO mneme_schema (version) VALUES (%s)", (SCHEMA_VERSION,))
-                elif (
-                    tuple(names) != _TABLES
-                    or tuple(tuple(row) for row in connection.execute(_COLUMNS_SQL)) != _V1_COLUMNS
-                    or tuple(tuple(row) for row in connection.execute(_CONSTRAINTS_SQL)) != _V1_CONSTRAINTS
-                    or connection.execute("SELECT array_agg(version) FROM mneme_schema").fetchone()
-                    != ([SCHEMA_VERSION],)
-                ):
-                    raise MnemeValidationError(
-                        "persistence.schema_incompatible", f"mneme tables {names} are not schema version 1"
-                    )
+                connection.execute(OPEN_LOCK, (SCHEMA_OPEN_LOCK_KEY,))
+                namespace = cls._open_locked(connection)
         except BaseException:
             connection.close()
             raise
-        return cls(connection, clock)
+        return cls(connection, clock, namespace)
+
+    @staticmethod
+    def _open_locked(connection: psycopg.Connection[Any]) -> str:
+        """Open steps 1-4 under the schema-open lock; returns the namespace."""
+        environment = connection.execute(ENVIRONMENT_SQL).fetchone()
+        assert environment is not None  # the current database always has a pg_database row
+        version_num, encoding, collate, ctype = environment
+        problem = environment_mismatch(int(version_num), encoding, collate, ctype)
+        if problem is not None:
+            raise _incompatible(problem)
+        current = connection.execute(NAMESPACE_SQL).fetchone()
+        if current is None:
+            connection.execute(_NO_NAMESPACE)
+        namespace_oid, namespace = current  # type: ignore[misc]
+        found = fetch(connection, namespace_oid)
+        if not found.relations:
+            # Initialize, pinning the settings that shape the result; the comparison below is the
+            # postcondition, checked before commit (CE04-CP-002).
+            connection.execute("SET LOCAL default_tablespace = ''")
+            connection.execute("SET LOCAL default_table_access_method = heap")
+            for statement in DDL:
+                connection.execute(bind(statement, namespace))
+            connection.execute(bind(_HEADER, namespace), (SCHEMA_VERSION,))
+            found = fetch(connection, namespace_oid)
+        problem = mismatch(found, V1_CATALOG)
+        if problem is not None:
+            raise _incompatible(
+                f"the mneme_ catalog of schema {namespace!r} differs from v1 in its {problem}"
+            )
+        if connection.execute(bind(_VERSION, namespace)).fetchall() != [(SCHEMA_VERSION,)]:
+            raise _incompatible(f"schema {namespace!r} does not hold one schema version 1 row")
+        return str(namespace)
 
     def close(self) -> None:
         self._connection.close()
@@ -255,10 +261,7 @@ class PostgresHistoryStore:
         """Create an empty store (tail 0); an existing ID is `persistence.store_exists`."""
         sid = _store_id(validate_arguments({"store_id": store_id})["store_id"])
         with self._transaction(IsolationLevel.READ_COMMITTED):
-            created = self._connection.execute(
-                "INSERT INTO mneme_store (store_id) VALUES (%s) ON CONFLICT DO NOTHING RETURNING store_id",
-                (sid,),
-            ).fetchone()
+            created = self._connection.execute(self._sql["create"], (sid,)).fetchone()
         if created is None:
             raise MnemeValidationError("persistence.store_exists", f"store {sid!r} exists", "store_id")
 
@@ -266,9 +269,7 @@ class PostgresHistoryStore:
         """The HistoryBoundary of the last committed record (position 0 for an empty store)."""
         sid = _store_id(validate_arguments({"store_id": store_id})["store_id"])
         with self._transaction(IsolationLevel.READ_COMMITTED, read_only=True):
-            row = self._connection.execute(
-                "SELECT tail FROM mneme_store WHERE store_id = %s", (sid,)
-            ).fetchone()
+            row = self._connection.execute(self._sql["tail"], (sid,)).fetchone()
         if row is None:
             raise MnemeValidationError("persistence.store_unknown", f"no store {sid!r}", "store_id")
         return {"store_id": sid, "position": row[0]}
@@ -296,16 +297,12 @@ class PostgresHistoryStore:
         db = self._connection
         with self._transaction(IsolationLevel.READ_COMMITTED):
             # Step 8, then the serialization boundary for steps 9-13 (G-084).
-            row = db.execute("SELECT tail FROM mneme_store WHERE store_id = %s FOR UPDATE", (sid,)).fetchone()
+            row = db.execute(self._sql["lock"], (sid,)).fetchone()
             if row is None:
                 raise MnemeValidationError("persistence.store_unknown", f"no store {sid!r}", "store_id")
             tail: int = row[0]
             # Step 9: idempotency (G-082, G-086).
-            prior = db.execute(
-                "SELECT mutation, first_position, last_position, recorded_at FROM mneme_operation"
-                " WHERE store_id = %s AND source_namespace = %s AND source_operation_id = %s",
-                (sid, namespace, key),
-            ).fetchone()
+            prior = db.execute(self._sql["prior"], (sid, namespace, key)).fetchone()
             if prior is not None:
                 if bytes(prior[0]) != mutation:
                     raise MnemeValidationError(
@@ -315,19 +312,11 @@ class PostgresHistoryStore:
                     )
                 committed = [
                     decode_json(bytes(r[0]))
-                    for r in db.execute(
-                        "SELECT envelope FROM mneme_record WHERE store_id = %s"
-                        " AND position BETWEEN %s AND %s ORDER BY position",
-                        (sid, prior[1], prior[2]),
-                    )
+                    for r in db.execute(self._sql["range"], (sid, prior[1], prior[2]))
                 ]
                 return _receipt(sid, namespace, operation_id, prior[1], prior[2], prior[3], committed)
             # Step 10: record IDs are unique across the store (G-083).
-            taken = db.execute(
-                "SELECT record_id FROM mneme_record WHERE store_id = %s AND record_id = ANY(%s)"
-                " ORDER BY position LIMIT 1",
-                (sid, [draft["record_id"] for draft in drafts]),
-            ).fetchone()
+            taken = db.execute(self._sql["taken"], (sid, [draft["record_id"] for draft in drafts])).fetchone()
             if taken is not None:
                 raise MnemeValidationError(
                     "history.duplicate_record_id", f"record_id {taken[0]!r} is already committed", "records"
@@ -348,8 +337,7 @@ class PostgresHistoryStore:
             first = tail + 1
             with db.cursor() as cursor:
                 cursor.executemany(
-                    "INSERT INTO mneme_record (store_id, position, record_id, profile, record_type,"
-                    " schema_version, envelope) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                    self._sql["record"],
                     [
                         (
                             sid,
@@ -364,12 +352,8 @@ class PostgresHistoryStore:
                     ],
                 )
             last = tail + len(envelopes)
-            db.execute(
-                "INSERT INTO mneme_operation (store_id, source_namespace, source_operation_id, mutation,"
-                " first_position, last_position, recorded_at) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                (sid, namespace, key, mutation, first, last, recorded_at),
-            )
-            db.execute("UPDATE mneme_store SET tail = %s WHERE store_id = %s", (last, sid))
+            db.execute(self._sql["operation"], (sid, namespace, key, mutation, first, last, recorded_at))
+            db.execute(self._sql["advance"], (last, sid))
         # The transaction has committed durably (synchronous_commit = on): the durability barrier.
         stored: list[Value] = [decode_json(canonical_bytes(e)) for e in envelopes]
         return _receipt(sid, namespace, operation_id, first, last, recorded_at, stored)
@@ -385,7 +369,7 @@ class PostgresHistoryStore:
         count = _limit(values["limit"])
         db = self._connection
         with self._transaction(IsolationLevel.REPEATABLE_READ, read_only=True):
-            row = db.execute("SELECT tail FROM mneme_store WHERE store_id = %s", (sid,)).fetchone()
+            row = db.execute(self._sql["tail"], (sid,)).fetchone()
             if row is None:
                 raise MnemeValidationError("persistence.store_unknown", f"no store {sid!r}", "store_id")
             tail: int = row[0]
@@ -401,11 +385,7 @@ class PostgresHistoryStore:
                 )
             entries: list[Value] = [
                 {"position": position, "record": decode_json(bytes(envelope))}
-                for position, envelope in db.execute(
-                    "SELECT position, envelope FROM mneme_record WHERE store_id = %s AND position > %s"
-                    " ORDER BY position LIMIT %s",
-                    (sid, since_position, count),
-                )
+                for position, envelope in db.execute(self._sql["page"], (sid, since_position, count))
             ]
         through = entries[-1]["position"] if entries else since_position  # type: ignore[index,call-overload]
         return {
