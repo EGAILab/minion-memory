@@ -1520,7 +1520,8 @@ rows:
   spec: spec/core.md#hist-001
   source_status: NORMATIVE
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.projection.canonical-path
   python:
     location: null
   rust:
@@ -1631,7 +1632,8 @@ rows:
   spec: spec/core.md#hist-006
   source_status: FROZEN
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.projection.lineage-current-heads
   python:
     location: null
   rust:
@@ -1654,7 +1656,8 @@ rows:
   spec: spec/core.md#hist-007
   source_status: FROZEN
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.projection.lineage-current-heads
   python:
     location: null
   rust:
@@ -1743,7 +1746,8 @@ rows:
   spec: spec/core.md#proj-001
   source_status: NORMATIVE
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.projection.canonical-path
   python:
     location: null
   rust:
@@ -1763,7 +1767,8 @@ rows:
   spec: spec/core.md#proj-002
   source_status: GUARDRAIL
   disposition: adopted
-  scenarios: []
+  scenarios:
+  - core.projection.lineage-current-heads
   python:
     location: null
   rust:

@@ -1,0 +1,624 @@
+scenario_format: 1
+id: core.projection.canonical-path
+family: core
+layer: '03'
+status: DRAFT
+title: One deterministic, fail-safe projection from admitted records; atomic failure names the position
+description: PROJ-001, HIST-001; Owner G-066..G-070 (reference/governance/2026-10-11-owner-layer03-start.md).
+requirements:
+- PROJ-001
+- HIST-001
+given: {}
+when:
+- project_history:
+    case: three decoded records
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: correction
+        schema_version: 1
+    stream:
+      store_id: store-1
+      entries:
+      - position: 1
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 2
+        record:
+          record_id: e-1
+          profile: learning
+          record_type: evaluation
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 3
+        record:
+          record_id: e-2
+          profile: learning
+          record_type: evaluation
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+    relations: []
+- project_history:
+    case: 'empty stream: boundary before the first record (G-054)'
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: correction
+        schema_version: 1
+    stream:
+      store_id: store-1
+      entries: []
+    relations: []
+- project_history:
+    case: excluded and skipped records advance the boundary but are not history (G-050, G-051)
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: correction
+        schema_version: 1
+    stream:
+      store_id: store-1
+      entries:
+      - position: 1
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 2
+        record:
+          record_id: x-1
+          profile: agent
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 3
+        record:
+          record_id: p-1
+          profile: learning
+          record_type: ping
+          schema_version: 1
+          compatibility: ignorable
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 4
+        record:
+          record_id: e-1
+          profile: learning
+          record_type: evaluation
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+    relations: []
+- project_history:
+    case: position gaps are allowed; positions are a store-local cursor
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: correction
+        schema_version: 1
+    stream:
+      store_id: store-1
+      entries:
+      - position: 2
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 5
+        record:
+          record_id: e-1
+          profile: learning
+          record_type: evaluation
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 9
+        record:
+          record_id: e-2
+          profile: learning
+          record_type: evaluation
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+    relations: []
+- project_history:
+    case: unknown required record fails the whole projection atomically (G-070)
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: correction
+        schema_version: 1
+    stream:
+      store_id: store-1
+      entries:
+      - position: 1
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 2
+        record:
+          record_id: e-1
+          profile: learning
+          record_type: evaluation
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 3
+        record:
+          record_id: u-1
+          profile: learning
+          record_type: mystery
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 4
+        record:
+          record_id: e-2
+          profile: learning
+          record_type: evaluation
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+    relations: []
+- project_history:
+    case: invalid envelope fails the whole projection, naming its position
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: correction
+        schema_version: 1
+    stream:
+      store_id: store-1
+      entries:
+      - position: 1
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 2
+        record:
+          record_id: BAD
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 3
+        record:
+          record_id: e-1
+          profile: learning
+          record_type: evaluation
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+    relations: []
+- project_history:
+    case: earliest failing position wins
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: correction
+        schema_version: 1
+    stream:
+      store_id: store-1
+      entries:
+      - position: 1
+        record:
+          record_id: u-1
+          profile: learning
+          record_type: mystery
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 2
+        record:
+          record_id: BAD
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+    relations: []
+- project_history:
+    case: positions must strictly increase
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: correction
+        schema_version: 1
+    stream:
+      store_id: store-1
+      entries:
+      - position: 2
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 1
+        record:
+          record_id: e-1
+          profile: learning
+          record_type: evaluation
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+    relations: []
+- project_history:
+    case: equal positions are invalid
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: correction
+        schema_version: 1
+    stream:
+      store_id: store-1
+      entries:
+      - position: 1
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 1
+        record:
+          record_id: e-1
+          profile: learning
+          record_type: evaluation
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+    relations: []
+- project_history:
+    case: position 0 is a boundary, never an entry
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: correction
+        schema_version: 1
+    stream:
+      store_id: store-1
+      entries:
+      - position: 0
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+    relations: []
+- project_history:
+    case: stream with an unknown member
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: correction
+        schema_version: 1
+    stream:
+      store_id: store-1
+      entries:
+      - position: 1
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      cursor: 1
+    relations: []
+- project_history:
+    case: entry with an unknown member
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: correction
+        schema_version: 1
+    stream:
+      store_id: store-1
+      entries:
+      - position: 1
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+        note: x
+    relations: []
+- project_history:
+    case: store_id outside the stable-ID domain
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: correction
+        schema_version: 1
+    stream:
+      store_id: Store-1
+      entries:
+      - position: 1
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+    relations: []
+- project_history:
+    case: duplicate decoded record_id is corrupt history
+    reader:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+      - record_type: correction
+        schema_version: 1
+    stream:
+      store_id: store-1
+      entries:
+      - position: 1
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 2
+        record:
+          record_id: e-1
+          profile: learning
+          record_type: evaluation
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+      - position: 3
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+    relations: []
+- project_history:
+    case: reader errors precede stream errors
+    reader:
+      profile: learning
+    stream:
+      store_id: store-1
+      entries:
+      - position: 0
+        record:
+          record_id: o-1
+          profile: learning
+          record_type: attempt
+          schema_version: 1
+          compatibility: required
+          recorded_at: '2026-10-11T08:00:00Z'
+    relations: []
+expect:
+  results:
+  - case: three decoded records
+    projection:
+      through:
+        store_id: store-1
+        position: 3
+      records:
+      - record_id: o-1
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00.000000Z'
+      - record_id: e-1
+        profile: learning
+        record_type: evaluation
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00.000000Z'
+      - record_id: e-2
+        profile: learning
+        record_type: evaluation
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00.000000Z'
+      skipped: []
+      excluded: []
+      relations: []
+      current:
+      - o-1
+      - e-1
+      - e-2
+      interpretations: []
+  - case: 'empty stream: boundary before the first record (G-054)'
+    projection:
+      through:
+        store_id: store-1
+        position: 0
+      records: []
+      skipped: []
+      excluded: []
+      relations: []
+      current: []
+      interpretations: []
+  - case: excluded and skipped records advance the boundary but are not history (G-050, G-051)
+    projection:
+      through:
+        store_id: store-1
+        position: 4
+      records:
+      - record_id: o-1
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00.000000Z'
+      - record_id: e-1
+        profile: learning
+        record_type: evaluation
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00.000000Z'
+      skipped:
+      - 3
+      excluded:
+      - 2
+      relations: []
+      current:
+      - o-1
+      - e-1
+      interpretations: []
+  - case: position gaps are allowed; positions are a store-local cursor
+    projection:
+      through:
+        store_id: store-1
+        position: 9
+      records:
+      - record_id: o-1
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00.000000Z'
+      - record_id: e-1
+        profile: learning
+        record_type: evaluation
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00.000000Z'
+      - record_id: e-2
+        profile: learning
+        record_type: evaluation
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00.000000Z'
+      skipped: []
+      excluded: []
+      relations: []
+      current:
+      - o-1
+      - e-1
+      - e-2
+      interpretations: []
+  - case: unknown required record fails the whole projection atomically (G-070)
+    error: history.unknown_required
+    position: 3
+  - case: invalid envelope fails the whole projection, naming its position
+    error: id.invalid
+    argument: stream
+    position: 2
+  - case: earliest failing position wins
+    error: history.unknown_required
+    position: 1
+  - case: positions must strictly increase
+    error: history.stream_invalid
+    argument: stream
+  - case: equal positions are invalid
+    error: history.stream_invalid
+    argument: stream
+  - case: position 0 is a boundary, never an entry
+    error: history.stream_invalid
+    argument: stream
+  - case: stream with an unknown member
+    error: history.stream_invalid
+    argument: stream
+  - case: entry with an unknown member
+    error: history.stream_invalid
+    argument: stream
+  - case: store_id outside the stable-ID domain
+    error: history.stream_invalid
+    argument: stream
+  - case: duplicate decoded record_id is corrupt history
+    error: history.duplicate_record_id
+    argument: stream
+    position: 3
+  - case: reader errors precede stream errors
+    error: history.reader_invalid
+    argument: reader
+negative_controls:
+- returning a partial projection after an unknown required record
+- treating excluded or skipped records as history
+- deduplicating records by id instead of failing
+- accepting non-increasing positions
