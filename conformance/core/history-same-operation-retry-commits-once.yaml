@@ -4,9 +4,9 @@ family: core
 layer: '04'
 status: DRAFT
 title: Retrying the same durable operation identity commits one historical record
-description: CORE-012, PERS-006, HIST-008; Owner G-077..G-084 (reference/governance/2026-10-11-owner-layer04-start.md);
-  spec/persistence.md Layer 04. Each scenario starts with no stores; steps run in order against one fresh
-  backend.
+description: CORE-012, PERS-006, HIST-008; Owner G-077..G-087 (reference/governance/2026-10-11-owner-layer04-start.md);
+  spec/persistence.md Layer 04. Each scenario runs its steps in order against one fresh backend with no
+  stores.
 requirements:
 - CORE-012
 - PERS-006
@@ -17,8 +17,9 @@ when:
     case: create store
     store_id: store-1
     clock:
-    - '2026-10-11T08:00:00Z'
-    - '2026-10-11T09:00:00Z'
+    - '2026-10-11T08:00:00.000000Z'
+    - '2026-10-11T09:00:00.000000Z'
+    - '2026-10-11T10:00:00.000000Z'
 - commit_history:
     case: first commit
     store_id: store-1
@@ -44,7 +45,7 @@ when:
       schema_version: 1
       compatibility: required
 - commit_history:
-    case: an identical retry returns the original receipt, original recorded_at included
+    case: an identical retry returns the original receipt, original recorded_at included; no clock sample
     store_id: store-1
     writer:
       profile: learning
@@ -68,11 +69,13 @@ when:
       schema_version: 1
       compatibility: required
 - commit_history:
-    case: the retry is compared after normalization; a different writer schema is not part of the mutation
+    case: a writer with a different recognized set is not part of the mutation
     store_id: store-1
     writer:
       profile: learning
       recognized:
+      - record_type: correction
+        schema_version: 1
       - record_type: evaluation
         schema_version: 1
       - record_type: attempt
@@ -153,8 +156,94 @@ when:
       record_type: attempt
       schema_version: 1
       compatibility: required
+- commit_history:
+    case: a NUL source_operation_id is a valid identity (G-033)
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: "\0"
+    records:
+    - record_id: o-5
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      payload:
+        n: 2
+      occurred_at: '2026-10-11T08:00:00Z'
+- commit_history:
+    case: a retry spelled differently but equal after normalization (offset occurred_at, 2.0) returns
+      the original receipt
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: "\0"
+    records:
+    - record_id: o-5
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      payload:
+        n: 2.0
+      occurred_at: '2026-10-11T10:00:00+02:00'
+- commit_history:
+    case: a different mutation under the NUL identity conflicts
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: "\0"
+    records:
+    - record_id: o-6
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+- commit_history:
+    case: a-NUL-b is a different identity from the NUL identity, so its reuse of o-5 is a store duplicate
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: "a\0b"
+    records:
+    - record_id: o-5
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      payload:
+        n: 2
+      occurred_at: '2026-10-11T08:00:00Z'
 - store_tail:
-    case: retries consumed no positions and no clock instants
+    case: retries and conflicts consumed no positions
     store_id: store-1
 expect:
   results:
@@ -168,21 +257,21 @@ expect:
         source_operation_id: r-1
       first_position: 1
       last_position: 2
-      recorded_at: '2026-10-11T08:00:00Z'
+      recorded_at: '2026-10-11T08:00:00.000000Z'
       records:
       - record_id: o-1
         profile: learning
         record_type: attempt
         schema_version: 1
         compatibility: required
-        recorded_at: '2026-10-11T08:00:00Z'
+        recorded_at: '2026-10-11T08:00:00.000000Z'
       - record_id: e-1
         profile: learning
         record_type: evaluation
         schema_version: 1
         compatibility: required
-        recorded_at: '2026-10-11T08:00:00Z'
-  - case: an identical retry returns the original receipt, original recorded_at included
+        recorded_at: '2026-10-11T08:00:00.000000Z'
+  - case: an identical retry returns the original receipt, original recorded_at included; no clock sample
     receipt:
       store_id: store-1
       operation:
@@ -190,21 +279,21 @@ expect:
         source_operation_id: r-1
       first_position: 1
       last_position: 2
-      recorded_at: '2026-10-11T08:00:00Z'
+      recorded_at: '2026-10-11T08:00:00.000000Z'
       records:
       - record_id: o-1
         profile: learning
         record_type: attempt
         schema_version: 1
         compatibility: required
-        recorded_at: '2026-10-11T08:00:00Z'
+        recorded_at: '2026-10-11T08:00:00.000000Z'
       - record_id: e-1
         profile: learning
         record_type: evaluation
         schema_version: 1
         compatibility: required
-        recorded_at: '2026-10-11T08:00:00Z'
-  - case: the retry is compared after normalization; a different writer schema is not part of the mutation
+        recorded_at: '2026-10-11T08:00:00.000000Z'
+  - case: a writer with a different recognized set is not part of the mutation
     receipt:
       store_id: store-1
       operation:
@@ -212,20 +301,20 @@ expect:
         source_operation_id: r-1
       first_position: 1
       last_position: 2
-      recorded_at: '2026-10-11T08:00:00Z'
+      recorded_at: '2026-10-11T08:00:00.000000Z'
       records:
       - record_id: o-1
         profile: learning
         record_type: attempt
         schema_version: 1
         compatibility: required
-        recorded_at: '2026-10-11T08:00:00Z'
+        recorded_at: '2026-10-11T08:00:00.000000Z'
       - record_id: e-1
         profile: learning
         record_type: evaluation
         schema_version: 1
         compatibility: required
-        recorded_at: '2026-10-11T08:00:00Z'
+        recorded_at: '2026-10-11T08:00:00.000000Z'
   - case: a different mutation under the same operation is a visible conflict (G-013)
     error: persistence.operation_conflict
     argument: operation
@@ -240,20 +329,67 @@ expect:
         source_operation_id: r-1
       first_position: 3
       last_position: 3
-      recorded_at: '2026-10-11T09:00:00Z'
+      recorded_at: '2026-10-11T09:00:00.000000Z'
       records:
       - record_id: o-2
         profile: learning
         record_type: attempt
         schema_version: 1
         compatibility: required
-        recorded_at: '2026-10-11T09:00:00Z'
-  - case: retries consumed no positions and no clock instants
+        recorded_at: '2026-10-11T09:00:00.000000Z'
+  - case: a NUL source_operation_id is a valid identity (G-033)
+    receipt:
+      store_id: store-1
+      operation:
+        source_namespace: app
+        source_operation_id: "\0"
+      first_position: 4
+      last_position: 4
+      recorded_at: '2026-10-11T10:00:00.000000Z'
+      records:
+      - record_id: o-5
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        payload:
+          n: 2
+        occurred_at: '2026-10-11T08:00:00.000000Z'
+        recorded_at: '2026-10-11T10:00:00.000000Z'
+  - case: a retry spelled differently but equal after normalization (offset occurred_at, 2.0) returns
+      the original receipt
+    receipt:
+      store_id: store-1
+      operation:
+        source_namespace: app
+        source_operation_id: "\0"
+      first_position: 4
+      last_position: 4
+      recorded_at: '2026-10-11T10:00:00.000000Z'
+      records:
+      - record_id: o-5
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        payload:
+          n: 2
+        occurred_at: '2026-10-11T08:00:00.000000Z'
+        recorded_at: '2026-10-11T10:00:00.000000Z'
+  - case: a different mutation under the NUL identity conflicts
+    error: persistence.operation_conflict
+    argument: operation
+  - case: a-NUL-b is a different identity from the NUL identity, so its reuse of o-5 is a store duplicate
+    error: history.duplicate_record_id
+    argument: records
+  - case: retries and conflicts consumed no positions
     boundary:
       store_id: store-1
-      position: 3
+      position: 4
 negative_controls:
 - retry appends a second record
 - retry deduplicates by content similarity instead of operation identity
 - a retry returns a fresh recorded_at
 - a conflicting retry overwrites (last-write-wins)
+- the mutation is compared as raw caller bytes instead of normalized drafts
+- the operation ID is trimmed, rejected or mangled at a NUL character

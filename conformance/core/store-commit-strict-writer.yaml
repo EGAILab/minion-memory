@@ -4,10 +4,10 @@ family: core
 layer: '04'
 status: DRAFT
 title: Only records the writer fully recognizes can become canonical; record IDs are unique across the
-  store
-description: PERS-005, PERS-012, PERS-014, HIST-008; Owner G-077..G-084 (reference/governance/2026-10-11-owner-layer04-start.md);
-  spec/persistence.md Layer 04. Each scenario starts with no stores; steps run in order against one fresh
-  backend.
+  store; one evaluation order
+description: PERS-005, PERS-012, PERS-014, HIST-008; Owner G-077..G-087 (reference/governance/2026-10-11-owner-layer04-start.md);
+  spec/persistence.md Layer 04. Each scenario runs its steps in order against one fresh backend with no
+  stores.
 requirements:
 - PERS-005
 - PERS-012
@@ -19,10 +19,10 @@ when:
     case: create store
     store_id: store-1
     clock:
-    - '2026-10-11T08:00:00Z'
-    - '2026-10-11T09:00:00Z'
+    - '2026-10-11T08:00:00.000000Z'
+    - '2026-10-11T09:00:00.000000Z'
 - commit_history:
-    case: a draft carrying recorded_at is invalid; the store owns it (G-082)
+    case: a draft carrying recorded_at fails the closed draft shape (D3)
     store_id: store-1
     writer:
       profile: learning
@@ -40,7 +40,27 @@ when:
       record_type: attempt
       schema_version: 1
       compatibility: required
-      recorded_at: '2026-10-11T08:00:00Z'
+      recorded_at: '2026-10-11T08:00:00.000000Z'
+- commit_history:
+    case: 'D3 precedes D4: supplied recorded_at with an invalid record_id is still envelope_invalid'
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: v-1
+    records:
+    - record_id: BAD
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00.000000Z'
 - commit_history:
     case: a foreign-profile draft is not an acceptable write (excluded is a reader outcome)
     store_id: store-1
@@ -60,6 +80,26 @@ when:
       record_type: attempt
       schema_version: 1
       compatibility: required
+- commit_history:
+    case: 'D2 precedes D3: a foreign-profile draft carrying recorded_at is record_unrecognized'
+    store_id: store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: v-2
+    records:
+    - record_id: o-1
+      profile: agent
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+      recorded_at: '2026-10-11T08:00:00.000000Z'
 - commit_history:
     case: an unrecognized required type is rejected
     store_id: store-1
@@ -156,8 +196,46 @@ when:
       schema_version: 1
       compatibility: required
 - commit_history:
+    case: an in-batch repeated record_id precedes the unknown-store check
+    store_id: store-9
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: v-7
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+- commit_history:
     case: an invalid writer is rejected
     store_id: store-1
+    writer:
+      profile: learning
+    operation:
+      source_namespace: app
+      source_operation_id: v-8
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
+- commit_history:
+    case: store_id is checked before writer
+    store_id: Store-1
     writer:
       profile: learning
     operation:
@@ -187,11 +265,22 @@ when:
       record_type: attempt
       schema_version: 1
       compatibility: required
-- store_tail:
-    case: nothing was committed
-    store_id: store-1
 - commit_history:
-    case: a valid batch commits
+    case: 'JSON seam: a duplicate key in records (stage 1) precedes an invalid store_id (stage 3)'
+    store_id: Store-1
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: v-9
+    records_json: '[{"record_id": "o-1", "record_id": "o-2"}]'
+- commit_history:
+    case: 'JSON seam: a valid records text behaves like the native value'
     store_id: store-1
     writer:
       profile: learning
@@ -203,12 +292,8 @@ when:
     operation:
       source_namespace: app
       source_operation_id: v-9
-    records:
-    - record_id: o-1
-      profile: learning
-      record_type: attempt
-      schema_version: 1
-      compatibility: required
+    records_json: '[{"record_id": "o-1", "profile": "learning", "record_type": "evaluation", "schema_version":
+      1, "compatibility": "required", "payload": {"n": 1}}]'
 - commit_history:
     case: reusing a committed record_id under another operation is rejected even with identical content
     store_id: store-1
@@ -225,9 +310,11 @@ when:
     records:
     - record_id: o-1
       profile: learning
-      record_type: attempt
+      record_type: evaluation
       schema_version: 1
       compatibility: required
+      payload:
+        n: 1
 - commit_history:
     case: 'record IDs are unique across profiles: an agent writer cannot reuse o-1'
     store_id: store-1
@@ -266,10 +353,16 @@ expect:
   results:
   - case: create store
     result: created
-  - case: a draft carrying recorded_at is invalid; the store owns it (G-082)
+  - case: a draft carrying recorded_at fails the closed draft shape (D3)
+    error: history.envelope_invalid
+    argument: records
+  - case: 'D3 precedes D4: supplied recorded_at with an invalid record_id is still envelope_invalid'
     error: history.envelope_invalid
     argument: records
   - case: a foreign-profile draft is not an acceptable write (excluded is a reader outcome)
+    error: persistence.record_unrecognized
+    argument: records
+  - case: 'D2 precedes D3: a foreign-profile draft carrying recorded_at is record_unrecognized'
     error: persistence.record_unrecognized
     argument: records
   - case: an unrecognized required type is rejected
@@ -287,17 +380,22 @@ expect:
   - case: a record_id repeated inside one batch is rejected
     error: history.duplicate_record_id
     argument: records
+  - case: an in-batch repeated record_id precedes the unknown-store check
+    error: history.duplicate_record_id
+    argument: records
   - case: an invalid writer is rejected
     error: history.reader_invalid
     argument: writer
+  - case: store_id is checked before writer
+    error: id.invalid
+    argument: store_id
   - case: an invalid operation identity is rejected
     error: operation_identity.invalid
     argument: operation
-  - case: nothing was committed
-    boundary:
-      store_id: store-1
-      position: 0
-  - case: a valid batch commits
+  - case: 'JSON seam: a duplicate key in records (stage 1) precedes an invalid store_id (stage 3)'
+    error: value.duplicate_key
+    argument: records
+  - case: 'JSON seam: a valid records text behaves like the native value'
     receipt:
       store_id: store-1
       operation:
@@ -305,14 +403,16 @@ expect:
         source_operation_id: v-9
       first_position: 1
       last_position: 1
-      recorded_at: '2026-10-11T08:00:00Z'
+      recorded_at: '2026-10-11T08:00:00.000000Z'
       records:
       - record_id: o-1
         profile: learning
-        record_type: attempt
+        record_type: evaluation
         schema_version: 1
         compatibility: required
-        recorded_at: '2026-10-11T08:00:00Z'
+        payload:
+          n: 1
+        recorded_at: '2026-10-11T08:00:00.000000Z'
   - case: reusing a committed record_id under another operation is rejected even with identical content
     error: history.duplicate_record_id
     argument: records
@@ -327,16 +427,17 @@ expect:
         source_operation_id: v-12
       first_position: 2
       last_position: 2
-      recorded_at: '2026-10-11T09:00:00Z'
+      recorded_at: '2026-10-11T09:00:00.000000Z'
       records:
       - record_id: n-1
         profile: agent
         record_type: note
         schema_version: 1
         compatibility: required
-        recorded_at: '2026-10-11T09:00:00Z'
+        recorded_at: '2026-10-11T09:00:00.000000Z'
 negative_controls:
 - the store accepts records the writer would skip or exclude
 - the store stamps over a caller recorded_at
 - record IDs are unique only per profile
 - identical content under a new operation is treated as a retry
+- store existence is checked before argument and draft validation

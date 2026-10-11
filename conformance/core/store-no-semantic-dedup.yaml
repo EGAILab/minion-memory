@@ -4,9 +4,9 @@ family: core
 layer: '04'
 status: DRAFT
 title: Equal content under different record IDs and operations stays two canonical records
-description: HIST-008, PERS-006; Owner G-077..G-084 (reference/governance/2026-10-11-owner-layer04-start.md);
-  spec/persistence.md Layer 04. Each scenario starts with no stores; steps run in order against one fresh
-  backend.
+description: HIST-008, PERS-006; Owner G-077..G-087 (reference/governance/2026-10-11-owner-layer04-start.md);
+  spec/persistence.md Layer 04. Each scenario runs its steps in order against one fresh backend with no
+  stores.
 requirements:
 - HIST-008
 - PERS-006
@@ -16,8 +16,8 @@ when:
     case: create store
     store_id: store-1
     clock:
-    - '2026-10-11T08:00:00Z'
-    - '2026-10-11T09:00:00Z'
+    - '2026-10-11T08:00:00.000000Z'
+    - '2026-10-11T09:00:00.000000Z'
 - commit_history:
     case: first observation
     store_id: store-1
@@ -75,7 +75,7 @@ expect:
         source_operation_id: d-1
       first_position: 1
       last_position: 1
-      recorded_at: '2026-10-11T08:00:00Z'
+      recorded_at: '2026-10-11T08:00:00.000000Z'
       records:
       - record_id: o-1
         profile: learning
@@ -84,7 +84,7 @@ expect:
         compatibility: required
         payload:
           answer: Paris
-        recorded_at: '2026-10-11T08:00:00Z'
+        recorded_at: '2026-10-11T08:00:00.000000Z'
   - case: an identical observation later is new evidence, never merged
     receipt:
       store_id: store-1
@@ -93,7 +93,7 @@ expect:
         source_operation_id: d-2
       first_position: 2
       last_position: 2
-      recorded_at: '2026-10-11T09:00:00Z'
+      recorded_at: '2026-10-11T09:00:00.000000Z'
       records:
       - record_id: o-2
         profile: learning
@@ -102,7 +102,7 @@ expect:
         compatibility: required
         payload:
           answer: Paris
-        recorded_at: '2026-10-11T09:00:00Z'
+        recorded_at: '2026-10-11T09:00:00.000000Z'
   - case: both are canonical
     boundary:
       store_id: store-1
