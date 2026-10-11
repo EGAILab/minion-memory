@@ -245,6 +245,13 @@ REFUSED: dict[str, list[str]] = {
         "CREATE POLICY probe_policy ON mneme_record USING (false) WITH CHECK (true)",
     ],
     "CH05": ["CREATE POLICY probe_policy ON mneme_record USING (false)"],
+    # row security alone, without any policy (relation properties only)
+    "RLS-enabled": ["ALTER TABLE mneme_record ENABLE ROW LEVEL SECURITY"],
+    "RLS-forced": ["ALTER TABLE mneme_operation FORCE ROW LEVEL SECURITY"],
+    "RLS-enabled-forced": [
+        "ALTER TABLE mneme_store ENABLE ROW LEVEL SECURITY",
+        "ALTER TABLE mneme_store FORCE ROW LEVEL SECURITY",
+    ],
     # rules, one on each table
     "R10": ["CREATE RULE probe_rule AS ON INSERT TO mneme_record DO INSTEAD NOTHING"],
     "R11": ["CREATE RULE probe_rule AS ON UPDATE TO mneme_store DO INSTEAD NOTHING"],
@@ -361,6 +368,9 @@ REFUSED: dict[str, list[str]] = {
     ],
     "C11": ["ALTER TABLE mneme_record ALTER COLUMN schema_version SET DEFAULT 2"],
     "C12": ["ALTER TABLE mneme_store ALTER COLUMN tail DROP DEFAULT"],
+    # a different value for an existing default (the defaults part only)
+    "DEFAULT-tail": ["ALTER TABLE mneme_store ALTER COLUMN tail SET DEFAULT 1"],
+    "DEFAULT-singleton": ["ALTER TABLE mneme_schema ALTER COLUMN singleton SET DEFAULT false"],
     "C13": ["ALTER TABLE mneme_record ALTER COLUMN envelope SET STORAGE PLAIN"],
     "C14": ["ALTER TABLE mneme_record ALTER COLUMN envelope SET STORAGE EXTERNAL"],
     "C15": ["ALTER TABLE mneme_record ALTER COLUMN envelope SET STORAGE MAIN"],
@@ -551,6 +561,20 @@ def test_public_ch09c_a_prefixed_view_blocks_initialization_and_nothing_is_creat
         execute(params, ["CREATE VIEW mneme_extra AS SELECT 1 AS x"])
         refused_without_change(params)
         assert [row[0] for row in snapshot(params).relations] == ["mneme_extra"]
+
+
+@pytest.mark.parametrize(
+    ("name", "statement"),
+    [
+        ("mneme_store", "CREATE VIEW mneme_store AS SELECT 'x'::text AS store_id"),
+        ("mneme_record", "CREATE SEQUENCE mneme_record"),
+    ],
+)
+def test_public_ch09c_a_non_table_with_a_v1_name_blocks_initialization(name: str, statement: str) -> None:
+    with pgdb.fresh_backend() as params:
+        execute(params, [statement])
+        refused_without_change(params)
+        assert [row[0] for row in snapshot(params).relations] == [name]
 
 
 # ------------------------------------------------------------------------------- public: accepted
