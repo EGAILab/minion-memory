@@ -2,7 +2,7 @@ scenario_format: 1
 id: core.store.no-semantic-dedup
 family: core
 layer: '04'
-status: DRAFT
+status: ACTIVE
 title: Equal content under different record IDs and operations stays two canonical records
 description: HIST-008, PERS-006; Owner G-077..G-087 (reference/governance/2026-10-11-owner-layer04-start.md);
   spec/persistence.md Layer 04. Each scenario runs its steps in order against one fresh backend with no

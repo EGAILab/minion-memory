@@ -3,7 +3,9 @@ name = "minion-memory"
 version = "0.0.0"
 description = "Minion-Memory (Project Mneme) — Python implementation. WP-00 scaffold: no memory behavior."
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "psycopg[binary]>=3.2,<3.3",
+]
 
 [dependency-groups]
 dev = [

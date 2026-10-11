@@ -2,7 +2,7 @@ scenario_format: 1
 id: core.store.commit-strict-writer
 family: core
 layer: '04'
-status: DRAFT
+status: ACTIVE
 title: Only records the writer fully recognizes can become canonical; record IDs are unique across the
   store; one evaluation order
 description: PERS-005, PERS-012, PERS-014, HIST-008; Owner G-077..G-087 (reference/governance/2026-10-11-owner-layer04-start.md);

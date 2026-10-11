@@ -2,7 +2,7 @@ scenario_format: 1
 id: core.store.bounded-read
 family: core
 layer: '04'
-status: DRAFT
+status: ACTIVE
 title: Record-counted since-boundary pages over gapless positions; boundaries of other stores are incomparable
 description: PERS-007, PERS-008, HIST-005; Owner G-077..G-087 (reference/governance/2026-10-11-owner-layer04-start.md);
   spec/persistence.md Layer 04. Each scenario runs its steps in order against one fresh backend with no

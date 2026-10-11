@@ -21,6 +21,9 @@ from .values import SAFE_INTEGER_MAX, Value, _utf16_key, validate_arguments
 _ROUTING = ("profile", "record_type", "schema_version")
 _REQUIRED = frozenset({"record_id", *_ROUTING, "compatibility", "recorded_at"})
 _MEMBERS = _REQUIRED | {"occurred_at", "payload", "provenance"}
+# A record draft (Layer 04, G-082/G-083) is an envelope without `recorded_at`, which the store owns.
+_DRAFT_REQUIRED = _REQUIRED - {"recorded_at"}
+_DRAFT_MEMBERS = _MEMBERS - {"recorded_at"}
 _COMPATIBILITY = ("required", "ignorable")
 
 
@@ -86,7 +89,11 @@ def _envelope_invalid(detail: str) -> MnemeValidationError:
     return MnemeValidationError("history.envelope_invalid", detail)
 
 
-def _admit(reader: tuple[str, frozenset[tuple[str, int]]], value: Value) -> HistoryAdmission:
+def _admit(
+    reader: tuple[str, frozenset[tuple[str, int]]], value: Value, *, draft: bool = False
+) -> HistoryAdmission:
+    """The four G-055 gates. With `draft`, gate 3's closed member set omits `recorded_at` (Layer 04
+    draft gates D1-D4), so a supplied `recorded_at` is an unknown member."""
     profile, recognized = reader
     # Gate 1: identity and routing — the schema-identity triple, for every record (G-052).
     if not isinstance(value, dict):
@@ -111,8 +118,13 @@ def _admit(reader: tuple[str, frozenset[tuple[str, int]]], value: Value) -> Hist
         raise _UnknownRequired(f"{record_type} v{schema_version} is required but not recognized")
     # Gate 3: closed shape of a recognized same-profile schema (G-048, G-049).
     members = set(value)
-    if members - _MEMBERS or _REQUIRED - members:
-        raise _envelope_invalid("a recognized envelope has exactly the G-048 members")
+    allowed, required = (_DRAFT_MEMBERS, _DRAFT_REQUIRED) if draft else (_MEMBERS, _REQUIRED)
+    if members - allowed or required - members:
+        raise _envelope_invalid(
+            "a recognized draft has the G-048 members without recorded_at"
+            if draft
+            else "a recognized envelope has exactly the G-048 members"
+        )
     # Gate 4: typed fields in canonical member order (G-034).
     envelope = dict(value)
     for name in sorted(value, key=_utf16_key):

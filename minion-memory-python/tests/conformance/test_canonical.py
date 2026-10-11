@@ -13,6 +13,11 @@ it).
 * an ACTIVE scenario must pass, and an ACTIVE scenario using an operation this runner does not know
   fails loudly: a missing operation is a gap, not a skip.
 
+Layer 04 store scenarios are stateful (`spec/persistence.md`, scenario seams): each runs its steps in
+order against one PostgreSQL backend holding no stores (`tests/pgdb.py`), and a `create_store`
+step's `clock` is runner configuration, the instants that store's clock yields in order. A
+structured argument `<name>` may be given as JSON text in `<name>_json`.
+
 Loading uses `yaml.safe_load`. That is sound only because `mneme-process check conformance`
 guarantees every corpus document reads identically under YAML 1.1 and the YAML-1.2-core profile;
 the runner relies on that gate rather than re-implementing it.
@@ -22,20 +27,23 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
 
 import jsonschema
+import pgdb
 import pytest
 import yaml
 
 from minion_memory import core
+from minion_memory.persistence import PostgresHistoryStore
 
 CORPUS = Path(__file__).resolve().parents[3] / "conformance"
 FAMILIES = ("core", "learning", "agent")
 # Highest layer the Python implementation covers; it moves only with an implementation candidate.
-IMPLEMENTED_LAYER = 3
+IMPLEMENTED_LAYER = 4
+STORE_OPERATIONS = frozenset({"create_store", "store_tail", "commit_history", "read_history"})
 
 
 def _scenario_files() -> list[Path]:
@@ -102,8 +110,43 @@ OPERATIONS: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] = {
 }
 
 
-def _observe(operation: str, params: dict[str, Any]) -> dict[str, Any]:
+def _arg(params: dict[str, Any], name: str) -> object:
+    """A store argument given natively or, as `<name>_json`, as JSON text (Layer 04 seams)."""
+    return core.JsonText(params[f"{name}_json"]) if f"{name}_json" in params else params[name]
+
+
+class _StoreRun:
+    """One stateful Layer 04 scenario run: a store handle plus each store's clock fixture."""
+
+    def __init__(self) -> None:
+        self.clocks: dict[str, Iterator[str]] = {}
+        self.store: PostgresHistoryStore | None = None
+
+    def clock(self, store_id: str) -> str:
+        instant = next(self.clocks[store_id], None)
+        assert instant is not None, f"the clock fixture of {store_id} is exhausted"
+        return instant
+
+    def run(self, operation: str, params: dict[str, Any]) -> dict[str, Any]:
+        assert self.store is not None
+        if operation == "create_store":
+            self.store.create_store(_arg(params, "store_id"))
+            self.clocks[params["store_id"]] = iter(params["clock"])
+            return {"result": "created"}
+        if operation == "store_tail":
+            return {"boundary": self.store.store_tail(_arg(params, "store_id"))}
+        if operation == "commit_history":
+            args = [_arg(params, n) for n in ("store_id", "writer", "operation", "records")]
+            return {"receipt": self.store.commit_history(*args)}
+        args = [_arg(params, n) for n in ("store_id", "since", "limit")]
+        return {"page": self.store.read_history(*args)}
+
+
+def _observe(operation: str, params: dict[str, Any], run: _StoreRun | None = None) -> dict[str, Any]:
     try:
+        if operation in STORE_OPERATIONS:
+            assert run is not None
+            return run.run(operation, params)
         return OPERATIONS[operation](params)
     except core.MnemeValidationError as error:
         observed: dict[str, Any] = {"error": error.code}
@@ -177,16 +220,33 @@ def test_canonical_scenario(path: Path) -> None:
         pytest.xfail(reason)
     expected = scenario["expect"]["results"]
     assert len(expected) == len(scenario["when"]), "one expectation per step"
-    failures = []
-    for step, expect in zip(scenario["when"], expected, strict=True):
-        ((operation, params),) = step.items()
-        assert operation in OPERATIONS, (
+    steps = [next(iter(step.items())) for step in scenario["when"]]
+    for operation, _ in steps:
+        assert operation in OPERATIONS or operation in STORE_OPERATIONS, (
             f"no operation vocabulary implemented for {operation!r} ({scenario['id']})"
         )
-        observed = _observe(operation, params)
+    if any(operation in STORE_OPERATIONS for operation, _ in steps):
+        run = _StoreRun()
+        with pgdb.empty_backend() as database:
+            run.store = PostgresHistoryStore.open(database, run.clock)
+            try:
+                failures = _compare(steps, expected, run)
+            finally:
+                run.store.close()
+    else:
+        failures = _compare(steps, expected, None)
+    assert not failures, "\n".join(failures)
+
+
+def _compare(
+    steps: list[tuple[str, dict[str, Any]]], expected: list[dict[str, Any]], run: _StoreRun | None
+) -> list[str]:
+    failures = []
+    for (operation, params), expect in zip(steps, expected, strict=True):
+        observed = _observe(operation, params, run)
         wanted = {key: value for key, value in expect.items() if key != "case"}
         if "argument" not in wanted:
             observed.pop("argument", None)  # only compared where the scenario pins it
         if observed != wanted:
             failures.append(f"{params.get('case')}: expected {wanted}, observed {observed}")
-    assert not failures, "\n".join(failures)
+    return failures

@@ -1689,7 +1689,7 @@ rows:
   - core.store.commit-strict-writer
   - core.store.no-semantic-dedup
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
     location: null
   evidence: []
@@ -1706,7 +1706,7 @@ rows:
   disposition: adopted
   scenarios: []
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
     location: null
   evidence: []
@@ -3886,7 +3886,7 @@ rows:
   - core.store.commit-gapless-positions
   - core.store.commit-strict-writer
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
     location: null
   evidence: []
@@ -3908,7 +3908,7 @@ rows:
   - core.history.same-operation-retry-commits-once
   - core.store.no-semantic-dedup
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
     location: null
   evidence: []
@@ -3933,7 +3933,7 @@ rows:
   - core.store.bounded-read
   - core.store.commit-gapless-positions
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
     location: null
   evidence: []
@@ -3955,7 +3955,7 @@ rows:
   - core.store.bounded-read
   - core.store.commit-gapless-positions
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
     location: null
   evidence: []
@@ -4035,7 +4035,7 @@ rows:
   - core.store.commit-gapless-positions
   - core.store.commit-strict-writer
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
     location: null
   evidence: []
@@ -4076,7 +4076,7 @@ rows:
   - core.store.commit-gapless-positions
   - core.store.commit-strict-writer
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
     location: null
   evidence: []
@@ -4094,7 +4094,7 @@ rows:
   disposition: adopted
   scenarios: []
   python:
-    location: null
+    location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
     location: null
   evidence: []
