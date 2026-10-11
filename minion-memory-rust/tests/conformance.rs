@@ -5,7 +5,7 @@ use serde_json::{Value as Json, json};
 use std::path::{Path, PathBuf};
 
 // Moves only with a Rust implementation candidate that passes the newly admitted corpus.
-const IMPLEMENTED_LAYER: u8 = 2;
+const IMPLEMENTED_LAYER: u8 = 3;
 
 fn observed_value(value: &Value) -> Result<Json, Error> {
     Ok(serde_json::from_slice(&canonical_bytes(value)?).expect("normalized public value"))
@@ -70,12 +70,17 @@ fn observe(step: &Json) -> Result<Json, String> {
             .map(|equal| json!({"result":equal})),
         "scope_visible" => scope_visible(Input::Native(&support::native(field("record")?)), Input::Native(&support::native(field("query")?)))
             .map(|visible| json!({"result":visible})),
+        "project_history" => project_history(Input::Native(&support::native(field("reader")?)), Input::Native(&support::native(field("stream")?)), Input::Native(&support::native(field("relations")?)))
+            .and_then(|projection| Ok(json!({"projection":observed_value(&projection)?}))),
         _ => return Err(format!("unsupported ACTIVE operation {operation}")),
     };
     Ok(result.unwrap_or_else(|e| {
         let mut result = json!({"error":e.code.as_str()});
         if let Some(argument) = e.argument {
             result["argument"] = json!(argument);
+        }
+        if let Some(position) = e.position {
+            result["position"] = json!(position);
         }
         result
     }))
@@ -296,7 +301,7 @@ fn draft_rule_and_active_promotion() {
 }
 #[test]
 fn implemented_layer_and_promotion() {
-    assert_eq!(IMPLEMENTED_LAYER, 2);
+    assert_eq!(IMPLEMENTED_LAYER, 3);
     let future = IMPLEMENTED_LAYER + 1;
     let mut scenario = json!({"status":"ACTIVE", "layer":format!("{future:02}"), "when":[{"unknown_active":{}}], "expect":{"results":[{"result":"wrong"}]}});
     let expected = ScenarioOutcome::ExpectedFailure {

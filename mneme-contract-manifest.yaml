@@ -1637,7 +1637,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/core/projection.py
   rust:
-    location: null
+    location: minion-memory-rust/src/projection.rs
   evidence: []
   findings: []
 - id: HIST-007
@@ -1661,7 +1661,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/core/projection.py
   rust:
-    location: null
+    location: minion-memory-rust/src/projection.rs
   evidence: []
   findings: []
 - id: HIST-008
@@ -1751,7 +1751,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/core/projection.py
   rust:
-    location: null
+    location: minion-memory-rust/src/projection.rs
   evidence: []
   findings:
   - NF-002
@@ -1772,7 +1772,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/core/projection.py
   rust:
-    location: null
+    location: minion-memory-rust/src/projection.rs
   evidence: []
   findings: []
 - id: PROJ-003

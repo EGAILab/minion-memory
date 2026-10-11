@@ -4,7 +4,7 @@
 the Python implementation is not an oracle. Workspace/package `minion-memory`, public crate
 `minion_memory`, Rust **1.97.1** pinned in `rust-toolchain.toml`, dependencies pinned in
 `Cargo.toml` and `Cargo.lock`. Layer 02 includes history admission, store-local boundary relations and MemoryScope.
-No persistence or Layer 03+ behavior.
+Layer 03 adds the purpose-neutral HistoryProjector and lineage resolution. No persistence.
 
 ## Public seams
 
@@ -18,7 +18,7 @@ at the seam; exact native integers are checked without binary64 rounding.
 explicit. `decode_text`/`decode_json` own JSON decoding. `validate_arguments` runs each generic
 stage across every argument before the next stage. The comparison primitives declare `a`, then
 `b`; their validation errors carry that argument name. `ErrorCode::as_str()` exposes the stable
-contract vocabulary; diagnostic detail is bounded and never formats an input value.
+contract vocabulary; diagnostic detail is bounded; the projector formats only normalized ASCII routing tokens and an edition.
 
 `validate_value`, `canonical_bytes`, `content_hash` and `raw_content_hash` provide SER-008/009
 and CORE-011. Typed operations are `validate_stable_id`, `validate_version`, `compare_versions`,
@@ -63,10 +63,10 @@ its outputs and all caches must still stay inside the project.
 loads it using an equivalent portable YAML profile, validates each envelope with its shared
 Draft 2020-12 schema, and calls public operations. It performs no canonicalization or repair.
 It reports the discovered ACTIVE scenario/step counts and explicit expected failures; this Layer 01
-and Layer 02 candidate has 15 ACTIVE scenarios / 289 steps and 5 recursive `TO_BE_` expected failures.
+through Layer 03 candidate has 17 ACTIVE scenarios / 343 steps and 5 recursive `TO_BE_` expected failures.
 Every DRAFT scenario reports xfail with its layer and the corpus rule as the reason. Drafts never
-execute as evidence. The Rust runner declares `IMPLEMENTED_LAYER = 2`: ACTIVE scenarios above
-Layer 02 report xfail naming their layer, Rust and the Implemented layers rule. This declaration
+execute as evidence. The Rust runner declares `IMPLEMENTED_LAYER = 3`: ACTIVE scenarios above
+Layer 03 report xfail naming their layer, Rust and the Implemented layers rule. This declaration
 moves only with a Rust implementation candidate. At or below the declared layer, promotion to
 ACTIVE executes every step and fails on unsupported operations or wrong results. Counts derive
 from dispatch, not a pinned inventory. Unknown eligible ACTIVE operations fail. Native scenario integers are constructed exactly as Rust `i128`;
@@ -109,3 +109,25 @@ at their owning later layers.
 `tests/layer02.rs` supplies independent public-seam controls, including all typed-field
 source permutations, generic-stage precedence, a 20,000-level payload and 46,656
 six-facet matching cases. No Python outputs are used as expectations.
+
+## Layer 03 operations
+
+`project_history(reader, stream, relations)` takes three explicit `Input` seams and returns a
+purpose-neutral `Value`. Generic stages across all three arguments precede reader, stream and
+early lineage shapes. Admission reuses the certified Layer 02 gates; complete canonical envelope
+bytes determine repeat coalescing. The first entry failure is atomic and carries `Error.position`;
+unknown-required also identifies the full routing triple without an argument. Byte-offset decoder
+diagnostics are separate and do not set a store position.
+
+Late endpoint, self-link and separate resolution/derivation cycle checks run before any result
+is returned. Kahn graph walks are iterative. Current heads are set-valued with no tie-break;
+interpretation membership comes only from direct reinterprets links. Typed external derivations
+are retained unresolved. Presentation keys explicitly order record, versioned and hash targets.
+The projector copies only each record's reachable arena nodes, preserves its caller inputs, and
+does not repeatedly clone the containing stream. Profile decoders supply relations; the core
+never parses profile-specific payload semantics.
+
+`tests/layer03.rs` replays all 54 projection steps across the 27 native/text/byte argument seam
+combinations, checks early-versus-late paired errors, full routing identity, canonical coalescing,
+typed target order, 15,625 three-record graphs against an independent transitive-closure oracle,
+and deep payloads/long chains. Expectations come from the accepted contract and corpus, not Python.

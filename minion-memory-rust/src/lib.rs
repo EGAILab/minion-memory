@@ -1,4 +1,4 @@
-//! Mneme Layers 01–02, implemented from the accepted contract and canonical corpus.
+//! Mneme Layers 01–03, implemented from the accepted contract and canonical corpus.
 //!
 //! All primitives validate structural inputs across every declared argument before
 //! checking the generic value domain, then apply typed rules (SER-008/G-031).
@@ -17,6 +17,7 @@ mod errors;
 mod history;
 mod identity;
 mod json;
+mod projection;
 mod scope;
 mod time;
 mod values;
@@ -30,6 +31,7 @@ pub use identity::{
     compare_operation_identities, compare_versions, operation_identity, validate_stable_id,
     validate_version,
 };
+pub use projection::project_history;
 pub use scope::{AGENT_FACETS, scope_visible, scopes_equal, validate_scope};
 pub use time::normalize_timestamp;
 pub use values::{

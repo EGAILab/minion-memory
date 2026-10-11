@@ -29,7 +29,11 @@ pub(crate) fn object(
     }
 }
 
-fn member(members: &[(String, usize)], name: &str, code: ErrorCode) -> Result<usize, Error> {
+pub(crate) fn member(
+    members: &[(String, usize)],
+    name: &str,
+    code: ErrorCode,
+) -> Result<usize, Error> {
     members
         .iter()
         .find(|(k, _)| k == name)
@@ -50,7 +54,12 @@ pub(crate) fn token(value: &Value, index: usize, code: ErrorCode) -> Result<Stri
     id_rule(&Value::string(s)).map_err(|_| Error::new(code))
 }
 
-fn integer(value: &Value, index: usize, minimum: i128, code: ErrorCode) -> Result<i128, Error> {
+pub(crate) fn integer(
+    value: &Value,
+    index: usize,
+    minimum: i128,
+    code: ErrorCode,
+) -> Result<i128, Error> {
     // Generic stage 2 has already enforced the safe upper bound and normalized integral floats.
     match value.nodes[index] {
         Node::Integer(n) if n >= minimum => Ok(n),
@@ -58,12 +67,12 @@ fn integer(value: &Value, index: usize, minimum: i128, code: ErrorCode) -> Resul
     }
 }
 
-struct Reader {
+pub(crate) struct Reader {
     profile: String,
     recognized: HashSet<(String, i128)>,
 }
 
-fn reader_rule(value: &Value) -> Result<Reader, Error> {
+pub(crate) fn reader_rule(value: &Value) -> Result<Reader, Error> {
     let code = ErrorCode::HistoryReaderInvalid;
     let members = object(value, value.root, code)?;
     if members.len() != 2 {
@@ -91,7 +100,7 @@ fn reader_rule(value: &Value) -> Result<Reader, Error> {
     })
 }
 
-fn envelope_rule(reader: &Reader, mut value: Value) -> Result<HistoryAdmission, Error> {
+pub(crate) fn envelope_rule(reader: &Reader, mut value: Value) -> Result<HistoryAdmission, Error> {
     let code = ErrorCode::HistoryEnvelopeInvalid;
     let members = object(&value, value.root, code)?;
     // Gate 1: validate the entire routing triple, even on foreign-profile records.

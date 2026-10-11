@@ -118,6 +118,40 @@ impl Value {
             root,
         }
     }
+    pub(crate) fn detached(&self, root: usize) -> Self {
+        // Copy reachable nodes only. Extracting every record must not clone its entire stream.
+        // An explicit work stack keeps payload extraction and drop safe at arbitrary depth.
+        let mut nodes = vec![Node::Null];
+        let mut pending = vec![(root, 0)];
+        while let Some((source, destination)) = pending.pop() {
+            nodes[destination] = match &self.nodes[source] {
+                Node::Array(children) => Node::Array(
+                    children
+                        .iter()
+                        .map(|child| {
+                            let index = nodes.len();
+                            nodes.push(Node::Null);
+                            pending.push((*child, index));
+                            index
+                        })
+                        .collect(),
+                ),
+                Node::Object(members) => Node::Object(
+                    members
+                        .iter()
+                        .map(|(name, child)| {
+                            let index = nodes.len();
+                            nodes.push(Node::Null);
+                            pending.push((*child, index));
+                            (name.clone(), index)
+                        })
+                        .collect(),
+                ),
+                scalar => scalar.clone(),
+            };
+        }
+        Self { nodes, root: 0 }
+    }
     /// The normalized root string, if this value is a string.
     pub fn as_str(&self) -> Option<&str> {
         if let Node::String(value) = self.node() {

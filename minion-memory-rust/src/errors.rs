@@ -45,6 +45,12 @@ pub enum ErrorCode {
     ScopeInvalid,
     /// Stage 3: malformed or unknown-facet allowed-scope query.
     ScopeQueryInvalid,
+    /// Stage 3: malformed history stream or non-increasing entry positions.
+    HistoryStreamInvalid,
+    /// Early lineage shape or late endpoint/self-link/cycle failure.
+    LineageInvalid,
+    /// A later decoded occurrence reuses a record ID with different canonical content.
+    HistoryDuplicateRecordId,
 }
 
 impl ErrorCode {
@@ -71,6 +77,9 @@ impl ErrorCode {
             Self::HistoryBoundaryIncomparable => "history.boundary_incomparable",
             Self::ScopeInvalid => "scope.invalid",
             Self::ScopeQueryInvalid => "scope.query_invalid",
+            Self::HistoryStreamInvalid => "history.stream_invalid",
+            Self::LineageInvalid => "lineage.invalid",
+            Self::HistoryDuplicateRecordId => "history.duplicate_record_id",
         }
     }
 }
@@ -84,6 +93,8 @@ pub struct Error {
     pub argument: Option<String>,
     /// Bounded diagnostic context; not part of the shared equality contract.
     pub detail: String,
+    /// Blocking store position for a projection entry failure; never a JSON byte offset.
+    pub position: Option<i128>,
 }
 
 impl Error {
@@ -92,6 +103,7 @@ impl Error {
             code,
             argument: None,
             detail: String::new(),
+            position: None,
         }
     }
 
@@ -106,6 +118,11 @@ impl Error {
         }
         self
     }
+
+    pub(crate) fn positioned(mut self, position: i128) -> Self {
+        self.position = Some(position);
+        self
+    }
 }
 
 impl fmt::Display for Error {
@@ -113,6 +130,9 @@ impl fmt::Display for Error {
         write!(f, "{}", self.code.as_str())?;
         if let Some(name) = &self.argument {
             write!(f, " (argument {name})")?;
+        }
+        if let Some(position) = self.position {
+            write!(f, " (store position {position})")?;
         }
         if !self.detail.is_empty() {
             write!(f, ": {}", self.detail)?;

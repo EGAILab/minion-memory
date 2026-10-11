@@ -7,7 +7,7 @@ name = "minion-memory"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.97"
-description = "Project Mneme Layers 01-02: portable values, history envelopes and MemoryScope"
+description = "Project Mneme Layers 01-03: portable values, history, scope and canonical projection"
 publish = false
 
 [dependencies]
