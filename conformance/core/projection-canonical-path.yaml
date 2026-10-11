@@ -4,7 +4,7 @@ family: core
 layer: '03'
 status: DRAFT
 title: One deterministic, fail-safe projection from admitted records; atomic failure names the position
-description: PROJ-001, HIST-001; Owner G-066..G-074 (reference/governance/2026-10-11-owner-layer03-start.md).
+description: PROJ-001, HIST-001; Owner G-066..G-075 (reference/governance/2026-10-11-owner-layer03-start.md).
 requirements:
 - PROJ-001
 - HIST-001
