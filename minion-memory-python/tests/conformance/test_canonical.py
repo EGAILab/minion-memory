@@ -131,7 +131,12 @@ class _StoreRun:
         assert self.store is not None
         if operation == "create_store":
             self.store.create_store(_arg(params, "store_id"))
-            self.clocks[params["store_id"]] = iter(params["clock"])
+            # The fixture belongs to the store the argument names, native or JSON text (WP04-CR-010).
+            created = (
+                core.decode_json(params["store_id_json"]) if "store_id_json" in params else params["store_id"]
+            )
+            assert isinstance(created, str)
+            self.clocks[created] = iter(params["clock"])
             return {"result": "created"}
         if operation == "store_tail":
             return {"boundary": self.store.store_tail(_arg(params, "store_id"))}

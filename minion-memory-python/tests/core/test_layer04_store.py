@@ -15,9 +15,15 @@ import pgdb
 import psycopg
 import pytest
 
-from minion_memory.core import MnemeValidationError
+from minion_memory.core import JsonText, MnemeValidationError
 from minion_memory.persistence import SCHEMA_OPEN_LOCK_KEY, ClockDefectError, PostgresHistoryStore
-from minion_memory.persistence.postgres import _DDL
+from minion_memory.persistence.postgres import (
+    _COLUMNS_SQL,
+    _CONSTRAINTS_SQL,
+    _DDL,
+    _V1_COLUMNS,
+    _V1_CONSTRAINTS,
+)
 
 MAX = 2**53 - 1
 T = "2026-10-11T08:00:00.000000Z"
@@ -418,3 +424,145 @@ def test_reads_during_commits_see_one_snapshot_of_whole_commits() -> None:
         for t in threads:
             t.join()
         assert problems == []
+
+
+# ------------------------------------------------------------------------------- remediation (CR-008..011)
+
+
+@pytest.mark.parametrize(
+    "damage",
+    [
+        "ALTER TABLE mneme_schema RENAME COLUMN version TO revision",
+        "ALTER TABLE mneme_store DROP COLUMN tail",
+        "ALTER TABLE mneme_store ALTER COLUMN tail TYPE integer",
+        "ALTER TABLE mneme_store ALTER COLUMN tail DROP DEFAULT",
+        "ALTER TABLE mneme_record ALTER COLUMN envelope DROP NOT NULL",
+        "ALTER TABLE mneme_record ADD COLUMN extra text",
+        "ALTER TABLE mneme_record DROP CONSTRAINT mneme_record_store_id_record_id_key",
+        "ALTER TABLE mneme_store DROP CONSTRAINT mneme_store_tail_check",
+        "ALTER TABLE mneme_operation DROP CONSTRAINT mneme_operation_store_id_fkey",
+        # two schema rows: only possible once the singleton key and check are gone
+        "ALTER TABLE mneme_schema DROP CONSTRAINT mneme_schema_pkey;"
+        " ALTER TABLE mneme_schema DROP CONSTRAINT mneme_schema_singleton_check;"
+        " INSERT INTO mneme_schema VALUES (false, 1)",
+    ],
+)
+def test_open_rejects_a_malformed_v1_structure_and_changes_nothing(damage: str) -> None:
+    with pgdb.fresh_backend() as params:
+        PostgresHistoryStore.open(params, CountingClock()).close()
+        with psycopg.connect(**params) as c:  # type: ignore[arg-type]
+            c.execute(damage)
+            c.commit()
+            before = c.execute(_COLUMNS_SQL).fetchall(), c.execute(_CONSTRAINTS_SQL).fetchall()
+        assert (
+            code(lambda: PostgresHistoryStore.open(params, CountingClock()))
+            == "persistence.schema_incompatible"
+        )
+        with psycopg.connect(**params) as c:  # type: ignore[arg-type]
+            assert (c.execute(_COLUMNS_SQL).fetchall(), c.execute(_CONSTRAINTS_SQL).fetchall()) == before
+
+
+def test_a_fresh_v1_schema_matches_the_pinned_catalog_shape() -> None:
+    with pgdb.fresh_backend() as params:
+        PostgresHistoryStore.open(params, CountingClock()).close()
+        with psycopg.connect(**params) as c:  # type: ignore[arg-type]
+            assert tuple(tuple(r) for r in c.execute(_COLUMNS_SQL)) == _V1_COLUMNS
+            assert tuple(tuple(r) for r in c.execute(_CONSTRAINTS_SQL)) == _V1_CONSTRAINTS
+
+
+class GatedClock(CountingClock):
+    """Signals when a sample begins and holds it until released, to fix an interleaving."""
+
+    def __init__(self) -> None:
+        self.sampling, self.release = threading.Event(), threading.Event()
+        super().__init__(self._gate)
+
+    def _gate(self) -> None:
+        self.sampling.set()
+        assert self.release.wait(30)
+
+
+def test_overlapping_identical_retries_on_one_handle_share_one_commit_and_receipt() -> None:
+    clock = GatedClock()
+    with store(clock) as (s, params):
+        results: list[object] = []
+
+        def commit() -> None:
+            try:
+                results.append(s.commit_history("s", WRITER, op("same"), [draft("o-1")]))
+            except BaseException as error:
+                results.append(error)
+
+        first = threading.Thread(target=commit)
+        first.start()
+        assert clock.sampling.wait(30)  # the first attempt is inside its transaction
+        second = threading.Thread(target=commit)
+        second.start()
+        second.join(0.5)
+        assert second.is_alive()  # waits for the handle instead of failing
+        clock.release.set()
+        first.join(30)
+        second.join(30)
+        assert len(results) == 2 and all(isinstance(r, dict) for r in results)
+        assert results[0] == results[1] and clock.calls == 1
+        assert counts(params) == (1, 1, 1)
+
+
+def test_overlapping_mixed_operations_on_one_handle_all_succeed() -> None:
+    clock = GatedClock()
+    with store(clock) as (s, _):
+        outcomes: dict[str, object] = {}
+
+        def run(name: str, call: Callable[[], object]) -> threading.Thread:
+            def body() -> None:
+                try:
+                    outcomes[name] = call()
+                except BaseException as error:
+                    outcomes[name] = error
+
+            thread = threading.Thread(target=body)
+            thread.start()
+            return thread
+
+        writer = run("commit", lambda: s.commit_history("s", WRITER, op("a"), [draft("o-1")]))
+        assert clock.sampling.wait(30)
+        others = [
+            run("other", lambda: s.commit_history("s", WRITER, op("b"), [draft("o-2")])),
+            run("read", lambda: s.read_history("s", {"store_id": "s", "position": 0}, 10)),
+            run("tail", lambda: s.store_tail("s")),
+            run("create", lambda: s.create_store("t")),
+        ]
+        clock.hook = None  # later samples do not wait
+        clock.release.set()
+        for thread in [writer, *others]:
+            thread.join(30)
+        assert not any(isinstance(v, BaseException) for v in outcomes.values()), outcomes
+        assert outcomes["commit"]["first_position"] == 1  # type: ignore[index]
+        assert s.store_tail("s") == {"store_id": "s", "position": 2}
+
+
+@pytest.mark.parametrize(
+    ("since", "limit", "expected"),
+    [
+        ({"store_id": "s"}, 1, ("history.boundary_invalid", "since")),
+        ({"store_id": "s", "position": -1}, 1, ("history.boundary_invalid", "since")),
+        ({"store_id": "S", "position": 0}, 1, ("history.boundary_invalid", "since")),
+        ({"store_id": "s", "position": 0}, True, ("persistence.limit_invalid", "limit")),
+        ({"store_id": "s", "position": 0}, MAX + 1, ("value.integer_out_of_range", "limit")),
+        ({"store_id": "s"}, 0, ("history.boundary_invalid", "since")),  # since precedes limit (stage 3 order)
+    ],
+)
+def test_read_rejects_malformed_arguments_with_their_argument_and_no_position(
+    since: object, limit: object, expected: tuple[str, str]
+) -> None:
+    with store() as (s, _):
+        with pytest.raises(MnemeValidationError) as info:
+            s.read_history("s", since, limit)
+        assert (info.value.code, info.value.argument, info.value.position) == (*expected, None)
+
+
+def test_read_json_seam_reports_generic_stages_before_typed_checks() -> None:
+    with store() as (s, _):
+        with pytest.raises(MnemeValidationError) as info:
+            s.read_history(JsonText('"S"'), JsonText('{"store_id": "s"}'), JsonText("1e400"))
+        assert (info.value.code, info.value.argument) == ("value.number_not_finite", "limit")

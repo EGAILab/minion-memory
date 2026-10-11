@@ -10,7 +10,9 @@ schema-open advisory lock (WP04-CR-007).
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+import threading
+from collections.abc import Callable, Iterator, Mapping
+from contextlib import contextmanager
 from typing import Any
 
 import psycopg
@@ -28,6 +30,57 @@ SCHEMA_VERSION = 1
 SCHEMA_OPEN_LOCK_KEY = -4695452043516644990
 
 _TABLES = ("mneme_operation", "mneme_record", "mneme_schema", "mneme_store")
+# The catalog shape of schema version 1 created by `_DDL` (WP04-CR-008): per table, its columns in
+# order as (name, type, NOT NULL, default) and its constraints as (kind, definition). Compared before
+# any query relies on a column, so a malformed shape is `persistence.schema_incompatible`, never a
+# leaked catalog error or a usable-looking handle. Constraint text is PostgreSQL's
+# `pg_get_constraintdef` on the reference backend (G-081); if a server release rendered it
+# differently, open fails visibly as incompatible rather than accepting an unverified shape.
+_V1_COLUMNS = (
+    ("mneme_operation", "store_id", "text", True, None),
+    ("mneme_operation", "source_namespace", "text", True, None),
+    ("mneme_operation", "source_operation_id", "bytea", True, None),
+    ("mneme_operation", "mutation", "bytea", True, None),
+    ("mneme_operation", "first_position", "bigint", True, None),
+    ("mneme_operation", "last_position", "bigint", True, None),
+    ("mneme_operation", "recorded_at", "text", True, None),
+    ("mneme_record", "store_id", "text", True, None),
+    ("mneme_record", "position", "bigint", True, None),
+    ("mneme_record", "record_id", "text", True, None),
+    ("mneme_record", "profile", "text", True, None),
+    ("mneme_record", "record_type", "text", True, None),
+    ("mneme_record", "schema_version", "bigint", True, None),
+    ("mneme_record", "envelope", "bytea", True, None),
+    ("mneme_schema", "singleton", "boolean", True, "true"),
+    ("mneme_schema", "version", "integer", True, None),
+    ("mneme_store", "store_id", "text", True, None),
+    ("mneme_store", "tail", "bigint", True, "0"),
+)
+_V1_CONSTRAINTS = (
+    ("mneme_operation", "f", "FOREIGN KEY (store_id) REFERENCES mneme_store(store_id)"),
+    ("mneme_operation", "p", "PRIMARY KEY (store_id, source_namespace, source_operation_id)"),
+    ("mneme_record", "c", 'CHECK ((("position" >= 1) AND ("position" <= \'9007199254740991\'::bigint)))'),
+    ("mneme_record", "f", "FOREIGN KEY (store_id) REFERENCES mneme_store(store_id)"),
+    ("mneme_record", "p", 'PRIMARY KEY (store_id, "position")'),
+    ("mneme_record", "u", "UNIQUE (store_id, record_id)"),
+    ("mneme_schema", "c", "CHECK (singleton)"),
+    ("mneme_schema", "p", "PRIMARY KEY (singleton)"),
+    ("mneme_store", "c", "CHECK (((tail >= 0) AND (tail <= '9007199254740991'::bigint)))"),
+    ("mneme_store", "p", "PRIMARY KEY (store_id)"),
+)
+_COLUMNS_SQL = (
+    "SELECT c.relname, a.attname, format_type(a.atttypid, a.atttypmod), a.attnotnull,"
+    " pg_get_expr(d.adbin, d.adrelid) FROM pg_attribute a JOIN pg_class c ON c.oid = a.attrelid"
+    " LEFT JOIN pg_attrdef d ON d.adrelid = a.attrelid AND d.adnum = a.attnum"
+    " WHERE c.relnamespace = current_schema()::regnamespace AND c.relname LIKE 'mneme\\_%'"
+    " AND c.relkind = 'r' AND a.attnum > 0 AND NOT a.attisdropped ORDER BY 1, a.attnum"
+)
+_CONSTRAINTS_SQL = (
+    "SELECT c.relname, con.contype, pg_get_constraintdef(con.oid) FROM pg_constraint con"
+    " JOIN pg_class c ON c.oid = con.conrelid"
+    " WHERE c.relnamespace = current_schema()::regnamespace AND c.relname LIKE 'mneme\\_%'"
+    " ORDER BY 1, 2, 3"
+)
 _DDL = (
     """CREATE TABLE mneme_schema (singleton boolean PRIMARY KEY DEFAULT true CHECK (singleton),
                                version integer NOT NULL)""",
@@ -136,6 +189,10 @@ class PostgresHistoryStore:
     def __init__(self, connection: psycopg.Connection[Any], clock: Clock) -> None:
         self._connection = connection
         self._clock = clock
+        # One connection serves the handle, so overlapping public calls on it are serialized over
+        # their whole transaction lifecycle (isolation setup to commit or rollback); the store-row
+        # lock then serializes across handles (G-084, WP04-CR-009).
+        self._serial = threading.Lock()
 
     # ----------------------------------------------------------------------------- open (WP04-CR-007)
 
@@ -160,9 +217,13 @@ class PostgresHistoryStore:
                     for statement in _DDL:
                         connection.execute(statement)
                     connection.execute("INSERT INTO mneme_schema (version) VALUES (%s)", (SCHEMA_VERSION,))
-                elif tuple(names) != _TABLES or connection.execute(
-                    "SELECT array_agg(version) FROM mneme_schema"
-                ).fetchone() != ([SCHEMA_VERSION],):
+                elif (
+                    tuple(names) != _TABLES
+                    or tuple(tuple(row) for row in connection.execute(_COLUMNS_SQL)) != _V1_COLUMNS
+                    or tuple(tuple(row) for row in connection.execute(_CONSTRAINTS_SQL)) != _V1_CONSTRAINTS
+                    or connection.execute("SELECT array_agg(version) FROM mneme_schema").fetchone()
+                    != ([SCHEMA_VERSION],)
+                ):
                     raise MnemeValidationError(
                         "persistence.schema_incompatible", f"mneme tables {names} are not schema version 1"
                     )
@@ -180,10 +241,13 @@ class PostgresHistoryStore:
     def __exit__(self, *_: object) -> None:
         self.close()
 
-    def _transaction(self, level: IsolationLevel, read_only: bool = False) -> Any:
-        self._connection.isolation_level = level
-        self._connection.read_only = read_only
-        return self._connection.transaction()
+    @contextmanager
+    def _transaction(self, level: IsolationLevel, read_only: bool = False) -> Iterator[None]:
+        with self._serial:
+            self._connection.isolation_level = level
+            self._connection.read_only = read_only
+            with self._connection.transaction():
+                yield
 
     # ----------------------------------------------------------------------------- the four operations
 

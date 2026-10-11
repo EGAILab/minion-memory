@@ -157,6 +157,30 @@ when:
       record_type: attempt
       schema_version: 1
       compatibility: required
+- create_store:
+    case: 'JSON seam: a store created from JSON text only'
+    store_id_json: '"store-3"'
+    clock:
+    - '2026-10-11T08:00:00.000000Z'
+- commit_history:
+    case: the JSON-created store commits from position 1 with its own clock
+    store_id: store-3
+    writer:
+      profile: learning
+      recognized:
+      - record_type: attempt
+        schema_version: 1
+      - record_type: evaluation
+        schema_version: 1
+    operation:
+      source_namespace: app
+      source_operation_id: c-1
+    records:
+    - record_id: o-1
+      profile: learning
+      record_type: attempt
+      schema_version: 1
+      compatibility: required
 expect:
   results:
   - case: create an empty store; its clock yields T1, then T2 spelled with an offset, then T3
@@ -275,6 +299,24 @@ expect:
         schema_version: 1
         compatibility: required
         recorded_at: '2026-10-11T10:00:00.000000Z'
+  - case: 'JSON seam: a store created from JSON text only'
+    result: created
+  - case: the JSON-created store commits from position 1 with its own clock
+    receipt:
+      store_id: store-3
+      operation:
+        source_namespace: app
+        source_operation_id: c-1
+      first_position: 1
+      last_position: 1
+      recorded_at: '2026-10-11T08:00:00.000000Z'
+      records:
+      - record_id: o-1
+        profile: learning
+        record_type: attempt
+        schema_version: 1
+        compatibility: required
+        recorded_at: '2026-10-11T08:00:00.000000Z'
 negative_controls:
 - a failed commit consumes a position or a clock instant
 - positions follow wall-clock order instead of commit order
