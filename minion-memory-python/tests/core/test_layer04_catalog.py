@@ -1389,7 +1389,8 @@ _TAIL = lambda r: r[0] == "mneme_store" and r[1] == "tail"  # noqa: E731
 _RECORD_PK = lambda r: r[0] == "mneme_record" and r[21] == ("p",)  # noqa: E731
 _INDEX_ATTRIBUTE = lambda r: r[0] == "mneme_store" and r[3] == 1  # noqa: E731
 
-PREDICATES.update(
+# Its own dict and test: a parametrize decorator reads its argument list once, when it is defined.
+EXTENSION_PREDICATES: dict[str, tuple[str, Catalog]] = dict(
     {
         # columns (classification rev. 3 §8.5.1, rev. 4 §9.2.1)
         "O006 an active missing-value cache": ("columns", _vary("columns", _set(16, True), _TAIL)),
@@ -1523,6 +1524,18 @@ PREDICATES.update(
         ),
     }
 )
+
+
+@pytest.mark.parametrize("row", sorted(EXTENSION_PREDICATES))
+def test_predicate_an_extension_difference_is_refused(row: str) -> None:
+    part, synthesized = EXTENSION_PREDICATES[row]
+    assert mismatch(synthesized, V1_CATALOG) == part
+
+
+def test_predicate_every_extension_predicate_is_collected() -> None:
+    """Guard: the extension predicates are a separate parametrized set, all of them collected."""
+    # 7 column, 6 relation, 13 index, 20 index-attribute, 8 member and 1 label difference
+    assert len(EXTENSION_PREDICATES) == 55 and not set(EXTENSION_PREDICATES) & set(PREDICATES)
 
 
 def test_predicate_dropped_column_residue_keeps_the_relnatts_invariant() -> None:
