@@ -1517,6 +1517,16 @@ EXTENSION_PREDICATES: dict[str, tuple[str, Catalog]] = dict(
                 ),
             ),
         ),
+        # one row in each part the boundary also covers publicly (run 3: comparison-skip witnesses)
+        "part inheritance alone": (
+            "inheritance",
+            dataclasses.replace(V1_CATALOG, inheritance=(("inherits",),)),
+        ),
+        "part policies alone": (
+            "policies",
+            dataclasses.replace(V1_CATALOG, policies=(("mneme_store", "p"),)),
+        ),
+        "part rules alone": ("rules", dataclasses.replace(V1_CATALOG, rules=(("mneme_store", "r"),))),
         # the boundary (G-094, G-097)
         "CH16 a security label": (
             "boundary",
@@ -1534,8 +1544,8 @@ def test_predicate_an_extension_difference_is_refused(row: str) -> None:
 
 def test_predicate_every_extension_predicate_is_collected() -> None:
     """Guard: the extension predicates are a separate parametrized set, all of them collected."""
-    # 7 column, 6 relation, 13 index, 20 index-attribute, 8 member and 1 label difference
-    assert len(EXTENSION_PREDICATES) == 55 and not set(EXTENSION_PREDICATES) & set(PREDICATES)
+    # 7 column, 6 relation, 13 index, 20 index-attribute, 8 member, 3 single-part and 1 label difference
+    assert len(EXTENSION_PREDICATES) == 58 and not set(EXTENSION_PREDICATES) & set(PREDICATES)
 
 
 def test_predicate_dropped_column_residue_keeps_the_relnatts_invariant() -> None:
@@ -1621,6 +1631,13 @@ FETCH_CONTROLS: dict[str, tuple[str, dict[str, str], str, str]] = {
     "atthasmissing flag only": ("pg_attribute", {"atthasmissing": "true"}, _TAIL_ATTRIBUTE, "columns"),
     "type copy length": ("pg_attribute", {"attlen": "4::int2"}, _TAIL_ATTRIBUTE, "columns"),
     "stored offset cache": ("pg_attribute", {"attcacheoff": "8"}, _TAIL_ATTRIBUTE, "columns"),
+    # an unlogged table (its TOAST relation keeps its own persistence in this projection)
+    "table persistence": (
+        "pg_class",
+        {"relpersistence": f"'u'{_CHAR}"},
+        "x.oid = 'mneme_store'::regclass",
+        "relations",
+    ),
     # attmissingval is anyarray: the supplied value is a genuine cached value of an unrelated table
     # (FETCH_SETUP), so only the stored value differs, not the flag.
     "cached value only": (
@@ -1734,6 +1751,63 @@ def test_fetch_binding_control_the_fetch_reports_a_supplied_row(control: str) ->
     """[F] (CR-014): an added catalog row reaches the comparison."""
     name, added, part = ROW_CONTROLS[control]
     _projected(name, lambda _: f"SELECT * FROM pg_catalog.{name} UNION ALL {added}", part)
+
+
+# A genuine catalog row of an unrelated object, added with one pointer redirected to a v1 table. Each
+# changes only the one part that reads that catalog (no dependency row is added), so it isolates that
+# part's read where the public setups are also refused by the boundary (gate run 3).
+PATCHED_ROW_CONTROLS: dict[str, tuple[str, dict[str, str], str, list[str], str]] = {
+    # name: (catalog, patch, which row to copy, setup of the unrelated object, the part that must differ)
+    "a user trigger row": (
+        "pg_trigger",
+        {"tgisinternal": "false"},
+        "x.tgrelid = 'mneme_record'::regclass AND x.tgfoid = 'pg_catalog.\"RI_FKey_check_ins\"'::regproc",
+        [],
+        "triggers",
+    ),
+    "a rule row": (
+        "pg_rewrite",
+        {"ev_class": "'mneme_store'::regclass"},
+        "x.ev_class = 'probe_rt'::regclass",
+        ["CREATE TABLE probe_rt (a integer)", "CREATE RULE probe_r AS ON INSERT TO probe_rt DO ALSO NOTHING"],
+        "rules",
+    ),
+    "a policy row": (
+        "pg_policy",
+        {"polrelid": "'mneme_store'::regclass"},
+        "x.polrelid = 'probe_pt'::regclass",
+        ["CREATE TABLE probe_pt (a integer)", "CREATE POLICY probe_p ON probe_pt USING (true)"],
+        "policies",
+    ),
+    "an index row without a constraint": (
+        "pg_index",
+        {"indrelid": "'mneme_record'::regclass", "indisprimary": "false"},
+        "x.indrelid = 'probe_it'::regclass",
+        ["CREATE TABLE probe_it (a integer PRIMARY KEY)"],
+        "indexes",
+    ),
+    "an inheritance row": (
+        "pg_inherits",
+        {"inhparent": "'mneme_store'::regclass"},
+        "x.inhrelid = 'probe_kid'::regclass",
+        ["CREATE TABLE probe_parent (a integer)", "CREATE TABLE probe_kid () INHERITS (probe_parent)"],
+        "inheritance",
+    ),
+}
+
+
+@pytest.mark.parametrize("control", sorted(PATCHED_ROW_CONTROLS))
+def test_fetch_binding_control_the_fetch_reports_a_supplied_patched_row(control: str) -> None:
+    """[F] (CR-014): a catalog row naming a v1 table reaches the part that reads that catalog."""
+    name, patch, which, setup, part = PATCHED_ROW_CONTROLS[control]
+
+    def projection(c: psycopg.Connection[Any]) -> str:
+        for statement in setup:
+            c.execute(statement)
+        added = f"{_override(c, name, patch, which)} WHERE {which}"
+        return f"SELECT * FROM pg_catalog.{name} UNION ALL {added}"
+
+    _projected(name, projection, part)
 
 
 # ------------------------------------------------------------------------------- catalog inventory

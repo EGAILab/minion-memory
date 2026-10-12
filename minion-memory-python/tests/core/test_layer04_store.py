@@ -357,9 +357,13 @@ def _parallel(n: int, work: Callable[[int], Any]) -> list[Any]:
 def test_parallel_writers_get_gapless_disjoint_ranges() -> None:
     with store() as (_, params):
         clock = CountingClock()
+        # Opens are serialized by the schema-open lock, so every writer opens first and all of them
+        # start committing together; otherwise each could finish before the next one has opened.
+        started = threading.Barrier(8, timeout=120)
 
         def writer(i: int) -> list[tuple[int, int]]:
             with PostgresHistoryStore.open(params, clock) as s:
+                started.wait()
                 return [
                     (r["first_position"], r["last_position"])
                     for k in range(15)
