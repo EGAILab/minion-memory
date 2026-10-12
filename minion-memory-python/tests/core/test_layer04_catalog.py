@@ -1621,6 +1621,17 @@ FETCH_CONTROLS: dict[str, tuple[str, dict[str, str], str, str]] = {
     "atthasmissing flag only": ("pg_attribute", {"atthasmissing": "true"}, _TAIL_ATTRIBUTE, "columns"),
     "type copy length": ("pg_attribute", {"attlen": "4::int2"}, _TAIL_ATTRIBUTE, "columns"),
     "stored offset cache": ("pg_attribute", {"attcacheoff": "8"}, _TAIL_ATTRIBUTE, "columns"),
+    # attmissingval is anyarray: the supplied value is a genuine cached value of an unrelated table
+    # (FETCH_SETUP), so only the stored value differs, not the flag.
+    "cached value only": (
+        "pg_attribute",
+        {
+            "attmissingval": "(SELECT m.attmissingval FROM pg_catalog.pg_attribute m"
+            " WHERE m.attrelid = 'probe_missing'::regclass AND m.attname = 'b')"
+        },
+        _TAIL_ATTRIBUTE,
+        "columns",
+    ),
     "index attribute descriptor": (
         "pg_attribute",
         {"attnotnull": "true"},
@@ -1699,7 +1710,23 @@ def _projected(name: str, projection: Callable[[psycopg.Connection[Any]], str], 
 def test_fetch_binding_control_the_fetch_reports_a_supplied_field(control: str) -> None:
     """[F] (CR-014): the actual fetch reads the property, never an expected constant."""
     name, patch, where, part = FETCH_CONTROLS[control]
-    _projected(name, lambda c: _override(c, name, patch, where), part)
+
+    def projection(c: psycopg.Connection[Any]) -> str:
+        for statement in FETCH_SETUP.get(control, []):
+            c.execute(statement)
+        return _override(c, name, patch, where)
+
+    _projected(name, projection, part)
+
+
+# Unrelated objects some controls draw genuine values from; they record no dependency on the island.
+FETCH_SETUP: dict[str, list[str]] = {
+    "cached value only": [
+        "CREATE TABLE probe_missing (a integer)",
+        "INSERT INTO probe_missing VALUES (1)",
+        "ALTER TABLE probe_missing ADD COLUMN b bigint DEFAULT 7",
+    ],
+}
 
 
 @pytest.mark.parametrize("control", sorted(ROW_CONTROLS))
