@@ -1,15 +1,19 @@
 """CE-04-01 witnesses: the v1 catalog trust boundary of the PostgreSQL reference backend.
 
-Oracles come from the agreed checkpoint (`assurance/convergence/CE-04-01-classification.md` rev. 2,
-Codex APPROVED `bfb6cad3`) and `spec/persistence.md` ("Open and initialize", "v1 catalog contract",
-"Trust scope"; Owner G-089..G-092). Row IDs are the characterization's (`0f7ac1bf`) and the
-challenge additions (CH..). Four kinds of evidence are kept apart, as the checkpoint requires:
+Oracles come from the agreed checkpoint (`assurance/convergence/CE-04-01-classification.md`,
+revisions 2-5; Codex APPROVED `bfb6cad3` and `955d91f6`) and `spec/persistence.md` ("Open and
+initialize", "v1 catalog contract", "Trust scope"; Owner G-089..G-098). Row IDs are the
+characterization's (`0f7ac1bf`; extension E001..E112 and O001..O085 at `d8262cf5`) and the challenge
+additions (CH..). Five kinds of evidence are kept apart, as the checkpoint requires:
 
-* **public** - a fresh schema, the row's setup, then the public `open` and protocol N;
+* **public** - a fresh schema, the row's setup, then the public `open` and protocol N (E004 has its
+  own oracle);
 * **direct engine control** - CH12, the store's actual SQL texts in a poisoned session;
 * **transaction control** - initialization pins and postcondition, and the X09 lock observation;
 * **predicate** - the pure comparison over a synthesized catalog, for states this host or an
-  ordinary role cannot construct. Never reported as a public execution.
+  ordinary role cannot construct. Never reported as a public execution;
+* **fetch binding [F]** (CR-014) - the actual fetch over a catalog relation read through a
+  projection that overrides one field or adds one row. Never a public or physical execution.
 """
 
 from __future__ import annotations
@@ -34,7 +38,9 @@ from minion_memory.persistence import SCHEMA_OPEN_LOCK_KEY, PostgresHistoryStore
 from minion_memory.persistence._v1_catalog import V1_CATALOG
 from minion_memory.persistence.catalog import (
     ENVIRONMENT_SQL,
+    MEMBER_EXCLUSIONS,
     NAMESPACE_SQL,
+    NORMALIZED,
     QUERIES,
     Catalog,
     environment_mismatch,
@@ -445,6 +451,176 @@ REFUSED: dict[str, list[str]] = {
     "I13": ["ALTER TABLE mneme_record REPLICA IDENTITY FULL"],
     "I19": ["CREATE INDEX probe_idx ON mneme_record ((record_id::integer))"],
     "I20": ["CREATE INDEX probe_idx ON mneme_record (record_id) WHERE record_id::integer > 0"],
+    # Characterization extension (d8262cf5), literal setups; classification rev. 3-5 §8.2.
+    # cached missing values (CR-012)
+    "E002": [
+        "ALTER TABLE mneme_store DROP COLUMN tail",
+        "ALTER TABLE mneme_store ADD COLUMN tail bigint NOT NULL DEFAULT 1 CHECK(tail BETWEEN 0 AND "
+        "9007199254740991)",
+        "ALTER TABLE mneme_store ALTER COLUMN tail SET DEFAULT 0",
+    ],
+    "E003": [
+        "ALTER TABLE mneme_store DROP COLUMN tail",
+        "ALTER TABLE mneme_store ADD COLUMN tail bigint NOT NULL DEFAULT 0 CHECK(tail BETWEEN 0 AND "
+        "9007199254740991)",
+    ],
+    "E005": [
+        "ALTER TABLE mneme_schema DROP COLUMN version",
+        "ALTER TABLE mneme_schema ADD COLUMN version integer NOT NULL DEFAULT 2",
+        "ALTER TABLE mneme_schema ALTER COLUMN version DROP DEFAULT",
+    ],
+    "E006": [
+        "ALTER TABLE mneme_schema DROP COLUMN version",
+        "ALTER TABLE mneme_schema ADD COLUMN version integer NOT NULL DEFAULT 1",
+        "ALTER TABLE mneme_schema ALTER COLUMN version DROP DEFAULT",
+    ],
+    "E110": [
+        "ALTER TABLE mneme_store ALTER COLUMN store_id SET STATISTICS 200",
+        "ALTER TABLE mneme_store DROP COLUMN tail",
+        "ALTER TABLE mneme_store ADD COLUMN tail bigint NOT NULL DEFAULT 1 CHECK(tail BETWEEN 0 AND "
+        "9007199254740991)",
+        "ALTER TABLE mneme_store ALTER COLUMN tail SET DEFAULT 0",
+    ],
+    # an outside constraint trigger naming a table (CR-013)
+    "E028": [
+        "CREATE TABLE outside_t(sid text)",
+        "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+        "CREATE CONSTRAINT TRIGGER outside_constraint AFTER INSERT ON outside_t FROM mneme_store "
+        "DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION noop()",
+    ],
+    "E050": [
+        "CREATE TABLE outside_t(sid text)",
+        "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+        "CREATE CONSTRAINT TRIGGER outside_constraint AFTER INSERT ON outside_t FROM mneme_schema FOR "
+        "EACH ROW EXECUTE FUNCTION noop()",
+    ],
+    "E051": [
+        "CREATE TABLE outside_t(sid text)",
+        "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+        "CREATE CONSTRAINT TRIGGER outside_constraint AFTER INSERT ON outside_t FROM mneme_record FOR "
+        "EACH ROW EXECUTE FUNCTION noop()",
+    ],
+    "E052": [
+        "CREATE TABLE outside_t(sid text)",
+        "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+        "CREATE CONSTRAINT TRIGGER outside_constraint AFTER INSERT ON outside_t FROM mneme_operation FOR "
+        "EACH ROW EXECUTE FUNCTION noop()",
+    ],
+    "E097": [
+        "CREATE SCHEMA {ns}_ref",
+        "CREATE TABLE {ns}_ref.t(v text)",
+        "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+        "CREATE CONSTRAINT TRIGGER outside_constraint AFTER INSERT ON {ns}_ref.t FROM mneme_store FOR "
+        "EACH ROW EXECUTE FUNCTION noop()",
+    ],
+    "E111": [
+        "GRANT SELECT(tail) ON mneme_store TO PUBLIC",
+        "CREATE TABLE outside_t(v text)",
+        "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+        "CREATE CONSTRAINT TRIGGER outside_constraint AFTER INSERT ON outside_t FROM mneme_store FOR EACH "
+        "ROW EXECUTE FUNCTION noop()",
+    ],
+    "E112": [
+        "CREATE SCHEMA {ns}_else",
+        "CREATE TABLE {ns}_else.mneme_store(v text)",
+        "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+        "CREATE CONSTRAINT TRIGGER outside_constraint AFTER INSERT ON {ns}_else.mneme_store FROM "
+        "mneme_store FOR EACH ROW EXECUTE FUNCTION noop()",
+    ],
+    # a recorded dependency on the island (G-094, G-095)
+    "E021": ["CREATE VIEW outside_view AS SELECT * FROM mneme_store"],
+    "E022": ["CREATE MATERIALIZED VIEW outside_mat AS SELECT * FROM mneme_store"],
+    "E023": [
+        "CREATE TABLE outside_log(sid text)",
+        "CREATE RULE outside_rule AS ON INSERT TO outside_log DO ALSO INSERT INTO mneme_store(store_id) "
+        "VALUES(NEW.sid)",
+    ],
+    "E024": ["CREATE SEQUENCE outside_seq OWNED BY mneme_store.tail"],
+    "E025": ["CREATE PUBLICATION {ns}_pub FOR TABLE mneme_store"],
+    "E030": ["CREATE TABLE outside_row(v mneme_store)"],
+    "E031": [
+        "CREATE FUNCTION outside_fun(mneme_store) RETURNS bigint LANGUAGE SQL AS $$ SELECT $1.tail $$",
+    ],
+    "E032": [
+        "CREATE FUNCTION outside_fun() RETURNS bigint LANGUAGE SQL BEGIN ATOMIC SELECT tail FROM "
+        "mneme_store LIMIT 1; END",
+    ],
+    "E034": ["CREATE TABLE outside_default(v mneme_store DEFAULT ROW('x',0)::mneme_store)"],
+    "E035": ["CREATE TABLE outside_check(v text CHECK(ROW(v,0)::mneme_store IS NOT NULL))"],
+    "E036": [
+        "CREATE TABLE outside_gen(v text,r mneme_store GENERATED ALWAYS AS (ROW(v,0)::mneme_store) STORED)",
+    ],
+    "E037": [
+        "CREATE TABLE outside_expr(v text)",
+        "CREATE INDEX outside_idx ON outside_expr (((ROW(v,0)::mneme_store).tail))",
+    ],
+    "E038": [
+        "CREATE TABLE outside_policy(v text)",
+        "CREATE POLICY p ON outside_policy USING (ROW(v,0)::mneme_store IS NOT NULL)",
+    ],
+    "E039": ["CREATE DOMAIN outside_domain AS mneme_store"],
+    "E040": ["CREATE VIEW outside_arr AS SELECT ARRAY[ROW('x',0)::mneme_store] AS v"],
+    "E057": [
+        "CREATE DOMAIN outside_domain AS mneme_store",
+        "CREATE TABLE outside_arr(v outside_domain[])",
+    ],
+    "E058": [
+        "CREATE FUNCTION outside_fun() RETURNS mneme_store LANGUAGE SQL AS $$ SELECT "
+        "ROW('x',0)::mneme_store $$",
+    ],
+    "E059": [
+        "CREATE FUNCTION outside_state(mneme_store,mneme_store) RETURNS mneme_store LANGUAGE SQL AS $$ "
+        "SELECT $1 $$",
+        "CREATE AGGREGATE outside_agg(mneme_store) (SFUNC=outside_state,STYPE=mneme_store)",
+    ],
+    "E060": [
+        "CREATE FUNCTION outside_eq(mneme_store,mneme_store) RETURNS boolean LANGUAGE SQL IMMUTABLE AS $$ "
+        "SELECT $1.store_id=$2.store_id $$",
+        "CREATE OPERATOR === (LEFTARG=mneme_store,RIGHTARG=mneme_store,FUNCTION=outside_eq)",
+    ],
+    "E061": [
+        "CREATE FUNCTION outside_cast(mneme_store) RETURNS text LANGUAGE SQL AS $$ SELECT $1.store_id $$",
+        "CREATE CAST(mneme_store AS text) WITH FUNCTION outside_cast(mneme_store)",
+    ],
+    "E088": ["CREATE TYPE outside_range AS RANGE (subtype=mneme_store)"],
+    "E093": [
+        "CREATE PROCEDURE outside_proc() LANGUAGE SQL BEGIN ATOMIC SELECT tail FROM mneme_store; END",
+    ],
+    "E094": [
+        "CREATE TABLE outside_t(v text)",
+        "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+        "CREATE CONSTRAINT TRIGGER outside_constraint AFTER INSERT ON outside_t FOR EACH ROW WHEN "
+        "(ROW(NEW.v,0)::mneme_store IS NOT NULL) EXECUTE FUNCTION noop()",
+    ],
+    "E103": ["CREATE DOMAIN outside_domain AS mneme_store CHECK ((VALUE).tail >= 0)"],
+    "E104": [
+        "CREATE FUNCTION outside_variadic(VARIADIC v mneme_store[]) RETURNS integer LANGUAGE SQL AS $$ "
+        "SELECT 1 $$",
+    ],
+    "E105": [
+        "CREATE FUNCTION outside_inout(v text,INOUT x mneme_store) LANGUAGE SQL AS $$ SELECT x $$",
+    ],
+    "E106": [
+        "CREATE FUNCTION outside_state(mneme_store,mneme_store) RETURNS mneme_store LANGUAGE SQL AS $$ "
+        "SELECT $1 $$",
+        "CREATE AGGREGATE outside_agg(mneme_store) "
+        "(SFUNC=outside_state,STYPE=mneme_store,MSFUNC=outside_state,MINVFUNC=outside_state,MSTYPE=mneme_store)",
+    ],
+    "E108": ["CREATE TYPE outside_range AS RANGE (subtype=mneme_store)"],
+    # an island object depending outside it: extension membership (G-094)
+    "E062": [
+        "CREATE EXTENSION hstore",
+        "ALTER EXTENSION hstore ADD TABLE mneme_store",
+    ],
+    "E109": [
+        "CREATE EXTENSION hstore",
+        "ALTER EXTENSION hstore ADD TABLE mneme_store",
+    ],
+    # CH14: the statistics exemption is by dependent class; an owned sequence still refuses
+    "CH14": [
+        "CREATE STATISTICS probe_stats (dependencies) ON store_id, tail FROM mneme_store",
+        "CREATE SEQUENCE probe_seq OWNED BY mneme_store.tail",
+    ],
     # the version row
     "H01": ["UPDATE mneme_schema SET version = 2"],
     "H02": ["DELETE FROM mneme_schema"],
@@ -643,6 +819,102 @@ ACCEPTED: dict[str, tuple[list[str], str]] = {
             "CREATE OPERATOR {ns}.= (LEFTARG = text, RIGHTARG = text, FUNCTION = {ns}.loud_eq)",
         ],
         "-c search_path={ns},pg_catalog",
+    ),
+    # Characterization extension (d8262cf5): exempt or no recorded dependency (G-089, G-094, G-096, G-097)
+    "E011": (
+        [
+            "VACUUM (FREEZE,ANALYZE) mneme_schema",
+            "VACUUM (FREEZE,ANALYZE) mneme_store",
+            "VACUUM (FREEZE,ANALYZE) mneme_record",
+            "VACUUM (FREEZE,ANALYZE) mneme_operation",
+        ],
+        "",
+    ),
+    "E012": (
+        [
+            "REINDEX TABLE mneme_store",
+            "VACUUM FULL mneme_schema",
+        ],
+        "",
+    ),
+    "E013": (
+        [
+            "ALTER TABLE mneme_store ADD COLUMN gone text",
+            "ALTER TABLE mneme_store DROP COLUMN gone",
+        ],
+        "",
+    ),
+    "E014": (
+        [
+            "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+            "CREATE TRIGGER transient AFTER INSERT ON mneme_schema FOR EACH ROW EXECUTE FUNCTION noop()",
+            "DROP TRIGGER transient ON mneme_schema",
+        ],
+        "",
+    ),
+    "E015": (
+        [
+            "CREATE RULE transient AS ON INSERT TO mneme_schema DO ALSO NOTIFY probe",
+            "DROP RULE transient ON mneme_schema",
+        ],
+        "",
+    ),
+    "E016": (
+        [
+            "CREATE TABLE outside_child () INHERITS(mneme_store)",
+            "DROP TABLE outside_child",
+        ],
+        "",
+    ),
+    "E017": (
+        [
+            "GRANT SELECT(tail) ON mneme_store TO PUBLIC",
+            "GRANT SELECT ON mneme_record TO PUBLIC",
+        ],
+        "",
+    ),
+    "E018": (
+        [
+            "COMMENT ON TABLE mneme_store IS 'review'",
+            "COMMENT ON COLUMN mneme_store.tail IS 'review'",
+            "COMMENT ON INDEX mneme_store_pkey IS 'review'",
+        ],
+        "",
+    ),
+    "E020": (
+        [
+            "CREATE STATISTICS outside_stat (dependencies) ON store_id,tail FROM mneme_store",
+        ],
+        "",
+    ),
+    "E033": (
+        [
+            "CREATE FUNCTION outside_fun() RETURNS bigint LANGUAGE SQL AS $$ SELECT tail FROM mneme_store "
+            "LIMIT 1 $$",
+        ],
+        "",
+    ),
+    "E042": (
+        [
+            "CREATE TABLE outside_t(sid text)",
+            "CREATE FUNCTION outside_effect() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN INSERT INTO "
+            "mneme_store(store_id) VALUES(NEW.sid); RETURN NEW; END$$",
+            "CREATE TRIGGER outside_trigger AFTER INSERT ON outside_t FOR EACH ROW EXECUTE FUNCTION "
+            "outside_effect()",
+        ],
+        "",
+    ),
+    "E046": (
+        [
+            "ALTER INDEX mneme_store_pkey RENAME TO outside_name",
+        ],
+        "",
+    ),
+    "E056": (
+        [
+            "CREATE TABLE outside_unrelated(v text)",
+        ],
+        "",
     ),
     # The catalog queries' own operators: a raising user `=` for oid, int2 and name.
     "CH07b": (
@@ -875,12 +1147,15 @@ _POISON_RELATIONS = (
     "pg_type",
     "pg_proc",
     "pg_database",
+    "pg_depend",
+    "pg_seclabel",
+    "pg_statistic_ext",
     "mneme_schema",
     "mneme_store",
     "mneme_record",
     "mneme_operation",
 )
-_POISON_TYPES = ("text", "int8", "int4", "int2", "oid", "bool", "bytea")
+_POISON_TYPES = ("text", "int8", "int4", "int2", "oid", "bool", "bytea", "jsonb")
 
 
 def _poison(connection: psycopg.Connection[Any]) -> None:
@@ -965,6 +1240,7 @@ def _vary(
     rows = getattr(V1_CATALOG, part)
     assert any(where(row) for row in rows)
     changed = tuple(r for r in ((change(row) if where(row) else row) for row in rows) if r is not None)
+    assert changed != rows  # never a vacuous synthesized difference
     return dataclasses.replace(V1_CATALOG, **{part: changed})
 
 
@@ -1058,3 +1334,401 @@ def test_predicate_the_environment(
     version: int, encoding: str, collate: str, ctype: str, accepted: bool
 ) -> None:
     assert (environment_mismatch(version, encoding, collate, ctype) is None) is accepted
+
+
+# ------------------------------------------------------------------------------- E004 (its own oracle)
+
+
+def test_public_e004_a_rewrite_clears_the_cache_and_the_old_row_is_not_audited() -> None:
+    """Classification rev. 4 §9.3 / G-092: the catalog is v1 after the rewrite, so open accepts; the
+    pre-open row it materialized is not audited. Never credited as protocol N."""
+    with initialized() as params:
+        with PostgresHistoryStore.open(params, lambda _: T) as s:
+            s.create_store("old")
+        execute(
+            params,
+            [
+                "ALTER TABLE mneme_store DROP COLUMN tail",
+                "ALTER TABLE mneme_store ADD COLUMN tail bigint NOT NULL DEFAULT 1"
+                " CHECK(tail BETWEEN 0 AND 9007199254740991)",
+                "ALTER TABLE mneme_store ALTER COLUMN tail SET DEFAULT 0",
+                "VACUUM FULL mneme_store",
+            ],
+        )
+        with PostgresHistoryStore.open(params, lambda _: T) as s:
+            assert s.store_tail("old") == {"store_id": "old", "position": 1}
+            receipt = s.commit_history("old", WRITER, op("one"), [draft("r1"), draft("r2")])
+            assert (receipt["first_position"], receipt["last_position"]) == (2, 3)
+            assert s.commit_history("old", WRITER, op("one"), [draft("r1"), draft("r2")]) == receipt
+            page = s.read_history("old", {"store_id": "old", "position": 0}, 10)
+            assert [e["position"] for e in page["entries"]] == [2, 3]
+            assert page["tail"] == {"store_id": "old", "position": 3}
+        protocol_n(params)  # separately, on a new store in the same schema
+
+
+# ------------------------------------------------------------------------- predicate evidence (rev. 3-5)
+
+
+def _json_set(index: int, key: str, value: Any) -> Callable[[tuple[Any, ...]], tuple[Any, ...]]:
+    """Change one key of the jsonb member at `index` of a whole-row catalog row."""
+
+    def change(row: tuple[Any, ...]) -> tuple[Any, ...]:
+        document = json.loads(row[index])
+        assert key in document
+        document[key] = value
+        return (*row[:index], json.dumps(document), *row[index + 1 :])
+
+    return change
+
+
+def _member_kind(kind: str) -> Callable[[Any], bool]:
+    return lambda r: r[0] == "mneme_record" and r[1] == kind
+
+
+_TAIL = lambda r: r[0] == "mneme_store" and r[1] == "tail"  # noqa: E731
+_RECORD_PK = lambda r: r[0] == "mneme_record" and r[21] == ("p",)  # noqa: E731
+_INDEX_ATTRIBUTE = lambda r: r[0] == "mneme_store" and r[3] == 1  # noqa: E731
+
+PREDICATES.update(
+    {
+        # columns (classification rev. 3 §8.5.1, rev. 4 §9.2.1)
+        "O006 an active missing-value cache": ("columns", _vary("columns", _set(16, True), _TAIL)),
+        "O010/CH18 a dormant missing value": ("columns", _vary("columns", _set(17, "{1}"), _TAIL)),
+        "O009 foreign column options": ("columns", _vary("columns", _set(18, ("a=b",)), _TAIL)),
+        "O003 a stored offset cache": ("columns", _vary("columns", _set(19, 8), _TAIL)),
+        "O002 an inconsistent length copy": ("columns", _vary("columns", _set(20, False), _TAIL)),
+        "O004 an inconsistent by-value copy": ("columns", _vary("columns", _set(21, False), _TAIL)),
+        "O005 an inconsistent alignment copy": ("columns", _vary("columns", _set(22, False), _TAIL)),
+        # relations
+        "O044 a shared relation": (
+            "relations",
+            _vary("relations", _set(12, True), lambda r: r[0] == "mneme_store"),
+        ),
+        "O050 an unpopulated relation": (
+            "relations",
+            _vary("relations", _set(13, False), lambda r: r[0] == "mneme_store"),
+        ),
+        "O051 a rewrite in progress": (
+            "relations",
+            _vary("relations", _set(14, 1), lambda r: r[0] == "mneme_store"),
+        ),
+        "O055 a partition bound": (
+            "relations",
+            _vary("relations", _set(15, False), lambda r: r[0] == "mneme_store"),
+        ),
+        "O045 a broken relnatts invariant": (
+            "relations",
+            _vary("relations", _set(16, False), lambda r: r[0] == "mneme_store"),
+        ),
+        "O046 a broken relchecks invariant": (
+            "relations",
+            _vary("relations", _set(17, False), lambda r: r[0] == "mneme_store"),
+        ),
+        # indexes
+        "O069 a partitioned backing index": ("indexes", _vary("indexes", _set(22, "I"), _RECORD_PK)),
+        "O068 an unlogged backing index": ("indexes", _vary("indexes", _set(23, "u"), _RECORD_PK)),
+        "O059 a typed backing index": ("indexes", _vary("indexes", _set(24, 1), _RECORD_PK)),
+        "O067 a shared backing index": ("indexes", _vary("indexes", _set(25, True), _RECORD_PK)),
+        "O075 index row security": ("indexes", _vary("indexes", _set(26, True), _RECORD_PK)),
+        "O076 index forced row security": ("indexes", _vary("indexes", _set(27, True), _RECORD_PK)),
+        "O077 an unpopulated index": ("indexes", _vary("indexes", _set(28, False), _RECORD_PK)),
+        "O078 index replica identity": ("indexes", _vary("indexes", _set(29, "d"), _RECORD_PK)),
+        "O079 a partition index": ("indexes", _vary("indexes", _set(30, True), _RECORD_PK)),
+        "O080 an index rewrite in progress": ("indexes", _vary("indexes", _set(31, 1), _RECORD_PK)),
+        "O084 an index partition bound": ("indexes", _vary("indexes", _set(32, False), _RECORD_PK)),
+        "O070 a broken index relnatts invariant": ("indexes", _vary("indexes", _set(33, False), _RECORD_PK)),
+        "O071 a broken index relchecks invariant": ("indexes", _vary("indexes", _set(34, False), _RECORD_PK)),
+        # index attributes (G-098), one field each
+        **{
+            f"{oid} index attribute {key}": (
+                "index_columns",
+                _vary("index_columns", _json_set(4, key, value), _INDEX_ATTRIBUTE),
+            )
+            for oid, key, value in [
+                ("O013", "atttypid", "pg_catalog.varchar"),
+                ("O015", "attlen", False),
+                ("O017", "attndims", 1),
+                ("O018", "attcacheoff", 4),
+                ("O019", "atttypmod", 10),
+                ("O020", "attbyval", False),
+                ("O021", "attalign", False),
+                ("O022", "attstorage", "p"),
+                ("O023", "attcompression", "l"),
+                ("O024", "attnotnull", True),
+                ("O025", "atthasdef", True),
+                ("O026", "atthasmissing", True),
+                ("O027", "attidentity", "a"),
+                ("O028", "attgenerated", "s"),
+                ("O029", "attisdropped", True),
+                ("O030", "attislocal", False),
+                ("O031", "attinhcount", 1),
+                ("O032", "attcollation", "pg_catalog.POSIX"),
+                ("O035", "attfdwoptions", ["a=b"]),
+                ("O036", "attmissingval", "{x}"),
+            ]
+        },
+        # internal members (rev. 5 §10.1), one field of each row layout
+        "member TOAST relation options": (
+            "members",
+            _vary("members", _json_set(2, "reloptions", ["autovacuum_enabled=false"]), _member_kind("toast")),
+        ),
+        "member TOAST index options": (
+            "members",
+            _vary("members", _json_set(2, "reloptions", ["fillfactor=70"]), _member_kind("toast index")),
+        ),
+        "member TOAST index ordering": (
+            "members",
+            _vary("members", _json_set(2, "indoption", [0, 3]), _member_kind("toast index")),
+        ),
+        "member TOAST column": (
+            "members",
+            _vary(
+                "members",
+                _json_set(2, "attstorage", "x"),
+                lambda r: _member_kind("toast column")(r) and json.loads(r[2])["attnum"] == 1,
+            ),
+        ),
+        "member TOAST index column": (
+            "members",
+            _vary(
+                "members",
+                _json_set(2, "attcollation", "pg_catalog.C"),
+                lambda r: _member_kind("toast index column")(r) and json.loads(r[2])["attnum"] == 1,
+            ),
+        ),
+        "member row type": ("members", _vary("members", _json_set(2, "typdelim", ";"), _member_kind("row"))),
+        "member array backlink": (
+            "members",
+            _vary("members", _json_set(2, "typelem", False), _member_kind("array")),
+        ),
+        "member an extra TOAST index": (
+            "members",
+            dataclasses.replace(
+                V1_CATALOG,
+                members=tuple(
+                    sorted(
+                        (
+                            *V1_CATALOG.members,
+                            *(r for r in V1_CATALOG.members if _member_kind("toast index")(r)),
+                        ),
+                        key=repr,
+                    )
+                ),
+            ),
+        ),
+        # the boundary (G-094, G-097)
+        "CH16 a security label": (
+            "boundary",
+            dataclasses.replace(V1_CATALOG, boundary=(("label", "probe", "", "pg_class"),)),
+        ),
+    }
+)
+
+
+def test_predicate_dropped_column_residue_keeps_the_relnatts_invariant() -> None:
+    """G-098 positive control: E013's residue raises relnatts and the highest attribute number alike."""
+    with initialized() as params:
+        execute(
+            params,
+            ["ALTER TABLE mneme_store ADD COLUMN gone text", "ALTER TABLE mneme_store DROP COLUMN gone"],
+        )
+        assert snapshot(params) == V1_CATALOG
+
+
+# ------------------------------------------------------------------------------- [F] fetch-binding controls
+
+
+class _Projecting:
+    """A connection whose catalog relation `pg_catalog.<name>` reads as `projection` (CR-014): one
+    field overridden, or a row added, over the genuine catalog. The store's actual fetch SQL, joins,
+    filters and comparison run unchanged. Never a public or physical execution."""
+
+    def __init__(self, connection: psycopg.Connection[Any], name: str, projection: str) -> None:
+        self._connection, self._target, self._projection = connection, f"pg_catalog.{name} ", projection
+        self.rewritten = 0
+
+    def execute(self, query: str, params: Any = None) -> Any:
+        if self._target in query:
+            self.rewritten += 1
+            query = query.replace(self._target, f"({self._projection}) ")
+        return self._connection.execute(query, params)
+
+
+def _override(connection: psycopg.Connection[Any], name: str, patch: dict[str, str], where: str) -> str:
+    """`pg_catalog.<name>` with each column of `patch` set to its SQL expression in the rows `where`
+    selects (alias `x`); every other column is the genuine one."""
+    columns = [
+        row[0]
+        for row in connection.execute(
+            "SELECT attname::text FROM pg_catalog.pg_attribute WHERE attrelid = %s::regclass"
+            " AND attnum > 0 AND NOT attisdropped ORDER BY attnum",
+            (f"pg_catalog.{name}",),
+        )
+    ]
+    assert set(patch) <= set(columns)
+    select = ", ".join(
+        f"CASE WHEN {where} THEN {patch[c]} ELSE x.{c} END AS {c}" if c in patch else f"x.{c}"
+        for c in columns
+    )
+    return f"SELECT {select} FROM pg_catalog.{name} x"
+
+
+def _toast_of(table: str) -> str:
+    return f"(SELECT c.reltoastrelid FROM pg_catalog.pg_class c WHERE c.oid = '{table}'::regclass)"
+
+
+def _toast_index_of(table: str) -> str:
+    return f"(SELECT i.indexrelid FROM pg_catalog.pg_index i WHERE i.indrelid = {_toast_of(table)})"
+
+
+_TAIL_ATTRIBUTE = "x.attrelid = 'mneme_store'::regclass AND x.attname = 'tail'"
+_RECORD_TOAST_INDEX = f"x.indexrelid = {_toast_index_of('mneme_record')}"
+_CHAR = '::"char"'
+
+FETCH_CONTROLS: dict[str, tuple[str, dict[str, str], str, str]] = {
+    # name: (catalog, patch, rows, the part that must differ)
+    "P40 trigger disabled": (
+        "pg_trigger",
+        {"tgenabled": f"'D'{_CHAR}"},
+        "x.tgrelid = 'mneme_record'::regclass AND x.tgfoid = 'pg_catalog.\"RI_FKey_check_ins\"'::regproc",
+        "triggers",
+    ),
+    "P32 backing index not valid": (
+        "pg_index",
+        {"indisvalid": "false"},
+        "x.indexrelid = 'mneme_store_pkey'::regclass",
+        "indexes",
+    ),
+    "P32 backing index not ready": (
+        "pg_index",
+        {"indisready": "false"},
+        "x.indexrelid = 'mneme_store_pkey'::regclass",
+        "indexes",
+    ),
+    "atthasmissing flag only": ("pg_attribute", {"atthasmissing": "true"}, _TAIL_ATTRIBUTE, "columns"),
+    "type copy length": ("pg_attribute", {"attlen": "4::int2"}, _TAIL_ATTRIBUTE, "columns"),
+    "stored offset cache": ("pg_attribute", {"attcacheoff": "8"}, _TAIL_ATTRIBUTE, "columns"),
+    "index attribute descriptor": (
+        "pg_attribute",
+        {"attnotnull": "true"},
+        "x.attrelid = 'mneme_store_pkey'::regclass",
+        "index_columns",
+    ),
+    "backing index unlogged": (
+        "pg_class",
+        {"relpersistence": f"'u'{_CHAR}"},
+        "x.oid = 'mneme_store_pkey'::regclass",
+        "indexes",
+    ),
+    "TOAST index options": (
+        "pg_class",
+        {"reloptions": "ARRAY['fillfactor=70']::text[]"},
+        f"x.oid = {_toast_index_of('mneme_record')}",
+        "members",
+    ),
+    "TOAST index ordering": ("pg_index", {"indoption": "'0 3'::int2vector"}, _RECORD_TOAST_INDEX, "members"),
+    "TOAST index operator class": (
+        "pg_index",
+        # the two key operator classes swapped, looked up by name (no OID is hard-coded)
+        {
+            "indclass": "(SELECT pg_catalog.array_to_string(ARRAY(SELECT o.oid FROM pg_catalog.pg_opclass o"
+            " JOIN pg_catalog.pg_am m ON m.oid = o.opcmethod WHERE m.amname = 'btree'"
+            " AND o.opcname IN ('int4_ops', 'oid_ops') ORDER BY o.opcname), ' '))::oidvector"
+        },
+        _RECORD_TOAST_INDEX,
+        "members",
+    ),
+    "TOAST index not unique": ("pg_index", {"indisunique": "false"}, _RECORD_TOAST_INDEX, "members"),
+    # The relations part already reads a TOAST relation's options (CE-04-01 row TOAST-options).
+    "TOAST relation options": (
+        "pg_class",
+        {"reloptions": "ARRAY['autovacuum_enabled=false']::text[]"},
+        f"x.oid = {_toast_of('mneme_record')}",
+        "relations",
+    ),
+    "TOAST relation persistence": (
+        "pg_class",
+        {"relpersistence": f"'u'{_CHAR}"},
+        f"x.oid = {_toast_of('mneme_record')}",
+        "members",
+    ),
+    "row type field": ("pg_type", {"typdelim": f"';'{_CHAR}"}, "x.oid = 'mneme_record'::regtype", "members"),
+    "array backlink": ("pg_type", {"typelem": "0::oid"}, "x.oid = '_mneme_record'::regtype", "members"),
+}
+ROW_CONTROLS: dict[str, tuple[str, str, str]] = {
+    # name: (catalog, an added row's SELECT, the part that must differ)
+    "an extra TOAST index": (
+        "pg_index",
+        f"SELECT * FROM pg_catalog.pg_index x WHERE {_RECORD_TOAST_INDEX}",
+        "members",
+    ),
+    "security label": (
+        "pg_seclabel",
+        "SELECT 'mneme_store'::regclass::oid, 'pg_catalog.pg_class'::regclass::oid, 0, 'probe'::text,"
+        " 'secret'::text",
+        "boundary",
+    ),
+}
+
+
+def _projected(name: str, projection: Callable[[psycopg.Connection[Any]], str], part: str) -> None:
+    with initialized() as params, psycopg.connect(autocommit=True, **params) as c:  # type: ignore[arg-type]
+        namespace = c.execute(NAMESPACE_SQL).fetchone()
+        assert namespace is not None
+        assert fetch(c, namespace[0]) == V1_CATALOG  # the genuine catalog is v1
+        proxy = _Projecting(c, name, projection(c))
+        projected = fetch(proxy, namespace[0])  # type: ignore[arg-type]
+        assert proxy.rewritten > 0
+        assert mismatch(projected, V1_CATALOG) == part
+
+
+@pytest.mark.parametrize("control", sorted(FETCH_CONTROLS))
+def test_fetch_binding_control_the_fetch_reports_a_supplied_field(control: str) -> None:
+    """[F] (CR-014): the actual fetch reads the property, never an expected constant."""
+    name, patch, where, part = FETCH_CONTROLS[control]
+    _projected(name, lambda c: _override(c, name, patch, where), part)
+
+
+@pytest.mark.parametrize("control", sorted(ROW_CONTROLS))
+def test_fetch_binding_control_the_fetch_reports_a_supplied_row(control: str) -> None:
+    """[F] (CR-014): an added catalog row reaches the comparison."""
+    name, added, part = ROW_CONTROLS[control]
+    _projected(name, lambda _: f"SELECT * FROM pg_catalog.{name} UNION ALL {added}", part)
+
+
+# ------------------------------------------------------------------------------- catalog inventory
+
+
+def test_every_member_catalog_column_is_compared_or_named_as_excluded() -> None:
+    """Rev. 5 §10.3: each live column of pg_class, pg_index, pg_attribute and pg_type is either a key
+    of the whole-row member comparison or in the closed exclusion list, and never both."""
+    keys: dict[str, set[str]] = {
+        "pg_class": set(),
+        "pg_index": set(),
+        "pg_attribute": set(),
+        "pg_type": set(),
+    }
+    for _, kind, document in V1_CATALOG.members:
+        found = set(json.loads(document))
+        if kind == "toast":
+            keys["pg_class"] |= found
+        elif kind == "toast index":
+            keys["pg_class"] |= {k for k in found if k.startswith("rel")}
+            keys["pg_index"] |= {k for k in found if k.startswith("ind")}
+        elif kind in ("toast column", "toast index column"):
+            keys["pg_attribute"] |= found
+        else:
+            keys["pg_type"] |= found
+    with initialized() as params, psycopg.connect(**params) as c:  # type: ignore[arg-type]
+        for name, compared in keys.items():
+            live = {
+                row[0]
+                for row in c.execute(
+                    "SELECT attname::text FROM pg_catalog.pg_attribute"
+                    " WHERE attrelid = %s::regclass AND attnum > 0 AND NOT attisdropped",
+                    (f"pg_catalog.{name}",),
+                )
+            }
+            assert compared | MEMBER_EXCLUSIONS[name] == live, name
+            assert not compared & MEMBER_EXCLUSIONS[name], name
+            assert NORMALIZED[name] <= compared, name

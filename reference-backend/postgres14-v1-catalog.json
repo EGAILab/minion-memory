@@ -1,5 +1,5 @@
 {
- "description": "Mneme reference backend: the v1 catalog contract pins (spec/persistence.md, 'v1 catalog contract'; Owner G-089..G-092; CE-04-01). The catalog state PostgreSQL 14 records for the normative v1 DDL, as read by each implementation's structured catalog fetch: OID-free, names only where the contract compares names, expression trees with source locations removed and column numbers named. Every implementation embeds these values and tests its embedding against this file.",
+ "description": "Mneme reference backend: the v1 catalog contract pins (spec/persistence.md, 'v1 catalog contract'; Owner G-089..G-098; CE-04-01). The catalog state PostgreSQL 14 records for the normative v1 DDL, as read by each implementation's structured catalog fetch: OID-free, names only where the contract compares names, expression trees with source locations removed and column numbers named. Every implementation embeds these values and tests its embedding against this file.",
  "postgresql_major": 14,
  "derived_from": "the normative DDL text of spec/persistence.md executed on PostgreSQL 14.12 (x86-64) in a clean schema",
  "catalog": {
@@ -16,7 +16,13 @@
     false,
     false,
     "d",
-    null
+    null,
+    false,
+    true,
+    0,
+    true,
+    true,
+    true
    ],
    [
     "mneme_record",
@@ -30,7 +36,13 @@
     false,
     false,
     "d",
-    null
+    null,
+    false,
+    true,
+    0,
+    true,
+    true,
+    true
    ],
    [
     "mneme_schema",
@@ -44,7 +56,13 @@
     false,
     false,
     "d",
-    null
+    null,
+    false,
+    true,
+    0,
+    true,
+    true,
+    true
    ],
    [
     "mneme_store",
@@ -58,7 +76,13 @@
     false,
     false,
     "d",
-    null
+    null,
+    false,
+    true,
+    0,
+    true,
+    true,
+    true
    ]
   ],
   "inheritance": [],
@@ -227,7 +251,14 @@
     false,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ],
    [
     "mneme_operation",
@@ -245,7 +276,14 @@
     false,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ],
    [
     "mneme_operation",
@@ -263,7 +301,14 @@
     false,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ],
    [
     "mneme_operation",
@@ -281,7 +326,14 @@
     false,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ],
    [
     "mneme_operation",
@@ -299,7 +351,14 @@
     false,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ],
    [
     "mneme_operation",
@@ -317,7 +376,14 @@
     false,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ],
    [
     "mneme_operation",
@@ -335,7 +401,14 @@
     false,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ],
    [
     "mneme_record",
@@ -353,7 +426,14 @@
     false,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ],
    [
     "mneme_record",
@@ -371,7 +451,14 @@
     false,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ],
    [
     "mneme_record",
@@ -389,7 +476,14 @@
     false,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ],
    [
     "mneme_record",
@@ -407,7 +501,14 @@
     false,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ],
    [
     "mneme_record",
@@ -425,7 +526,14 @@
     false,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ],
    [
     "mneme_record",
@@ -443,7 +551,14 @@
     false,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ],
    [
     "mneme_record",
@@ -461,7 +576,14 @@
     false,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ],
    [
     "mneme_schema",
@@ -479,7 +601,14 @@
     true,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ],
    [
     "mneme_schema",
@@ -497,7 +626,14 @@
     false,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ],
    [
     "mneme_store",
@@ -515,7 +651,14 @@
     false,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ],
    [
     "mneme_store",
@@ -533,7 +676,14 @@
     true,
     0,
     true,
-    0
+    0,
+    false,
+    null,
+    null,
+    -1,
+    true,
+    true,
+    true
    ]
   ],
   "defaults": [
@@ -809,7 +959,20 @@
     0,
     [
      "p"
-    ]
+    ],
+    "i",
+    "p",
+    0,
+    false,
+    false,
+    false,
+    true,
+    "n",
+    false,
+    0,
+    true,
+    true,
+    true
    ],
    [
     "mneme_record",
@@ -847,7 +1010,20 @@
     0,
     [
      "u"
-    ]
+    ],
+    "i",
+    "p",
+    0,
+    false,
+    false,
+    false,
+    true,
+    "n",
+    false,
+    0,
+    true,
+    true,
+    true
    ],
    [
     "mneme_record",
@@ -885,7 +1061,20 @@
     0,
     [
      "p"
-    ]
+    ],
+    "i",
+    "p",
+    0,
+    false,
+    false,
+    false,
+    true,
+    "n",
+    false,
+    0,
+    true,
+    true,
+    true
    ],
    [
     "mneme_schema",
@@ -919,7 +1108,20 @@
     0,
     [
      "p"
-    ]
+    ],
+    "i",
+    "p",
+    0,
+    false,
+    false,
+    false,
+    true,
+    "n",
+    false,
+    0,
+    true,
+    true,
+    true
    ],
    [
     "mneme_store",
@@ -953,8 +1155,280 @@
     0,
     [
      "p"
-    ]
+    ],
+    "i",
+    "p",
+    0,
+    false,
+    false,
+    false,
+    true,
+    "n",
+    false,
+    0,
+    true,
+    true,
+    true
    ]
-  ]
+  ],
+  "index_columns": [
+   [
+    "mneme_operation",
+    [
+     "p"
+    ],
+    [
+     "store_id",
+     "source_namespace",
+     "source_operation_id"
+    ],
+    1,
+    "{\"attlen\": true, \"attnum\": 1, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.text\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"x\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": \"pg_catalog.default\", \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_operation",
+    [
+     "p"
+    ],
+    [
+     "store_id",
+     "source_namespace",
+     "source_operation_id"
+    ],
+    2,
+    "{\"attlen\": true, \"attnum\": 2, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.text\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"x\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": \"pg_catalog.default\", \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_operation",
+    [
+     "p"
+    ],
+    [
+     "store_id",
+     "source_namespace",
+     "source_operation_id"
+    ],
+    3,
+    "{\"attlen\": true, \"attnum\": 3, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.bytea\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"x\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_record",
+    [
+     "p"
+    ],
+    [
+     "store_id",
+     "position"
+    ],
+    1,
+    "{\"attlen\": true, \"attnum\": 1, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.text\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"x\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": \"pg_catalog.default\", \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_record",
+    [
+     "p"
+    ],
+    [
+     "store_id",
+     "position"
+    ],
+    2,
+    "{\"attlen\": true, \"attnum\": 2, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.int8\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"p\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_record",
+    [
+     "u"
+    ],
+    [
+     "store_id",
+     "record_id"
+    ],
+    1,
+    "{\"attlen\": true, \"attnum\": 1, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.text\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"x\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": \"pg_catalog.default\", \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_record",
+    [
+     "u"
+    ],
+    [
+     "store_id",
+     "record_id"
+    ],
+    2,
+    "{\"attlen\": true, \"attnum\": 2, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.text\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"x\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": \"pg_catalog.default\", \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_schema",
+    [
+     "p"
+    ],
+    [
+     "singleton"
+    ],
+    1,
+    "{\"attlen\": true, \"attnum\": 1, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.bool\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"p\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_store",
+    [
+     "p"
+    ],
+    [
+     "store_id"
+    ],
+    1,
+    "{\"attlen\": true, \"attnum\": 1, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.text\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"x\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": \"pg_catalog.default\", \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ]
+  ],
+  "members": [
+   [
+    "mneme_operation",
+    "array",
+    "{\"typlen\": -1, \"typelem\": true, \"typsend\": \"pg_catalog.array_send\", \"typtype\": \"b\", \"typalign\": \"d\", \"typarray\": true, \"typbyval\": false, \"typdelim\": \",\", \"typinput\": \"pg_catalog.array_in\", \"typmodin\": null, \"typndims\": 0, \"typrelid\": true, \"typmodout\": null, \"typoutput\": \"pg_catalog.array_out\", \"typtypmod\": -1, \"typanalyze\": \"pg_catalog.array_typanalyze\", \"typdefault\": null, \"typnotnull\": false, \"typreceive\": \"pg_catalog.array_recv\", \"typstorage\": \"x\", \"typbasetype\": \"0\", \"typcategory\": \"A\", \"typcollation\": \"0\", \"typisdefined\": true, \"typnamespace\": true, \"typsubscript\": \"pg_catalog.array_subscript_handler\", \"typdefaultbin\": null, \"typispreferred\": false}"
+   ],
+   [
+    "mneme_operation",
+    "row",
+    "{\"typlen\": -1, \"typelem\": true, \"typsend\": \"pg_catalog.record_send\", \"typtype\": \"c\", \"typalign\": \"d\", \"typarray\": true, \"typbyval\": false, \"typdelim\": \",\", \"typinput\": \"pg_catalog.record_in\", \"typmodin\": null, \"typndims\": 0, \"typrelid\": true, \"typmodout\": null, \"typoutput\": \"pg_catalog.record_out\", \"typtypmod\": -1, \"typanalyze\": null, \"typdefault\": null, \"typnotnull\": false, \"typreceive\": \"pg_catalog.record_recv\", \"typstorage\": \"x\", \"typbasetype\": \"0\", \"typcategory\": \"C\", \"typcollation\": \"0\", \"typisdefined\": true, \"typnamespace\": true, \"typsubscript\": null, \"typdefaultbin\": null, \"typispreferred\": false}"
+   ],
+   [
+    "mneme_operation",
+    "toast column",
+    "{\"attlen\": true, \"attnum\": 1, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.oid\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"p\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_operation",
+    "toast column",
+    "{\"attlen\": true, \"attnum\": 2, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.int4\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"p\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_operation",
+    "toast column",
+    "{\"attlen\": true, \"attnum\": 3, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.bytea\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"p\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_operation",
+    "toast index column",
+    "{\"attlen\": true, \"attnum\": 1, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.oid\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"p\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_operation",
+    "toast index column",
+    "{\"attlen\": true, \"attnum\": 2, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.int4\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"p\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_operation",
+    "toast index",
+    "{\"relam\": \"btree\", \"indkey\": [1, 2], \"indpred\": null, \"relkind\": \"i\", \"reltype\": false, \"indclass\": [\"pg_catalog.oid_ops\", \"pg_catalog.int4_ops\"], \"indexprs\": null, \"indnatts\": 2, \"relnatts\": true, \"indislive\": true, \"indoption\": [0, 0], \"relchecks\": true, \"reloftype\": \"0\", \"indisready\": true, \"indisvalid\": true, \"reloptions\": null, \"relrewrite\": \"0\", \"indisunique\": true, \"indnkeyatts\": 2, \"relisshared\": false, \"indcollation\": [\".\", \".\"], \"indimmediate\": true, \"indisprimary\": true, \"relnamespace\": \"pg_toast\", \"relpartbound\": null, \"relreplident\": \"n\", \"reltablespace\": \"0\", \"reltoastrelid\": \"0\", \"indisclustered\": false, \"indisexclusion\": false, \"indisreplident\": false, \"relispartition\": false, \"relispopulated\": true, \"relpersistence\": \"p\", \"relrowsecurity\": false, \"relforcerowsecurity\": false}"
+   ],
+   [
+    "mneme_operation",
+    "toast",
+    "{\"relam\": \"heap\", \"relkind\": \"t\", \"reltype\": false, \"relnatts\": true, \"relchecks\": true, \"reloftype\": \"0\", \"reloptions\": null, \"relrewrite\": \"0\", \"relisshared\": false, \"relnamespace\": \"pg_toast\", \"relpartbound\": null, \"relreplident\": \"n\", \"reltablespace\": \"0\", \"reltoastrelid\": \"0\", \"relispartition\": false, \"relispopulated\": true, \"relpersistence\": \"p\", \"relrowsecurity\": false, \"relforcerowsecurity\": false}"
+   ],
+   [
+    "mneme_record",
+    "array",
+    "{\"typlen\": -1, \"typelem\": true, \"typsend\": \"pg_catalog.array_send\", \"typtype\": \"b\", \"typalign\": \"d\", \"typarray\": true, \"typbyval\": false, \"typdelim\": \",\", \"typinput\": \"pg_catalog.array_in\", \"typmodin\": null, \"typndims\": 0, \"typrelid\": true, \"typmodout\": null, \"typoutput\": \"pg_catalog.array_out\", \"typtypmod\": -1, \"typanalyze\": \"pg_catalog.array_typanalyze\", \"typdefault\": null, \"typnotnull\": false, \"typreceive\": \"pg_catalog.array_recv\", \"typstorage\": \"x\", \"typbasetype\": \"0\", \"typcategory\": \"A\", \"typcollation\": \"0\", \"typisdefined\": true, \"typnamespace\": true, \"typsubscript\": \"pg_catalog.array_subscript_handler\", \"typdefaultbin\": null, \"typispreferred\": false}"
+   ],
+   [
+    "mneme_record",
+    "row",
+    "{\"typlen\": -1, \"typelem\": true, \"typsend\": \"pg_catalog.record_send\", \"typtype\": \"c\", \"typalign\": \"d\", \"typarray\": true, \"typbyval\": false, \"typdelim\": \",\", \"typinput\": \"pg_catalog.record_in\", \"typmodin\": null, \"typndims\": 0, \"typrelid\": true, \"typmodout\": null, \"typoutput\": \"pg_catalog.record_out\", \"typtypmod\": -1, \"typanalyze\": null, \"typdefault\": null, \"typnotnull\": false, \"typreceive\": \"pg_catalog.record_recv\", \"typstorage\": \"x\", \"typbasetype\": \"0\", \"typcategory\": \"C\", \"typcollation\": \"0\", \"typisdefined\": true, \"typnamespace\": true, \"typsubscript\": null, \"typdefaultbin\": null, \"typispreferred\": false}"
+   ],
+   [
+    "mneme_record",
+    "toast column",
+    "{\"attlen\": true, \"attnum\": 1, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.oid\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"p\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_record",
+    "toast column",
+    "{\"attlen\": true, \"attnum\": 2, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.int4\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"p\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_record",
+    "toast column",
+    "{\"attlen\": true, \"attnum\": 3, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.bytea\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"p\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_record",
+    "toast index column",
+    "{\"attlen\": true, \"attnum\": 1, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.oid\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"p\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_record",
+    "toast index column",
+    "{\"attlen\": true, \"attnum\": 2, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.int4\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"p\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_record",
+    "toast index",
+    "{\"relam\": \"btree\", \"indkey\": [1, 2], \"indpred\": null, \"relkind\": \"i\", \"reltype\": false, \"indclass\": [\"pg_catalog.oid_ops\", \"pg_catalog.int4_ops\"], \"indexprs\": null, \"indnatts\": 2, \"relnatts\": true, \"indislive\": true, \"indoption\": [0, 0], \"relchecks\": true, \"reloftype\": \"0\", \"indisready\": true, \"indisvalid\": true, \"reloptions\": null, \"relrewrite\": \"0\", \"indisunique\": true, \"indnkeyatts\": 2, \"relisshared\": false, \"indcollation\": [\".\", \".\"], \"indimmediate\": true, \"indisprimary\": true, \"relnamespace\": \"pg_toast\", \"relpartbound\": null, \"relreplident\": \"n\", \"reltablespace\": \"0\", \"reltoastrelid\": \"0\", \"indisclustered\": false, \"indisexclusion\": false, \"indisreplident\": false, \"relispartition\": false, \"relispopulated\": true, \"relpersistence\": \"p\", \"relrowsecurity\": false, \"relforcerowsecurity\": false}"
+   ],
+   [
+    "mneme_record",
+    "toast",
+    "{\"relam\": \"heap\", \"relkind\": \"t\", \"reltype\": false, \"relnatts\": true, \"relchecks\": true, \"reloftype\": \"0\", \"reloptions\": null, \"relrewrite\": \"0\", \"relisshared\": false, \"relnamespace\": \"pg_toast\", \"relpartbound\": null, \"relreplident\": \"n\", \"reltablespace\": \"0\", \"reltoastrelid\": \"0\", \"relispartition\": false, \"relispopulated\": true, \"relpersistence\": \"p\", \"relrowsecurity\": false, \"relforcerowsecurity\": false}"
+   ],
+   [
+    "mneme_schema",
+    "array",
+    "{\"typlen\": -1, \"typelem\": true, \"typsend\": \"pg_catalog.array_send\", \"typtype\": \"b\", \"typalign\": \"d\", \"typarray\": true, \"typbyval\": false, \"typdelim\": \",\", \"typinput\": \"pg_catalog.array_in\", \"typmodin\": null, \"typndims\": 0, \"typrelid\": true, \"typmodout\": null, \"typoutput\": \"pg_catalog.array_out\", \"typtypmod\": -1, \"typanalyze\": \"pg_catalog.array_typanalyze\", \"typdefault\": null, \"typnotnull\": false, \"typreceive\": \"pg_catalog.array_recv\", \"typstorage\": \"x\", \"typbasetype\": \"0\", \"typcategory\": \"A\", \"typcollation\": \"0\", \"typisdefined\": true, \"typnamespace\": true, \"typsubscript\": \"pg_catalog.array_subscript_handler\", \"typdefaultbin\": null, \"typispreferred\": false}"
+   ],
+   [
+    "mneme_schema",
+    "row",
+    "{\"typlen\": -1, \"typelem\": true, \"typsend\": \"pg_catalog.record_send\", \"typtype\": \"c\", \"typalign\": \"d\", \"typarray\": true, \"typbyval\": false, \"typdelim\": \",\", \"typinput\": \"pg_catalog.record_in\", \"typmodin\": null, \"typndims\": 0, \"typrelid\": true, \"typmodout\": null, \"typoutput\": \"pg_catalog.record_out\", \"typtypmod\": -1, \"typanalyze\": null, \"typdefault\": null, \"typnotnull\": false, \"typreceive\": \"pg_catalog.record_recv\", \"typstorage\": \"x\", \"typbasetype\": \"0\", \"typcategory\": \"C\", \"typcollation\": \"0\", \"typisdefined\": true, \"typnamespace\": true, \"typsubscript\": null, \"typdefaultbin\": null, \"typispreferred\": false}"
+   ],
+   [
+    "mneme_store",
+    "array",
+    "{\"typlen\": -1, \"typelem\": true, \"typsend\": \"pg_catalog.array_send\", \"typtype\": \"b\", \"typalign\": \"d\", \"typarray\": true, \"typbyval\": false, \"typdelim\": \",\", \"typinput\": \"pg_catalog.array_in\", \"typmodin\": null, \"typndims\": 0, \"typrelid\": true, \"typmodout\": null, \"typoutput\": \"pg_catalog.array_out\", \"typtypmod\": -1, \"typanalyze\": \"pg_catalog.array_typanalyze\", \"typdefault\": null, \"typnotnull\": false, \"typreceive\": \"pg_catalog.array_recv\", \"typstorage\": \"x\", \"typbasetype\": \"0\", \"typcategory\": \"A\", \"typcollation\": \"0\", \"typisdefined\": true, \"typnamespace\": true, \"typsubscript\": \"pg_catalog.array_subscript_handler\", \"typdefaultbin\": null, \"typispreferred\": false}"
+   ],
+   [
+    "mneme_store",
+    "row",
+    "{\"typlen\": -1, \"typelem\": true, \"typsend\": \"pg_catalog.record_send\", \"typtype\": \"c\", \"typalign\": \"d\", \"typarray\": true, \"typbyval\": false, \"typdelim\": \",\", \"typinput\": \"pg_catalog.record_in\", \"typmodin\": null, \"typndims\": 0, \"typrelid\": true, \"typmodout\": null, \"typoutput\": \"pg_catalog.record_out\", \"typtypmod\": -1, \"typanalyze\": null, \"typdefault\": null, \"typnotnull\": false, \"typreceive\": \"pg_catalog.record_recv\", \"typstorage\": \"x\", \"typbasetype\": \"0\", \"typcategory\": \"C\", \"typcollation\": \"0\", \"typisdefined\": true, \"typnamespace\": true, \"typsubscript\": null, \"typdefaultbin\": null, \"typispreferred\": false}"
+   ],
+   [
+    "mneme_store",
+    "toast column",
+    "{\"attlen\": true, \"attnum\": 1, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.oid\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"p\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_store",
+    "toast column",
+    "{\"attlen\": true, \"attnum\": 2, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.int4\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"p\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_store",
+    "toast column",
+    "{\"attlen\": true, \"attnum\": 3, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.bytea\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"p\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_store",
+    "toast index column",
+    "{\"attlen\": true, \"attnum\": 1, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.oid\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"p\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_store",
+    "toast index column",
+    "{\"attlen\": true, \"attnum\": 2, \"attalign\": true, \"attbyval\": true, \"attndims\": 0, \"atttypid\": \"pg_catalog.int4\", \"atthasdef\": false, \"atttypmod\": -1, \"attislocal\": true, \"attnotnull\": false, \"attstorage\": \"p\", \"attcacheoff\": -1, \"attidentity\": \"\", \"attinhcount\": 0, \"attcollation\": null, \"attgenerated\": \"\", \"attisdropped\": false, \"attfdwoptions\": null, \"atthasmissing\": false, \"attmissingval\": null, \"attcompression\": \"\"}"
+   ],
+   [
+    "mneme_store",
+    "toast index",
+    "{\"relam\": \"btree\", \"indkey\": [1, 2], \"indpred\": null, \"relkind\": \"i\", \"reltype\": false, \"indclass\": [\"pg_catalog.oid_ops\", \"pg_catalog.int4_ops\"], \"indexprs\": null, \"indnatts\": 2, \"relnatts\": true, \"indislive\": true, \"indoption\": [0, 0], \"relchecks\": true, \"reloftype\": \"0\", \"indisready\": true, \"indisvalid\": true, \"reloptions\": null, \"relrewrite\": \"0\", \"indisunique\": true, \"indnkeyatts\": 2, \"relisshared\": false, \"indcollation\": [\".\", \".\"], \"indimmediate\": true, \"indisprimary\": true, \"relnamespace\": \"pg_toast\", \"relpartbound\": null, \"relreplident\": \"n\", \"reltablespace\": \"0\", \"reltoastrelid\": \"0\", \"indisclustered\": false, \"indisexclusion\": false, \"indisreplident\": false, \"relispartition\": false, \"relispopulated\": true, \"relpersistence\": \"p\", \"relrowsecurity\": false, \"relforcerowsecurity\": false}"
+   ],
+   [
+    "mneme_store",
+    "toast",
+    "{\"relam\": \"heap\", \"relkind\": \"t\", \"reltype\": false, \"relnatts\": true, \"relchecks\": true, \"reloftype\": \"0\", \"reloptions\": null, \"relrewrite\": \"0\", \"relisshared\": false, \"relnamespace\": \"pg_toast\", \"relpartbound\": null, \"relreplident\": \"n\", \"reltablespace\": \"0\", \"reltoastrelid\": \"0\", \"relispartition\": false, \"relispopulated\": true, \"relpersistence\": \"p\", \"relrowsecurity\": false, \"relforcerowsecurity\": false}"
+   ]
+  ],
+  "boundary": []
  }
 }
