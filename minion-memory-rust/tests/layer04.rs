@@ -680,6 +680,15 @@ fn fetch_binding_projects_real_catalog_fields() {
     c.batch_execute(NORMATIVE).unwrap();
     let oid = namespace(&mut c);
     let cases = [
+        // CR-018: change only the root table's source field. A physical SET UNLOGGED
+        // also changes TOAST persistence and can mask an unbound relations fetch.
+        (
+            "pg_class",
+            "relpersistence",
+            "'u'::pg_catalog.\"char\"",
+            "oid OPERATOR(pg_catalog.=) 'mneme_store'::pg_catalog.regclass",
+            "relations",
+        ),
         (
             "pg_attribute",
             "attcacheoff",
@@ -1408,6 +1417,10 @@ fn security_label_fetch_binding_checks_subobjects_and_internal_members() {
 #[test]
 fn initialization_refuses_partial_nonindex_relations_and_preserves_engine_errors() {
     for object in [
+        // CR-017: no ordinary table exists, and initialization would collide with
+        // this v1 name. Refusal must precede DDL, rather than surface 42P07.
+        "CREATE VIEW mneme_store AS SELECT 1 AS x",
+        "CREATE SEQUENCE mneme_record",
         "CREATE VIEW mneme_surprise AS SELECT 1 AS x",
         "CREATE SEQUENCE mneme_surprise",
         "CREATE TABLE mneme_surprise(x integer)",
@@ -1416,6 +1429,12 @@ fn initialization_refuses_partial_nonindex_relations_and_preserves_engine_errors
         let b = pg::Backend::new();
         let mut c = b.client();
         c.batch_execute(object).unwrap();
+        let before = c
+            .query("SELECT oid, relname, relkind::pg_catalog.text FROM pg_catalog.pg_class WHERE relnamespace OPERATOR(pg_catalog.=) pg_catalog.current_schema()::pg_catalog.regnamespace ORDER BY oid", &[])
+            .unwrap()
+            .iter()
+            .map(|r| (r.get::<_, u32>(0), r.get::<_, String>(1), r.get::<_, String>(2)))
+            .collect::<Vec<_>>();
         error(
             Store::open(&b.conninfo, |_| Value::string(T))
                 .err()
@@ -1431,6 +1450,13 @@ fn initialization_refuses_partial_nonindex_relations_and_preserves_engine_errors
             .unwrap()
             .get(0);
         assert!(!created, "no initializer write on a partial schema");
+        let after = c
+            .query("SELECT oid, relname, relkind::pg_catalog.text FROM pg_catalog.pg_class WHERE relnamespace OPERATOR(pg_catalog.=) pg_catalog.current_schema()::pg_catalog.regnamespace ORDER BY oid", &[])
+            .unwrap()
+            .iter()
+            .map(|r| (r.get::<_, u32>(0), r.get::<_, String>(1), r.get::<_, String>(2)))
+            .collect::<Vec<_>>();
+        assert_eq!(before, after, "open preserved every pre-existing relation");
     }
     // A harmless non-Mneme relation and a Mneme-named index do not meet the init guard.
     let b = pg::Backend::new();
