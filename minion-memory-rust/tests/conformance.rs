@@ -1,11 +1,132 @@
 //! Canonical integration through the public library, with runner self-controls.
+#[path = "support/pg.rs"]
+#[allow(dead_code)] // The canonical runner needs only schema lifetime and conninfo.
+mod pg;
 mod support;
+use minion_memory::persistence::{PostgresHistoryStore, StoreError};
 use minion_memory::*;
 use serde_json::{Value as Json, json};
+use std::collections::{HashMap, VecDeque};
 use std::path::{Path, PathBuf};
+use std::sync::{Arc, Mutex};
 
 // Moves only with a Rust implementation candidate that passes the newly admitted corpus.
-const IMPLEMENTED_LAYER: u8 = 3;
+const IMPLEMENTED_LAYER: u8 = 4;
+
+struct StoreRun {
+    store: PostgresHistoryStore,
+    _backend: pg::Backend,
+    clocks: Arc<Mutex<HashMap<String, VecDeque<String>>>>,
+}
+fn store_input<'a>(args: &'a Json, key: &str, value: &'a Value) -> Result<Input<'a>, String> {
+    match args.get(format!("{key}_json")) {
+        Some(v) => Ok(Input::Text(v.as_str().ok_or("JSON argument must be text")?)),
+        None => {
+            if !args.as_object().is_some_and(|v| v.contains_key(key)) {
+                return Err(format!("missing {key}"));
+            }
+            Ok(Input::Native(value))
+        }
+    }
+}
+impl StoreRun {
+    fn new() -> Result<Self, String> {
+        let backend = pg::Backend::new();
+        let clocks = Arc::new(Mutex::new(HashMap::<String, VecDeque<String>>::new()));
+        let source = Arc::clone(&clocks);
+        let store = PostgresHistoryStore::open(&backend.conninfo, move |sid| {
+            let next = source
+                .lock()
+                .unwrap()
+                .get_mut(sid)
+                .and_then(VecDeque::pop_front)
+                .expect("clock fixture exhausted");
+            Value::string(&next)
+        })
+        .map_err(|e| e.to_string())?;
+        Ok(Self {
+            store,
+            _backend: backend,
+            clocks,
+        })
+    }
+    fn observe(&self, step: &Json) -> Result<Json, String> {
+        let (operation, args) = step
+            .as_object()
+            .ok_or("step map")?
+            .iter()
+            .next()
+            .ok_or("one operation")?;
+        let native = |key: &str| support::native(args.get(key).unwrap_or(&Json::Null));
+        let sid = native("store_id");
+        let writer = native("writer");
+        let op = native("operation");
+        let records = native("records");
+        let since = native("since");
+        let limit = native("limit");
+        let result: Result<Json, StoreError> = match operation.as_str() {
+            "create_store" => self
+                .store
+                .create_store(store_input(args, "store_id", &sid)?)
+                .map(|()| {
+                    // Decode only to bind configuration after the real create succeeds.
+                    let created = if let Some(v) = args.get("store_id_json") {
+                        decode_text(v.as_str().unwrap()).expect("successful create validated JSON")
+                    } else {
+                        sid.clone()
+                    };
+                    let instants = args["clock"]
+                        .as_array()
+                        .expect("clock fixture")
+                        .iter()
+                        .map(|t| t.as_str().expect("instant").to_owned())
+                        .collect();
+                    self.clocks.lock().unwrap().insert(
+                        created.as_str().expect("successful ID").to_owned(),
+                        instants,
+                    );
+                    json!({"result":"created"})
+                }),
+            "store_tail" => self
+                .store
+                .store_tail(store_input(args, "store_id", &sid)?)
+                .and_then(|v| Ok(json!({"boundary":observed_value(&v)?}))),
+            "commit_history" => self
+                .store
+                .commit_history(
+                    store_input(args, "store_id", &sid)?,
+                    store_input(args, "writer", &writer)?,
+                    store_input(args, "operation", &op)?,
+                    store_input(args, "records", &records)?,
+                )
+                .and_then(|v| Ok(json!({"receipt":observed_value(&v)?}))),
+            "read_history" => self
+                .store
+                .read_history(
+                    store_input(args, "store_id", &sid)?,
+                    store_input(args, "since", &since)?,
+                    store_input(args, "limit", &limit)?,
+                )
+                .and_then(|v| Ok(json!({"page":observed_value(&v)?}))),
+            _ => return observe(step),
+        };
+        match result {
+            Ok(v) => Ok(v),
+            Err(StoreError::Validation(e)) => {
+                let mut v = json!({"error":e.code.as_str()});
+                if let Some(argument) = e.argument {
+                    v["argument"] = json!(argument);
+                }
+                // Every store outcome is positionless, even if a later layer adds position.
+                if let Some(position) = e.position {
+                    v["position"] = json!(position);
+                }
+                Ok(v)
+            }
+            Err(e) => Err(e.to_string()),
+        }
+    }
+}
 
 fn observed_value(value: &Value) -> Result<Json, Error> {
     Ok(serde_json::from_slice(&canonical_bytes(value)?).expect("normalized public value"))
@@ -86,7 +207,9 @@ fn observe(step: &Json) -> Result<Json, String> {
     }))
 }
 fn compare_step(step: &Json, expected: &Json) -> Result<(), String> {
-    let mut observed = observe(step)?;
+    compare_observed(observe(step)?, expected)
+}
+fn compare_observed(mut observed: Json, expected: &Json) -> Result<(), String> {
     let mut expected = expected.clone();
     expected
         .as_object_mut()
@@ -183,8 +306,26 @@ fn run_scenario_at_layer(
     if when.len() != expected.len() {
         return Err("ACTIVE step/expectation lengths differ".into());
     }
+    let store = if when.iter().any(|s| {
+        s.as_object().is_some_and(|m| {
+            m.keys().any(|k| {
+                matches!(
+                    k.as_str(),
+                    "create_store" | "commit_history" | "read_history" | "store_tail"
+                )
+            })
+        })
+    }) {
+        Some(StoreRun::new()?)
+    } else {
+        None
+    };
     for (index, (step, expected)) in when.iter().zip(expected).enumerate() {
-        compare_step(step, expected).map_err(|e| format!("step {index}: {e}"))?;
+        match &store {
+            Some(store) => compare_observed(store.observe(step)?, expected),
+            None => compare_step(step, expected),
+        }
+        .map_err(|e| format!("step {index}: {e}"))?;
     }
     Ok(ScenarioOutcome::Active { steps: when.len() })
 }
@@ -301,7 +442,7 @@ fn draft_rule_and_active_promotion() {
 }
 #[test]
 fn implemented_layer_and_promotion() {
-    assert_eq!(IMPLEMENTED_LAYER, 3);
+    assert_eq!(IMPLEMENTED_LAYER, 4);
     let future = IMPLEMENTED_LAYER + 1;
     let mut scenario = json!({"status":"ACTIVE", "layer":format!("{future:02}"), "when":[{"unknown_active":{}}], "expect":{"results":[{"result":"wrong"}]}});
     let expected = ScenarioOutcome::ExpectedFailure {

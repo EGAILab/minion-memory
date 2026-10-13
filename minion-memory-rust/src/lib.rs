@@ -1,9 +1,10 @@
-//! Mneme Layers 01–03, implemented from the accepted contract and canonical corpus.
+//! Mneme Layers 01–04, implemented from the accepted contract and canonical corpus.
 //!
 //! All primitives validate structural inputs across every declared argument before
 //! checking the generic value domain, then apply typed rules (SER-008/G-031).
 //! JSON text uses a duplicate-aware, iterative decoder with deferred numbers.
-//! No persistence or profile-specific projection semantics are implemented here.
+//! The PostgreSQL history store implements the backend-neutral Layer 04 contract.
+//! Profile-specific projection semantics remain owned by the profiles.
 //!
 //! ```
 //! use minion_memory::{decode_text, canonical_bytes, compare_versions, Input, Value};
@@ -17,6 +18,7 @@ mod errors;
 mod history;
 mod identity;
 mod json;
+pub mod persistence;
 mod projection;
 mod scope;
 mod time;

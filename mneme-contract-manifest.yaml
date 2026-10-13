@@ -1691,7 +1691,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
-    location: null
+    location: minion-memory-rust/src/persistence/mod.rs
   evidence: []
   findings: []
 - id: HIST-009
@@ -1708,7 +1708,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
-    location: null
+    location: minion-memory-rust/src/persistence/mod.rs
   evidence: []
   findings: []
 - id: HIST-010
@@ -3888,7 +3888,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
-    location: null
+    location: minion-memory-rust/src/persistence/mod.rs
   evidence: []
   findings: []
 - id: PERS-006
@@ -3910,7 +3910,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
-    location: null
+    location: minion-memory-rust/src/persistence/mod.rs
   evidence: []
   findings:
   - NF-014
@@ -3935,7 +3935,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
-    location: null
+    location: minion-memory-rust/src/persistence/mod.rs
   evidence: []
   findings:
   - NF-016
@@ -3957,7 +3957,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
-    location: null
+    location: minion-memory-rust/src/persistence/mod.rs
   evidence: []
   findings:
   - NF-016
@@ -4037,7 +4037,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
-    location: null
+    location: minion-memory-rust/src/persistence/mod.rs
   evidence: []
   findings: []
 - id: PERS-013
@@ -4078,7 +4078,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
-    location: null
+    location: minion-memory-rust/src/persistence/mod.rs
   evidence: []
   findings: []
 - id: PERS-015
@@ -4096,7 +4096,7 @@ rows:
   python:
     location: minion-memory-python/src/minion_memory/persistence/postgres.py
   rust:
-    location: null
+    location: minion-memory-rust/src/persistence/mod.rs
   evidence: []
   findings: []
 - id: PERS-016

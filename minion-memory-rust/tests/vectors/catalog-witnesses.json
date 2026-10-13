@@ -1,0 +1,2035 @@
+{
+    "authority":  "Accepted CE-04-01 checkpoint rev2-5. SQL stimuli copied from Codex executed characterization ledgers, not Python implementation tests. Expected dispositions from classification 4.1-4.4,8.2,9.3. Special/privilege/transaction/fetch rows are separate Rust controls.",
+    "cases":  [
+                  {
+                      "id":  "B01",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "B02",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  true,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R01",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record SET UNLOGGED"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R02",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_operation SET UNLOGGED"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R04",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_schema SET UNLOGGED"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R05",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE TABLE probe_child () INHERITS (mneme_record)",
+                                    "INSERT INTO probe_child VALUES (\u0027s\u0027,99,\u0027shadow\u0027,\u0027learning\u0027,\u0027attempt\u0027,1,convert_to(\u0027{\"record_id\":\"shadow\",\"profile\":\"learning\",\"record_type\":\"attempt\",\"schema_version\":1,\"compatibility\":\"required\",\"recorded_at\":\"2026-10-11T08:00:00.000000Z\"}\u0027,\u0027UTF8\u0027))"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R06",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE TABLE probe_parent (LIKE mneme_record INCLUDING CONSTRAINTS)",
+                                    "ALTER TABLE mneme_record INHERIT probe_parent"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R07",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ENABLE ROW LEVEL SECURITY",
+                                    "CREATE POLICY probe_policy ON mneme_record USING (false) WITH CHECK (false)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R08",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ENABLE ROW LEVEL SECURITY",
+                                    "ALTER TABLE mneme_record FORCE ROW LEVEL SECURITY",
+                                    "CREATE POLICY probe_policy ON mneme_record USING (false) WITH CHECK (false)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R09",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ENABLE ROW LEVEL SECURITY",
+                                    "ALTER TABLE mneme_record FORCE ROW LEVEL SECURITY",
+                                    "CREATE POLICY probe_policy ON mneme_record USING (true) WITH CHECK (true)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R10",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE RULE probe_rule AS ON INSERT TO mneme_record DO INSTEAD NOTHING"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R11",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE RULE probe_rule AS ON UPDATE TO mneme_store DO INSTEAD NOTHING"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R12",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE RULE probe_rule AS ON INSERT TO mneme_record DO ALSO NOTHING"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R13",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE FUNCTION probe_fn() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NULL; END$$",
+                                    "CREATE TRIGGER probe_trigger BEFORE INSERT ON mneme_record FOR EACH ROW EXECUTE FUNCTION probe_fn()"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R14",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE FUNCTION probe_fn() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN DELETE FROM mneme_record WHERE store_id=NEW.store_id AND position=NEW.position; RETURN NEW; END$$",
+                                    "CREATE TRIGGER probe_trigger AFTER INSERT ON mneme_record FOR EACH ROW EXECUTE FUNCTION probe_fn()"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R15",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE FUNCTION probe_fn() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN DELETE FROM mneme_record; RETURN NULL; END$$",
+                                    "CREATE TRIGGER probe_trigger AFTER INSERT ON mneme_record FOR EACH STATEMENT EXECUTE FUNCTION probe_fn()"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R16",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE FUNCTION probe_fn() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NULL; END$$",
+                                    "CREATE TRIGGER probe_trigger BEFORE INSERT ON mneme_record FOR EACH STATEMENT EXECUTE FUNCTION probe_fn()"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R17",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE FUNCTION probe_fn() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+                                    "CREATE TRIGGER probe_trigger BEFORE INSERT ON mneme_record FOR EACH ROW EXECUTE FUNCTION probe_fn()"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R18",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE FUNCTION probe_fn() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NULL; END$$",
+                                    "CREATE TRIGGER probe_trigger BEFORE INSERT ON mneme_record FOR EACH ROW EXECUTE FUNCTION probe_fn()",
+                                    "ALTER TABLE mneme_record DISABLE TRIGGER probe_trigger"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R19",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record SET (fillfactor=50)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R20",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record SET (autovacuum_enabled=false)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R21",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record SET TABLESPACE mneme_ts"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R22",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record OWNER TO CURRENT_USER"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C01",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE COLLATION probe_loose (provider=icu,locale=\u0027und-u-ka-shifted\u0027,deterministic=false)",
+                                    "ALTER TABLE mneme_store ALTER COLUMN store_id TYPE text COLLATE probe_loose"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C02",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE COLLATION probe_loose (provider=icu,locale=\u0027und-u-ka-shifted\u0027,deterministic=false)",
+                                    "ALTER TABLE mneme_record ALTER COLUMN record_id TYPE text COLLATE probe_loose"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C03",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE COLLATION probe_loose (provider=icu,locale=\u0027und-u-ka-shifted\u0027,deterministic=false)",
+                                    "ALTER TABLE mneme_operation ALTER COLUMN source_namespace TYPE text COLLATE probe_loose"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C04",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE COLLATION probe_loose (provider=icu,locale=\u0027und-u-ka-shifted\u0027,deterministic=false)",
+                                    "ALTER TABLE mneme_record ALTER COLUMN profile TYPE text COLLATE probe_loose"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C05",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_store ALTER COLUMN store_id TYPE text COLLATE \"C\""
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C06",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_store ALTER COLUMN store_id TYPE text COLLATE \"POSIX\""
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C07",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ALTER COLUMN schema_version ADD GENERATED ALWAYS AS IDENTITY"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C08",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ALTER COLUMN schema_version ADD GENERATED BY DEFAULT AS IDENTITY"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C09",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_schema ALTER COLUMN version ADD GENERATED ALWAYS AS IDENTITY"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C10",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_store DROP COLUMN tail",
+                                    "ALTER TABLE mneme_store ADD COLUMN tail bigint GENERATED ALWAYS AS (0::bigint) STORED NOT NULL",
+                                    "ALTER TABLE mneme_store ADD CONSTRAINT mneme_store_tail_check CHECK(tail BETWEEN 0 AND 9007199254740991)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C11",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ALTER COLUMN schema_version SET DEFAULT 2"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C12",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_store ALTER COLUMN tail DROP DEFAULT"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C13",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ALTER COLUMN envelope SET STORAGE PLAIN"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  true,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C14",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ALTER COLUMN envelope SET STORAGE EXTERNAL"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  true,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C15",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ALTER COLUMN envelope SET STORAGE MAIN"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  true,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C16",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ALTER COLUMN envelope SET STORAGE EXTENDED"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  true,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C17",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ALTER COLUMN envelope SET COMPRESSION pglz"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  true,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C18",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ALTER COLUMN envelope SET COMPRESSION lz4"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  true,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C19",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE DOMAIN probe_domain AS bigint CHECK(VALUE=1)",
+                                    "ALTER TABLE mneme_record ALTER COLUMN schema_version TYPE probe_domain"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C20",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ADD COLUMN probe_dead text",
+                                    "ALTER TABLE mneme_record DROP COLUMN probe_dead"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C21",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ALTER COLUMN envelope SET STATISTICS 0"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C22",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record DROP COLUMN schema_version",
+                                    "ALTER TABLE mneme_record ADD COLUMN schema_version bigint NOT NULL"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C23",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE COLLATION probe_deterministic (provider=icu,locale=\u0027und-u-ka-shifted\u0027,deterministic=true)",
+                                    "ALTER TABLE mneme_store ALTER COLUMN store_id TYPE text COLLATE probe_deterministic"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C24",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_store DROP COLUMN tail",
+                                    "ALTER TABLE mneme_store ADD COLUMN tail bigint GENERATED ALWAYS AS (0) STORED NOT NULL CHECK(tail BETWEEN 0 AND 9007199254740991)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "K01",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record DROP CONSTRAINT mneme_record_store_id_record_id_key",
+                                    "ALTER TABLE mneme_record ADD CONSTRAINT mneme_record_store_id_record_id_key UNIQUE(store_id,record_id) DEFERRABLE"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "K02",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record DROP CONSTRAINT mneme_record_store_id_record_id_key",
+                                    "ALTER TABLE mneme_record ADD CONSTRAINT mneme_record_store_id_record_id_key UNIQUE(store_id,record_id) DEFERRABLE INITIALLY DEFERRED"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "K03",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record DROP CONSTRAINT mneme_record_position_check",
+                                    "ALTER TABLE mneme_record ADD CONSTRAINT mneme_record_position_check CHECK(position BETWEEN 1 AND 9007199254740991) NOT VALID"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "K04",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record DROP CONSTRAINT mneme_record_store_id_fkey",
+                                    "ALTER TABLE mneme_record ADD CONSTRAINT mneme_record_store_id_fkey FOREIGN KEY(store_id) REFERENCES mneme_store NOT VALID"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "K05",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record DROP CONSTRAINT mneme_record_store_id_fkey",
+                                    "ALTER TABLE mneme_record ADD CONSTRAINT mneme_record_store_id_fkey FOREIGN KEY(store_id) REFERENCES mneme_store ON DELETE CASCADE"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "K06",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record DROP CONSTRAINT mneme_record_store_id_fkey",
+                                    "ALTER TABLE mneme_record ADD CONSTRAINT mneme_record_store_id_fkey FOREIGN KEY(store_id) REFERENCES mneme_store ON UPDATE CASCADE"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "K07",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record DROP CONSTRAINT mneme_record_store_id_fkey",
+                                    "ALTER TABLE mneme_record ADD CONSTRAINT mneme_record_store_id_fkey FOREIGN KEY(store_id) REFERENCES mneme_store ON DELETE RESTRICT"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "K08",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record DROP CONSTRAINT mneme_record_store_id_fkey",
+                                    "ALTER TABLE mneme_record ADD CONSTRAINT mneme_record_store_id_fkey FOREIGN KEY(store_id) REFERENCES mneme_store DEFERRABLE INITIALLY DEFERRED"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "K09",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record RENAME CONSTRAINT mneme_record_store_id_record_id_key TO probe_unique"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "K10",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ADD CONSTRAINT probe_check CHECK(true)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "K11",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ADD CONSTRAINT probe_check CHECK(profile \u003c\u003e \u0027learning\u0027)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "I01",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE INDEX probe_idx ON mneme_record(profile)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "I02",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE UNIQUE INDEX probe_idx ON mneme_record(profile)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "I03",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE INDEX probe_idx ON mneme_record(profile) WHERE schema_version=1"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "I04",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE INDEX probe_idx ON mneme_record((lower(profile)))"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "I05",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE INDEX probe_idx ON mneme_record USING hash(profile)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "I06",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE UNIQUE INDEX probe_idx ON mneme_record(store_id,record_id)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "I07",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE INDEX probe_idx ON mneme_record(record_id text_pattern_ops)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "I08",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE UNIQUE INDEX probe_idx ON mneme_record(record_id) WHERE schema_version=1",
+                                    "ALTER TABLE mneme_record ADD CONSTRAINT probe_constraint UNIQUE USING INDEX probe_idx"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "I09",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE UNIQUE INDEX probe_idx ON mneme_record((lower(record_id)))",
+                                    "ALTER TABLE mneme_record ADD CONSTRAINT probe_constraint UNIQUE USING INDEX probe_idx"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "I10",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE UNIQUE INDEX probe_idx ON mneme_record(record_id text_pattern_ops)",
+                                    "ALTER TABLE mneme_record ADD CONSTRAINT probe_constraint UNIQUE USING INDEX probe_idx"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "I11",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER INDEX mneme_record_pkey SET (fillfactor=50)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "I12",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record CLUSTER ON mneme_record_pkey"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "I13",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record REPLICA IDENTITY FULL"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "S01",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+
+                                ],
+                      "options":  "-c default_transaction_isolation=repeatable\\ read",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "S02",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+
+                                ],
+                      "options":  "-c default_transaction_isolation=serializable",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "S03",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+
+                                ],
+                      "options":  "-c synchronous_commit=off",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "S04",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+
+                                ],
+                      "options":  "-c default_transaction_read_only=on",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "S05",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+
+                                ],
+                      "options":  "-c row_security=off",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R27",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record RENAME TO probe_saved",
+                                    "CREATE VIEW mneme_record AS SELECT * FROM probe_saved"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R28",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record RENAME TO probe_saved",
+                                    "CREATE MATERIALIZED VIEW mneme_record AS SELECT * FROM probe_saved"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R31",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record SET UNLOGGED",
+                                    "ALTER TABLE mneme_operation SET UNLOGGED",
+                                    "ALTER TABLE mneme_store SET UNLOGGED"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R35",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record RENAME TO probe_saved",
+                                    "CREATE TABLE mneme_record (LIKE probe_saved INCLUDING CONSTRAINTS) PARTITION BY RANGE(position)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R36",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE TABLE probe_extra (x integer)"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R37",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE TABLE mneme_extra (x integer)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R38",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE TABLE probe_child () INHERITS(mneme_record)",
+                                    "DROP TABLE probe_child"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R33",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE FUNCTION probe_fn() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NULL; END$$",
+                                    "CREATE TRIGGER probe_trigger BEFORE INSERT ON mneme_record FOR EACH ROW EXECUTE FUNCTION probe_fn()",
+                                    "ALTER TABLE mneme_record ENABLE REPLICA TRIGGER probe_trigger"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R39",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE RULE probe_rule AS ON INSERT TO mneme_record DO ALSO NOTHING",
+                                    "DROP RULE probe_rule ON mneme_record"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R40",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_schema ENABLE ROW LEVEL SECURITY",
+                                    "ALTER TABLE mneme_schema FORCE ROW LEVEL SECURITY",
+                                    "CREATE POLICY probe_policy ON mneme_schema USING(false) WITH CHECK(true)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R41",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_store ENABLE ROW LEVEL SECURITY",
+                                    "ALTER TABLE mneme_store FORCE ROW LEVEL SECURITY",
+                                    "CREATE POLICY probe_policy ON mneme_store USING(false) WITH CHECK(true)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R42",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_operation ENABLE ROW LEVEL SECURITY",
+                                    "ALTER TABLE mneme_operation FORCE ROW LEVEL SECURITY",
+                                    "CREATE POLICY probe_policy ON mneme_operation USING(false) WITH CHECK(true)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "R43",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ENABLE ROW LEVEL SECURITY",
+                                    "ALTER TABLE mneme_record FORCE ROW LEVEL SECURITY",
+                                    "CREATE POLICY probe_policy ON mneme_record USING(false) WITH CHECK(true)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "H01",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "UPDATE mneme_schema SET version=2"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C25",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_store RENAME COLUMN tail TO probe_tail"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C26",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_schema RENAME COLUMN version TO probe_version"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C27",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_store ALTER COLUMN tail TYPE integer"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "C28",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "ALTER TABLE mneme_record ALTER COLUMN envelope DROP NOT NULL"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "H02",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "DELETE FROM mneme_schema"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "S07",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+
+                                ],
+                      "options":  "-c quote_all_identifiers=on",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "S08",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+
+                                ],
+                      "options":  "-c standard_conforming_strings=off",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "S09",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+
+                                ],
+                      "options":  "-c timezone=Asia/Tokyo",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "S10",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+
+                                ],
+                      "options":  "-c quote_all_identifiers=on",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "I19",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE INDEX probe_idx ON mneme_record((record_id::integer))"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "I20",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+                                    "CREATE INDEX probe_idx ON mneme_record(record_id) WHERE record_id::integer\u003e0"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "S11",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+
+                                ],
+                      "options":  "-c client_encoding=SQL_ASCII",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "V01",
+                      "origin":  "Codex 0f7ac1bf / agreed classification 4.1-4.4",
+                      "setup":  [
+
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E001",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E002",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "ALTER TABLE mneme_store DROP COLUMN tail",
+                                    "ALTER TABLE mneme_store ADD COLUMN tail bigint NOT NULL DEFAULT 1 CHECK(tail BETWEEN 0 AND 9007199254740991)",
+                                    "ALTER TABLE mneme_store ALTER COLUMN tail SET DEFAULT 0"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  true
+                  },
+                  {
+                      "id":  "E003",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "ALTER TABLE mneme_store DROP COLUMN tail",
+                                    "ALTER TABLE mneme_store ADD COLUMN tail bigint NOT NULL DEFAULT 0 CHECK(tail BETWEEN 0 AND 9007199254740991)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  true
+                  },
+                  {
+                      "id":  "E004",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "ALTER TABLE mneme_store DROP COLUMN tail",
+                                    "ALTER TABLE mneme_store ADD COLUMN tail bigint NOT NULL DEFAULT 1 CHECK(tail BETWEEN 0 AND 9007199254740991)",
+                                    "ALTER TABLE mneme_store ALTER COLUMN tail SET DEFAULT 0",
+                                    "VACUUM FULL mneme_store"
+                                ],
+                      "options":  "",
+                      "expected":  "old",
+                      "large":  false,
+                      "old":  true
+                  },
+                  {
+                      "id":  "E005",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "ALTER TABLE mneme_schema DROP COLUMN version",
+                                    "ALTER TABLE mneme_schema ADD COLUMN version integer NOT NULL DEFAULT 2",
+                                    "ALTER TABLE mneme_schema ALTER COLUMN version DROP DEFAULT"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E006",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "ALTER TABLE mneme_schema DROP COLUMN version",
+                                    "ALTER TABLE mneme_schema ADD COLUMN version integer NOT NULL DEFAULT 1",
+                                    "ALTER TABLE mneme_schema ALTER COLUMN version DROP DEFAULT"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E007",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "ALTER TABLE mneme_store ALTER COLUMN tail SET STATISTICS 300",
+                                    "ALTER TABLE mneme_store ALTER COLUMN tail SET (n_distinct=0.5,n_distinct_inherited=-0.7)",
+                                    "ANALYZE mneme_store"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E011",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "VACUUM (FREEZE,ANALYZE) mneme_schema",
+                                    "VACUUM (FREEZE,ANALYZE) mneme_store",
+                                    "VACUUM (FREEZE,ANALYZE) mneme_record",
+                                    "VACUUM (FREEZE,ANALYZE) mneme_operation"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E012",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "REINDEX TABLE mneme_store",
+                                    "VACUUM FULL mneme_schema"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E013",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "ALTER TABLE mneme_store ADD COLUMN gone text",
+                                    "ALTER TABLE mneme_store DROP COLUMN gone"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E014",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+                                    "CREATE TRIGGER transient AFTER INSERT ON mneme_schema FOR EACH ROW EXECUTE FUNCTION noop()",
+                                    "DROP TRIGGER transient ON mneme_schema"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E015",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE RULE transient AS ON INSERT TO mneme_schema DO ALSO NOTIFY probe",
+                                    "DROP RULE transient ON mneme_schema"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E016",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_child () INHERITS(mneme_store)",
+                                    "DROP TABLE outside_child"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E017",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "GRANT SELECT(tail) ON mneme_store TO PUBLIC",
+                                    "GRANT SELECT ON mneme_record TO PUBLIC"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E018",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "COMMENT ON TABLE mneme_store IS \u0027review\u0027",
+                                    "COMMENT ON COLUMN mneme_store.tail IS \u0027review\u0027",
+                                    "COMMENT ON INDEX mneme_store_pkey IS \u0027review\u0027"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E020",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE STATISTICS outside_stat (dependencies) ON store_id,tail FROM mneme_store"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E021",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE VIEW outside_view AS SELECT * FROM mneme_store"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E022",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE MATERIALIZED VIEW outside_mat AS SELECT * FROM mneme_store"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E023",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_log(sid text)",
+                                    "CREATE RULE outside_rule AS ON INSERT TO outside_log DO ALSO INSERT INTO mneme_store(store_id) VALUES(NEW.sid)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E024",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE SEQUENCE outside_seq OWNED BY mneme_store.tail"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E025",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE PUBLICATION ce04_pub FOR TABLE mneme_store"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E027",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_fk(sid text REFERENCES mneme_store)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E028",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_t(sid text)",
+                                    "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+                                    "CREATE CONSTRAINT TRIGGER outside_constraint AFTER INSERT ON outside_t FROM mneme_store DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION noop()"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E029",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_child () INHERITS(mneme_store)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E030",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_row(v mneme_store)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E031",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE FUNCTION outside_fun(mneme_store) RETURNS bigint LANGUAGE SQL AS $$ SELECT $1.tail $$"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E032",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE FUNCTION outside_fun() RETURNS bigint LANGUAGE SQL BEGIN ATOMIC SELECT tail FROM mneme_store LIMIT 1; END"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E033",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE FUNCTION outside_fun() RETURNS bigint LANGUAGE SQL AS $$ SELECT tail FROM mneme_store LIMIT 1 $$"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E034",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_default(v mneme_store DEFAULT ROW(\u0027x\u0027,0)::mneme_store)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E035",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_check(v text CHECK(ROW(v,0)::mneme_store IS NOT NULL))"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E036",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_gen(v text,r mneme_store GENERATED ALWAYS AS (ROW(v,0)::mneme_store) STORED)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E037",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_expr(v text)",
+                                    "CREATE INDEX outside_idx ON outside_expr (((ROW(v,0)::mneme_store).tail))"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E038",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_policy(v text)",
+                                    "CREATE POLICY p ON outside_policy USING (ROW(v,0)::mneme_store IS NOT NULL)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E039",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE DOMAIN outside_domain AS mneme_store"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E040",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE VIEW outside_arr AS SELECT ARRAY[ROW(\u0027x\u0027,0)::mneme_store] AS v"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E041",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+                                    "CREATE CONSTRAINT TRIGGER direct_constraint AFTER INSERT ON mneme_store FOR EACH ROW EXECUTE FUNCTION noop()"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E042",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_t(sid text)",
+                                    "CREATE FUNCTION outside_effect() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN INSERT INTO mneme_store(store_id) VALUES(NEW.sid); RETURN NEW; END$$",
+                                    "CREATE TRIGGER outside_trigger AFTER INSERT ON outside_t FOR EACH ROW EXECUTE FUNCTION outside_effect()"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E043",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_fk(sid text)",
+                                    "ALTER TABLE outside_fk ADD CONSTRAINT f FOREIGN KEY(sid) REFERENCES mneme_store NOT VALID"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E045",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_parent (LIKE mneme_store INCLUDING ALL) PARTITION BY LIST(store_id)",
+                                    "ALTER TABLE outside_parent ATTACH PARTITION mneme_store DEFAULT"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E046",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "ALTER INDEX mneme_store_pkey RENAME TO outside_name"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E047",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE INDEX outside_index ON mneme_store(tail)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E049",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E050",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_t(sid text)",
+                                    "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+                                    "CREATE CONSTRAINT TRIGGER outside_constraint AFTER INSERT ON outside_t FROM mneme_schema FOR EACH ROW EXECUTE FUNCTION noop()"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E051",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_t(sid text)",
+                                    "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+                                    "CREATE CONSTRAINT TRIGGER outside_constraint AFTER INSERT ON outside_t FROM mneme_record FOR EACH ROW EXECUTE FUNCTION noop()"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E052",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_t(sid text)",
+                                    "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+                                    "CREATE CONSTRAINT TRIGGER outside_constraint AFTER INSERT ON outside_t FROM mneme_operation FOR EACH ROW EXECUTE FUNCTION noop()"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E053",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_fk(v boolean REFERENCES mneme_schema(singleton))"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E054",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_fk(s text,p bigint,FOREIGN KEY(s,p) REFERENCES mneme_record(store_id,position))"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E055",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_fk(s text,n text,i bytea,FOREIGN KEY(s,n,i) REFERENCES mneme_operation(store_id,source_namespace,source_operation_id))"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E056",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_unrelated(v text)"
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E057",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE DOMAIN outside_domain AS mneme_store",
+                                    "CREATE TABLE outside_arr(v outside_domain[])"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E058",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE FUNCTION outside_fun() RETURNS mneme_store LANGUAGE SQL AS $$ SELECT ROW(\u0027x\u0027,0)::mneme_store $$"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E059",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE FUNCTION outside_state(mneme_store,mneme_store) RETURNS mneme_store LANGUAGE SQL AS $$ SELECT $1 $$",
+                                    "CREATE AGGREGATE outside_agg(mneme_store) (SFUNC=outside_state,STYPE=mneme_store)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E060",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE FUNCTION outside_eq(mneme_store,mneme_store) RETURNS boolean LANGUAGE SQL IMMUTABLE AS $$ SELECT $1.store_id=$2.store_id $$",
+                                    "CREATE OPERATOR === (LEFTARG=mneme_store,RIGHTARG=mneme_store,FUNCTION=outside_eq)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E061",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE FUNCTION outside_cast(mneme_store) RETURNS text LANGUAGE SQL AS $$ SELECT $1.store_id $$",
+                                    "CREATE CAST(mneme_store AS text) WITH FUNCTION outside_cast(mneme_store)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E062",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE EXTENSION hstore",
+                                    "ALTER EXTENSION hstore ADD TABLE mneme_store"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E086",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+
+                                ],
+                      "options":  "",
+                      "expected":  "accept",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E088",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TYPE outside_range AS RANGE (subtype=mneme_store)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E093",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE PROCEDURE outside_proc() LANGUAGE SQL BEGIN ATOMIC SELECT tail FROM mneme_store; END"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E094",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TABLE outside_t(v text)",
+                                    "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+                                    "CREATE CONSTRAINT TRIGGER outside_constraint AFTER INSERT ON outside_t FOR EACH ROW WHEN (ROW(NEW.v,0)::mneme_store IS NOT NULL) EXECUTE FUNCTION noop()"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E095",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE SCHEMA outside_ns",
+                                    "CREATE TABLE outside_ns.fk(sid text REFERENCES mneme_store)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E097",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE SCHEMA outside_ref",
+                                    "CREATE TABLE outside_ref.t(v text)",
+                                    "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+                                    "CREATE CONSTRAINT TRIGGER outside_constraint AFTER INSERT ON outside_ref.t FROM mneme_store FOR EACH ROW EXECUTE FUNCTION noop()"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E103",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE DOMAIN outside_domain AS mneme_store CHECK ((VALUE).tail \u003e= 0)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E104",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE FUNCTION outside_variadic(VARIADIC v mneme_store[]) RETURNS integer LANGUAGE SQL AS $$ SELECT 1 $$"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E105",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE FUNCTION outside_inout(v text,INOUT x mneme_store) LANGUAGE SQL AS $$ SELECT x $$"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E106",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE FUNCTION outside_state(mneme_store,mneme_store) RETURNS mneme_store LANGUAGE SQL AS $$ SELECT $1 $$",
+                                    "CREATE AGGREGATE outside_agg(mneme_store) (SFUNC=outside_state,STYPE=mneme_store,MSFUNC=outside_state,MINVFUNC=outside_state,MSTYPE=mneme_store)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E107",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE INDEX outside_expr ON mneme_store ((tail+1))",
+                                    "ALTER INDEX outside_expr ALTER COLUMN 1 SET STATISTICS 300"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E108",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE TYPE outside_range AS RANGE (subtype=mneme_store)"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E109",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE EXTENSION hstore",
+                                    "ALTER EXTENSION hstore ADD TABLE mneme_store"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E110",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "ALTER TABLE mneme_store ALTER COLUMN store_id SET STATISTICS 200",
+                                    "ALTER TABLE mneme_store DROP COLUMN tail",
+                                    "ALTER TABLE mneme_store ADD COLUMN tail bigint NOT NULL DEFAULT 1 CHECK(tail BETWEEN 0 AND 9007199254740991)",
+                                    "ALTER TABLE mneme_store ALTER COLUMN tail SET DEFAULT 0"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  true
+                  },
+                  {
+                      "id":  "E111",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "GRANT SELECT(tail) ON mneme_store TO PUBLIC",
+                                    "CREATE TABLE outside_t(v text)",
+                                    "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+                                    "CREATE CONSTRAINT TRIGGER outside_constraint AFTER INSERT ON outside_t FROM mneme_store FOR EACH ROW EXECUTE FUNCTION noop()"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  },
+                  {
+                      "id":  "E112",
+                      "origin":  "Codex d8262cf5 / agreed classification 8.2,9.3",
+                      "setup":  [
+                                    "CREATE SCHEMA elsewhere",
+                                    "CREATE TABLE elsewhere.mneme_store(v text)",
+                                    "CREATE FUNCTION noop() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN RETURN NEW; END$$",
+                                    "CREATE CONSTRAINT TRIGGER outside_constraint AFTER INSERT ON elsewhere.mneme_store FROM mneme_store FOR EACH ROW EXECUTE FUNCTION noop()"
+                                ],
+                      "options":  "",
+                      "expected":  "reject",
+                      "large":  false,
+                      "old":  false
+                  }
+              ]
+}

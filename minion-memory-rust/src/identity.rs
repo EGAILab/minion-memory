@@ -76,7 +76,7 @@ pub struct OperationIdentity {
     pub source_operation_id: String,
 }
 
-fn operation_rule(value: &Value) -> Result<OperationIdentity, Error> {
+pub(crate) fn operation_rule(value: &Value) -> Result<OperationIdentity, Error> {
     let invalid = || Error::new(ErrorCode::OperationIdentityInvalid);
     let Node::Object(members) = value.node() else {
         return Err(invalid());

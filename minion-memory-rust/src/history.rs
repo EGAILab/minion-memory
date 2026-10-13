@@ -100,7 +100,16 @@ pub(crate) fn reader_rule(value: &Value) -> Result<Reader, Error> {
     })
 }
 
-pub(crate) fn envelope_rule(reader: &Reader, mut value: Value) -> Result<HistoryAdmission, Error> {
+pub(crate) fn envelope_rule(reader: &Reader, value: Value) -> Result<HistoryAdmission, Error> {
+    record_rule(reader, value, false)
+}
+
+/// G-083: the same four admission gates, excluding recorded_at for caller drafts.
+pub(crate) fn record_rule(
+    reader: &Reader,
+    mut value: Value,
+    draft: bool,
+) -> Result<HistoryAdmission, Error> {
     let code = ErrorCode::HistoryEnvelopeInvalid;
     let members = object(&value, value.root, code)?;
     // Gate 1: validate the entire routing triple, even on foreign-profile records.
@@ -124,20 +133,23 @@ pub(crate) fn envelope_rule(reader: &Reader, mut value: Value) -> Result<History
     }
     // Gate 3: the recognized envelope is closed, before any remaining typed field.
     member(members, "record_id", code)?;
-    member(members, "recorded_at", code)?;
+    if !draft {
+        member(members, "recorded_at", code)?;
+    }
     if members.iter().any(|(name, _)| {
-        !matches!(
-            name.as_str(),
-            "record_id"
-                | "profile"
-                | "record_type"
-                | "schema_version"
-                | "compatibility"
-                | "recorded_at"
-                | "occurred_at"
-                | "payload"
-                | "provenance"
-        )
+        (draft && name == "recorded_at")
+            || !matches!(
+                name.as_str(),
+                "record_id"
+                    | "profile"
+                    | "record_type"
+                    | "schema_version"
+                    | "compatibility"
+                    | "recorded_at"
+                    | "occurred_at"
+                    | "payload"
+                    | "provenance"
+            )
     }) {
         return Err(Error::new(code));
     }
@@ -181,12 +193,12 @@ pub fn admit_history_record(
 }
 
 #[derive(PartialEq, Eq)]
-struct Boundary {
-    store_id: String,
-    position: i128,
+pub(crate) struct Boundary {
+    pub(crate) store_id: String,
+    pub(crate) position: i128,
 }
 
-fn boundary_rule(value: &Value) -> Result<Boundary, Error> {
+pub(crate) fn boundary_rule(value: &Value) -> Result<Boundary, Error> {
     let code = ErrorCode::HistoryBoundaryInvalid;
     let members = object(value, value.root, code)?;
     if members.len() != 2 {

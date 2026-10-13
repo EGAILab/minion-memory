@@ -51,6 +51,22 @@ pub enum ErrorCode {
     LineageInvalid,
     /// A later decoded occurrence reuses a record ID with different canonical content.
     HistoryDuplicateRecordId,
+    /// Layer 04: records must be a nonempty array.
+    PersistenceBatchInvalid,
+    /// Layer 04: replay exclusion/skip/unknown is not an acceptable write.
+    PersistenceRecordUnrecognized,
+    /// Layer 04: page size outside integer 1..MAX.
+    PersistenceLimitInvalid,
+    /// Creating an existing store.
+    PersistenceStoreExists,
+    /// An operation names an absent store.
+    PersistenceStoreUnknown,
+    /// A committed operation identity is reused with different normalized drafts.
+    PersistenceOperationConflict,
+    /// An unseen batch does not fit after the tail (G-086).
+    PersistenceStoreFull,
+    /// The PostgreSQL environment or v1 catalog differs from the contract.
+    PersistenceSchemaIncompatible,
 }
 
 impl ErrorCode {
@@ -80,6 +96,14 @@ impl ErrorCode {
             Self::HistoryStreamInvalid => "history.stream_invalid",
             Self::LineageInvalid => "lineage.invalid",
             Self::HistoryDuplicateRecordId => "history.duplicate_record_id",
+            Self::PersistenceBatchInvalid => "persistence.batch_invalid",
+            Self::PersistenceRecordUnrecognized => "persistence.record_unrecognized",
+            Self::PersistenceLimitInvalid => "persistence.limit_invalid",
+            Self::PersistenceStoreExists => "persistence.store_exists",
+            Self::PersistenceStoreUnknown => "persistence.store_unknown",
+            Self::PersistenceOperationConflict => "persistence.operation_conflict",
+            Self::PersistenceStoreFull => "persistence.store_full",
+            Self::PersistenceSchemaIncompatible => "persistence.schema_incompatible",
         }
     }
 }

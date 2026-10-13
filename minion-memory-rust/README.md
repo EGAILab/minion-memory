@@ -1,10 +1,11 @@
-# minion-memory-rust — Layers 01–02
+# minion-memory-rust — Layers 01–04
 
 **Owner: Codex.** Implements the accepted shared contract and unchanged canonical corpus;
 the Python implementation is not an oracle. Workspace/package `minion-memory`, public crate
 `minion_memory`, Rust **1.97.1** pinned in `rust-toolchain.toml`, dependencies pinned in
 `Cargo.toml` and `Cargo.lock`. Layer 02 includes history admission, store-local boundary relations and MemoryScope.
-Layer 03 adds the purpose-neutral HistoryProjector and lineage resolution. No persistence.
+Layer 03 adds the purpose-neutral HistoryProjector and lineage resolution. Layer 04 adds the
+canonical history repository and the PostgreSQL 14 reference backend.
 
 ## Public seams
 
@@ -40,7 +41,9 @@ copies arenas; use the decoder for large textual trees.
 Canonical serialization explicitly sorts UTF-16 units and escapes strings per RFC 8785.
 `ryu-js` supplies ECMAScript binary64 formatting; `sha2` hashes bytes. `chrono` is used only for
 checked calendar arithmetic after the HIST-004 ASCII grammar and year bounds have passed.
-`serde_jcs` is not used. `serde_json`, YAML, regex and JSON Schema dependencies are test-only.
+`serde_jcs` is not used. `serde_json`, YAML and JSON Schema dependencies are test-only.
+The catalog expression normalizer uses `regex`; the repository uses the synchronous `postgres`
+driver. All repository SQL qualifies built-in catalog objects and quotes the resolved namespace.
 
 ## Gates and canonical runner
 
@@ -62,15 +65,54 @@ its outputs and all caches must still stay inside the project.
 `tests/conformance.rs` discovers the unchanged `../conformance/{core,learning,agent}` corpus,
 loads it using an equivalent portable YAML profile, validates each envelope with its shared
 Draft 2020-12 schema, and calls public operations. It performs no canonicalization or repair.
-It reports the discovered ACTIVE scenario/step counts and explicit expected failures; this Layer 01
-through Layer 03 candidate has 17 ACTIVE scenarios / 343 steps and 5 recursive `TO_BE_` expected failures.
+It reports the discovered ACTIVE scenario/step counts and explicit expected failures.
 Every DRAFT scenario reports xfail with its layer and the corpus rule as the reason. Drafts never
-execute as evidence. The Rust runner declares `IMPLEMENTED_LAYER = 3`: ACTIVE scenarios above
-Layer 03 report xfail naming their layer, Rust and the Implemented layers rule. This declaration
+execute as evidence. The Rust runner declares `IMPLEMENTED_LAYER = 4`: ACTIVE scenarios above
+Layer 04 report xfail naming their layer, Rust and the Implemented layers rule. This declaration
 moves only with a Rust implementation candidate. At or below the declared layer, promotion to
 ACTIVE executes every step and fails on unsupported operations or wrong results. Counts derive
 from dispatch, not a pinned inventory. Unknown eligible ACTIVE operations fail. Native scenario integers are constructed exactly as Rust `i128`;
 JSON-text inputs are handed to the library untouched.
+
+The store scenarios and `tests/layer04.rs` need a project-role PostgreSQL 14 service. Set
+`MNEME_RUST_PG_DATABASE` to an owned throwaway name beginning `mneme_codex_`; the test fixture
+creates it with the required UTF8/C/C environment and `mneme_ts` tablespace. Drop that database
+after the gate. Credentials come from the project-local `.tmp/work/pg.env`, or an explicitly
+set `MNEME_PG_ENV` for a POSIX relay. The fixture requires `mneme_dev` and refuses other roles.
+Set `MNEME_INTEROP_PYTHON` to the managed project Python with the accepted package dependencies.
+Cross-language tests fail if that interpreter is unavailable; they never silently skip.
+All test schemas have owned generated names and are dropped on exit.
+
+## Layer 04 repository
+
+`persistence::PostgresHistoryStore::open(conninfo, clock)` creates a private session and
+validates the complete v1 catalog against the embedded shared
+`reference-backend/postgres14-v1-catalog.json`. Every open uses explicit Read Committed and
+the shared single-bigint transaction advisory lock before inspection. Empty namespaces
+initialize atomically, with pinned storage defaults and a catalog postcondition.
+
+The four operations are `create_store`, `store_tail`, `commit_history` and `read_history`.
+Each value argument accepts the same native/text/byte seams as the core. Generic stages run
+across all arguments before typed validation. Commit then follows draft gates D1–D4, batch
+uniqueness, store lookup, store-row locking, normalized operation retry/conflict, persisted
+record uniqueness, capacity, one clock sample and atomic writes. A handle mutex spans the
+whole transaction lifecycle; independent handles serialize commits through the store row.
+The clock is a `FnMut(&str) -> Value` returning a HIST-004 instant for the requested store.
+
+`StoreError::Validation` retains the contract code and argument and has no entry position.
+`Database` retains genuine driver/availability errors, `Clock` identifies an invalid injected
+clock value, and `Poisoned` identifies a handle poisoned by a caller panic. There is no
+automatic reconnect or retry that could sample the clock again. Dropping the handle closes
+its private connection. Commit returns only after durable commit, and identical normalized
+retries return the original receipt. Reads use one Repeatable Read read-only snapshot and
+count records, so a page can split a batch.
+
+The diagnostic `catalog` module separates fetching from comparison. Its connection proxy seam
+supports explicitly labelled fetch-binding controls. Pure predicate controls are never
+credited as public catalog executions. Whole internal-member documents use PostgreSQL's
+`jsonb::text` rendering, with only the agreed exclusions and normalizations. The trust scope
+is the accepted recorded catalog/dependency boundary; it is not a row-integrity audit or
+protection against external edits after open.
 
 `tests/layer01.rs` covers source/stage/canonical precedence, native values, typed rules, timestamps,
 deep trees and realistic known-bad controls. `tests/vectors/` contains an independently generated
