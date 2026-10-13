@@ -1753,9 +1753,15 @@ def test_fetch_binding_control_the_fetch_reports_a_supplied_row(control: str) ->
     _projected(name, lambda _: f"SELECT * FROM pg_catalog.{name} UNION ALL {added}", part)
 
 
-# A genuine catalog row of an unrelated object, added with one pointer redirected to a v1 table. Each
-# changes only the one part that reads that catalog (no dependency row is added), so it isolates that
-# part's read where the public setups are also refused by the boundary (gate run 3).
+# A genuine catalog row, copied and added with one field changed so that it names a v1 table; no
+# dependency row is added. Each witnesses the read of the part named last, where the public setups are
+# also refused by the boundary (gate run 3). Isolation varies (closure review 2, WP04-CR-015):
+# - rules, policies and inheritance copy a row of an unrelated object, and only that part differs;
+# - the trigger row copies a core internal RI trigger with `tgisinternal` false, so only `triggers`
+#   differs;
+# - the index row is redirected into the island, so `indexes`, `index_columns` and `boundary` all
+#   differ. It kills P31 because losing the `indexes` read moves the first mismatch to `index_columns`:
+#   a bounded fetch kill, not a single-part projection.
 PATCHED_ROW_CONTROLS: dict[str, tuple[str, dict[str, str], str, list[str], str]] = {
     # name: (catalog, patch, which row to copy, setup of the unrelated object, the part that must differ)
     "a user trigger row": (
