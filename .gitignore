@@ -6,7 +6,14 @@
 /worktrees/
 .tmp/
 .cache/
+.uv-cache/
 /artifacts/
+
+# Node dependencies and download caches (vector-generation tooling)
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/cache/
 
 # Python environments, bytecode, packaging and analysis outputs
 .venv/
@@ -35,25 +42,41 @@ junit.xml
 
 # Rust build outputs (Cargo.lock remains tracked)
 target/
+.cargo/registry/
+.cargo/git/
 
 # Local credentials and database files; keep distributable examples
 .env
 .env.*
+.envrc
+.direnv/
 !.env.example
 !.env.sample
 !.env.template
 pg.env
 pg-admin.env
 .pgpass
+.pgpass.*
 .pg_service.conf
+.pg_service.conf.*
+.cargo/credentials
+.cargo/credentials.toml
+.ssh/
 *.key
+*.pem
+*.p8
 *.p12
 *.pfx
+*.jks
+*.keystore
 id_rsa
 id_ed25519
 *_private.pem
 *-private.pem
 *.db
+*.db-journal
+*.db-wal
+*.db-shm
 *.sqlite
 *.sqlite3
 *.sqlite-journal
